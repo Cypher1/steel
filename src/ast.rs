@@ -1,33 +1,9 @@
-use crate::arena::{Arena, ID};
-
-#[derive(Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
-pub struct Symbol<'a> {
-    // TODO: Intern strings
-    // TODO: Locations
-    pub name: &'a str,
-}
-
-impl<'a> Symbol<'a> {
-    fn new(name: &'a str) -> Self {
-        Self { name }
-    }
-}
+use crate::arena::Arena;
+use crate::nodes::*;
 
 impl<'a> From<Symbol<'a>> for Node<'a> {
     fn from(it: Symbol<'a>) -> Self {
         Node::Symbol(it)
-    }
-}
-
-#[derive(Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
-pub struct Call {
-    pub callee: ID,
-    pub args: Vec<ID>,
-}
-
-impl Call {
-    fn new(callee: ID, args: Vec<ID>) -> Self {
-        Self { callee, args }
     }
 }
 
