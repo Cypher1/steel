@@ -49,7 +49,10 @@ mod test {
 
         let hello = a.add(symbol("hello"));
 
-        assert_eq!(format!("{:?}", a.get(hello)), "Ok(Symbol(Symbol { name: \"hello\" }))");
+        assert_eq!(
+            format!("{:?}", a.get(hello)),
+            "Ok(Symbol(Symbol { name: \"hello\" }))"
+        );
     }
 
     #[test]
@@ -59,17 +62,26 @@ mod test {
         let hello = a.add(symbol("hello"));
         let world = a.add(symbol("world"));
 
-        assert_eq!(format!("{:?}", a.get(hello)), "Ok(Symbol(Symbol { name: \"hello\" }))");
-        assert_eq!(format!("{:?}", a.get(world)), "Ok(Symbol(Symbol { name: \"world\" }))");
+        assert_eq!(
+            format!("{:?}", a.get(hello)),
+            "Ok(Symbol(Symbol { name: \"hello\" }))"
+        );
+        assert_eq!(
+            format!("{:?}", a.get(world)),
+            "Ok(Symbol(Symbol { name: \"world\" }))"
+        );
     }
 
     #[test]
     fn can_construct_nodes_with_self_reference() {
         let mut a: Arena<Node<'static>> = Arena::new();
 
-        let reference = a.add_with_id(|id|call(id, vec![]));
+        let reference = a.add_with_id(|id| call(id, vec![]));
 
-        assert_eq!(format!("{:?}", a.get(reference)), format!("Ok(Call(Call {{ callee: {:?}, args: [] }}))", reference));
+        assert_eq!(
+            format!("{:?}", a.get(reference)),
+            format!("Ok(Call(Call {{ callee: {:?}, args: [] }}))", reference)
+        );
     }
 
     #[test]
@@ -80,6 +92,12 @@ mod test {
         let world = a.add(symbol("world"));
         let reference = a.add(call(hello, vec![world]));
 
-        assert_eq!(format!("{:?}", a.get(reference)), format!("Ok(Call(Call {{ callee: {:?}, args: [{:?}] }}))", hello, world));
+        assert_eq!(
+            format!("{:?}", a.get(reference)),
+            format!(
+                "Ok(Call(Call {{ callee: {:?}, args: [{:?}] }}))",
+                hello, world
+            )
+        );
     }
 }

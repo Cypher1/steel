@@ -1,4 +1,4 @@
-pub type ID=usize;
+pub type ID = usize;
 
 #[derive(Debug)]
 pub struct Arena<T> {
@@ -40,9 +40,9 @@ impl<'a, T> Iterator for ArenaIterator<'a, T> {
                 self.index += 1;
                 return Some(value);
             }
-            self.index+=1;
+            self.index += 1;
         }
-        return None
+        return None;
     }
 }
 
@@ -77,9 +77,9 @@ impl<'a, T> Iterator for ArenaIteratorMut<'a, T> {
                     return Some(&mut *ptr);
                 }
             }
-            self.index+=1;
+            self.index += 1;
         }
-        return None
+        return None;
     }
 }
 
@@ -157,7 +157,7 @@ mod test {
         for x in &a {
             dbg!(x);
         }
-        assert_eq!(a.into_iter().cloned().collect::<Vec<i32>>(), vec![1,2,3]);
+        assert_eq!(a.into_iter().cloned().collect::<Vec<i32>>(), vec![1, 2, 3]);
     }
 
     #[test]
@@ -168,7 +168,7 @@ mod test {
         a.add(3);
 
         let value = a.remove(id_to_remove);
-        assert_eq!(a.into_iter().cloned().collect::<Vec<i32>>(), vec![1,3]);
+        assert_eq!(a.into_iter().cloned().collect::<Vec<i32>>(), vec![1, 3]);
         assert_eq!(value, Ok(2));
     }
 
@@ -182,6 +182,6 @@ mod test {
         for x in &mut a {
             *x += 1;
         }
-        assert_eq!(a.into_iter().cloned().collect::<Vec<i32>>(), vec![2,3,4]);
+        assert_eq!(a.into_iter().cloned().collect::<Vec<i32>>(), vec![2, 3, 4]);
     }
 }
