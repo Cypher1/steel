@@ -5,7 +5,7 @@ pub struct Arena<T> {
     members: Vec<Item<T>>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum ArenaError {
     IndexEmpty(ID),
     IndexOutOfBounds(ID, ID),
@@ -42,7 +42,7 @@ impl<'a, T> Iterator for ArenaIterator<'a, T> {
             }
             self.index += 1;
         }
-        return None;
+        None
     }
 }
 
@@ -79,7 +79,7 @@ impl<'a, T> Iterator for ArenaIteratorMut<'a, T> {
             }
             self.index += 1;
         }
-        return None;
+        None
     }
 }
 

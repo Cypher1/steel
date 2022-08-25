@@ -31,7 +31,7 @@ pub enum Node<'a> {
     Call(Call),
 }
 
-pub fn symbol<'a>(name: &'a str) -> Node<'a> {
+pub fn symbol(name: &'_ str) -> Node<'_> {
     Node::Symbol(Symbol::new(name))
 }
 

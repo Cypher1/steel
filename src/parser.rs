@@ -15,7 +15,7 @@ fn from_hex(input: &str) -> Result<u8, std::num::ParseIntError> {
 }
 
 fn is_hex_digit(c: char) -> bool {
-    c.is_digit(16)
+    c.is_ascii_hexdigit()
 }
 
 fn hex_primary(input: &str) -> IResult<&str, u8> {
@@ -31,8 +31,8 @@ pub fn hex_color(input: &str) -> IResult<&str, Color> {
 
 pub fn number_i64(input: &str) -> IResult<&str, i64> {
     let (input, sign) = alt((tag("+"), tag("-"), tag("")))(input)?;
-    let (input, value) = map_res(take_while1(&|c: char| c.is_digit(10)), &|input| {
-        i64::from_str_radix(input, 10)
+    let (input, value) = map_res(take_while1(&|c: char| c.is_ascii_digit()), &|input: &str| {
+        input.parse::<i64>()
     })(input)?;
     Ok((input, if sign == "-" { -value } else { value }))
 }
