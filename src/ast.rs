@@ -1,4 +1,3 @@
-
 #[derive(Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
 pub struct Symbol<'a> {
     // TODO: Intern strings

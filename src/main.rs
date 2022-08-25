@@ -1,7 +1,7 @@
-mod primitives;
-mod parser;
-mod error;
 mod ast;
+mod error;
+mod parser;
+mod primitives;
 
 #[cfg(test)]
 mod assertions;
