@@ -102,12 +102,15 @@ impl<T> Arena<T> {
         }
     }
 
-    pub fn add_with_id<F: FnOnce(ID) -> T>(&mut self, value: F) -> ID {
+    pub fn add_with_id<S: Into<T>, F: FnOnce(ID) -> S>(&mut self, value: F) -> ID {
         let id = self.members.len();
-        self.members.push(Entry(value(id)));
+        self.members.push(Entry(value(id).into()));
         id
     }
 
+    pub fn add<S: Into<T>>(&mut self, value: S) -> ID {
+        self.add_with_id(|_id| value)
+    }
     pub fn get(&self, id: ID) -> Result<&T, ArenaError> {
         if id >= self.members.len() {
             return Err(IndexOutOfBounds(id, self.members.len()));
@@ -128,9 +131,6 @@ impl<T> Arena<T> {
         Err(IndexEmpty(id))
     }
 
-    pub fn add(&mut self, value: T) -> ID {
-        self.add_with_id(|_id| value)
-    }
     pub fn remove(&mut self, id: ID) -> Result<T, ArenaError> {
         if id >= self.members.len() {
             return Err(IndexOutOfBounds(id, self.members.len()));

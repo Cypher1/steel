@@ -13,6 +13,12 @@ impl<'a> Symbol<'a> {
     }
 }
 
+impl<'a> From<Symbol<'a>> for Node<'a> {
+    fn from(it: Symbol<'a>) -> Self {
+        Node::Symbol(it)
+    }
+}
+
 #[derive(Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
 pub struct Call {
     pub callee: ID,
@@ -25,18 +31,23 @@ impl Call {
     }
 }
 
+impl<'a> From<Call> for Node<'a> {
+    fn from(it: Call) -> Self {
+        Node::Call(it)
+    }
+}
+
+impl<'a> From<i64> for Node<'a> {
+    fn from(it: i64) -> Self {
+        Node::I64(it)
+    }
+}
+
 #[derive(Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
 pub enum Node<'a> {
     Symbol(Symbol<'a>),
     Call(Call),
-}
-
-pub fn symbol(name: &'_ str) -> Node<'_> {
-    Node::Symbol(Symbol::new(name))
-}
-
-pub fn call<'a>(id: ID, args: Vec<ID>) -> Node<'a> {
-    Node::Call(Call::new(id, args))
+    I64(i64),
 }
 
 #[cfg(test)]
@@ -47,7 +58,7 @@ mod test {
     fn can_construct_node() {
         let mut a: Arena<Node<'static>> = Arena::new();
 
-        let hello = a.add(symbol("hello"));
+        let hello = a.add(Symbol::new("hello"));
 
         assert_eq!(
             format!("{:?}", a.get(hello)),
@@ -59,8 +70,8 @@ mod test {
     fn can_construct_nodes() {
         let mut a: Arena<Node<'static>> = Arena::new();
 
-        let hello = a.add(symbol("hello"));
-        let world = a.add(symbol("world"));
+        let hello = a.add(Symbol::new("hello"));
+        let world = a.add(Symbol::new("world"));
 
         assert_eq!(
             format!("{:?}", a.get(hello)),
@@ -76,7 +87,7 @@ mod test {
     fn can_construct_nodes_with_self_reference() {
         let mut a: Arena<Node<'static>> = Arena::new();
 
-        let reference = a.add_with_id(|id| call(id, vec![]));
+        let reference = a.add_with_id(|id| Call::new(id, vec![]));
 
         assert_eq!(
             format!("{:?}", a.get(reference)),
@@ -88,9 +99,9 @@ mod test {
     fn can_construct_nodes_with_cross_reference() {
         let mut a: Arena<Node<'static>> = Arena::new();
 
-        let hello = a.add(symbol("hello"));
-        let world = a.add(symbol("world"));
-        let reference = a.add(call(hello, vec![world]));
+        let hello = a.add(Symbol::new("hello"));
+        let world = a.add(Symbol::new("world"));
+        let reference = a.add(Call::new(hello, vec![world]));
 
         assert_eq!(
             format!("{:?}", a.get(reference)),
