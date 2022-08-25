@@ -108,6 +108,26 @@ impl<T> Arena<T> {
         id
     }
 
+    pub fn get(&self, id: ID) -> Result<&T, ArenaError> {
+        if id >= self.members.len() {
+            return Err(IndexOutOfBounds(id, self.members.len()));
+        }
+        if let Entry(value) = &self.members[id] {
+            return Ok(value);
+        }
+        Err(IndexEmpty(id))
+    }
+
+    pub fn get_mut(&mut self, id: ID) -> Result<&mut T, ArenaError> {
+        if id >= self.members.len() {
+            return Err(IndexOutOfBounds(id, self.members.len()));
+        }
+        if let Entry(value) = &mut self.members[id] {
+            return Ok(value);
+        }
+        Err(IndexEmpty(id))
+    }
+
     pub fn add(&mut self, value: T) -> ID {
         self.add_with_id(|_id| value)
     }
