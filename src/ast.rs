@@ -4,3 +4,10 @@ pub struct Symbol<'a> {
     // TODO: Locations
     pub name: &'a str,
 }
+
+/*
+#[derive(Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
+pub enum Node<'a> {
+    Symbol(Symbol<'a>),
+}
+*/
