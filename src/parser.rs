@@ -7,7 +7,7 @@ use nom::{
     IResult,
 };
 
-use crate::nodes::Symbol;
+use crate::nodes::{Call, Symbol};
 use crate::primitives::Color;
 
 fn from_hex(input: &str) -> Result<u8, std::num::ParseIntError> {
@@ -38,7 +38,10 @@ pub fn number_i64_raw(input: &str) -> IResult<&str, i64> {
     Ok((input, if sign == "-" { -value } else { value }))
 }
 
-pub fn number_i64<'source, ID, C: ParserContext<ID, i64>>(context: &mut C, input: &'source str) -> IResult<&'source str, ID> {
+pub fn number_i64<'source, ID, E, C: ParserContext<ID, i64, E>>(
+    context: &mut C,
+    input: &'source str,
+) -> IResult<&'source str, ID> {
     let (input, value) = number_i64_raw(input)?;
     let id = context.add(value);
     Ok((input, id))
@@ -63,7 +66,10 @@ pub fn symbol_raw(og_input: &str) -> IResult<&str, Symbol> {
 
     Ok((input, Symbol { name }))
 }
-pub fn symbol<'source, ID, C: ParserContext<ID, Symbol<'source>>>(context: &mut C, input: &'source str) -> IResult<&'source str, ID> {
+pub fn symbol<'source, ID, E, C: ParserContext<ID, Symbol<'source>, E>>(
+    context: &mut C,
+    input: &'source str,
+) -> IResult<&'source str, ID> {
     let (input, symbol) = symbol_raw(input)?;
     let id = context.add(symbol);
     Ok((input, id))
@@ -73,18 +79,43 @@ fn is_operator_char(c: char) -> bool {
     "~!@$%^&*-+=|?/\\:".contains(c)
 }
 
-pub fn operator(input: &str) -> IResult<&str, Symbol> {
+pub fn operator_raw(input: &str) -> IResult<&str, Symbol> {
     let (input, name) = take_while_m_n(1, 3, is_operator_char)(input)?;
     Ok((input, Symbol { name }))
 }
-
-pub trait ParserContext<ID, T> {
-    fn add(&self, value: T) -> ID;
-    fn get(&self, id: ID) -> T;
-    fn get_mut(&mut self, id: ID) -> &mut T;
+pub fn operator<'source, ID, E, C: ParserContext<ID, Symbol<'source>, E>>(
+    context: &mut C,
+    input: &'source str,
+) -> IResult<&'source str, ID> {
+    let (input, symbol) = operator_raw(input)?;
+    let id = context.add(symbol);
+    Ok((input, id))
 }
 
-pub fn expr<'source, ID, C: ParserContext<ID, Symbol<'source>> + ParserContext<ID, i64>>(context: &mut C, input: &'source str) -> IResult<&'source str, ID> {
+pub trait ParserContext<ID, T, E> {
+    fn add(&mut self, value: T) -> ID;
+    fn get(&self, id: ID) -> Result<&T, E>;
+    fn get_mut(&mut self, id: ID) -> Result<&mut T, E>;
+}
+
+pub fn expr<
+    'source,
+    ID,
+    E,
+    C: ParserContext<ID, Call<ID>, E>
+        + ParserContext<ID, Symbol<'source>, E>
+        + ParserContext<ID, i64, E>,
+>(
+    context: &mut C,
+    input: &'source str,
+) -> IResult<&'source str, ID> {
+    if let Ok((input, _)) = tag::<&str, &str, nom::error::Error<_>>("(")(input) {
+        let (input, left) = expr(context, input)?;
+        let (input, op) = operator(context, input)?;
+        let (input, right) = expr(context, input)?;
+        let call = context.add(Call::new(op, vec![left, right]));
+        return Ok((input, call));
+    }
     if let Ok(res) = number_i64(context, input) {
         return Ok(res);
     }
@@ -148,19 +179,19 @@ mod test {
 
     #[test]
     fn parse_operator() {
-        assert_eq!(operator("||"), Ok(("", Symbol { name: "||" })));
-        assert_eq!(operator("+"), Ok(("", Symbol { name: "+" })));
-        assert_eq!(operator("*"), Ok(("", Symbol { name: "*" })));
+        assert_eq!(operator_raw("||"), Ok(("", Symbol { name: "||" })));
+        assert_eq!(operator_raw("+"), Ok(("", Symbol { name: "+" })));
+        assert_eq!(operator_raw("*"), Ok(("", Symbol { name: "*" })));
     }
 
     #[test]
     fn parse_non_operator() {
         assert_err_is(
-            operator("#lol"),
+            operator_raw("#lol"),
             "Parsing Error: Error { input: \"#lol\", code: TakeWhileMN }",
         );
         assert_err_is(
-            operator("123"),
+            operator_raw("123"),
             "Parsing Error: Error { input: \"123\", code: TakeWhileMN }",
         );
     }
