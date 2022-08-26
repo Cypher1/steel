@@ -1,3 +1,6 @@
+// TODO: Remove when we can run in ECS and AST mode.
+#![allow(unused)]
+
 mod arena;
 mod ast;
 mod ecs;
