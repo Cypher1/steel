@@ -1,10 +1,17 @@
 use crate::arena::{Arena, ArenaError, ID};
 use crate::nodes::*;
+use crate::parser::ParserContext;
 use std::marker::PhantomData;
 
-#[macro_use]
 mod component;
 use component::*;
+mod providers;
+use providers::*;
+
+// In future there may be other kinds of Providers.
+#[macro_use]
+mod arena_providers;
+use arena_providers::*;
 
 #[derive(Debug, Default)]
 struct Context<'source> {
@@ -14,29 +21,54 @@ struct Context<'source> {
     int64_values: Arena<i64>,
 }
 
-impl<'source> Context<'source> {
-    fn get<T: 'source>(&self, id: ID) -> Result<&T, ECSError>
-    where
-        Self: Provider<'source, T>,
-    {
-        <Context<'source> as Provider<'source, T>>::get(self, id)
+make_arena_provider!(Context<'a>, Symbol<'a>, Symbol, symbols);
+make_arena_provider!(Context<'a>, Call<ID>, Call, calls);
+make_arena_provider!(Context<'a>, i64, I64, int64_values);
+
+impl<'source, T: 'source> ParserContext<ID, T, ECSError> for Context<'source>
+where
+    Self: Provider<'source, T>,
+{
+    fn add(&mut self, value: T) -> ID {
+        self.add_component(value)
+    }
+
+    fn get(&self, id: ID) -> Result<&T, ECSError> {
+        <Context<'source> as Provider<'source, T>>::get_component_for_entity(self, id)
     }
     #[allow(unused)]
-    fn get_mut<T: 'source>(&mut self, id: ID) -> Result<&mut T, ECSError>
+    fn get_mut(&mut self, id: ID) -> Result<&mut T, ECSError>
     where
         Self: Provider<'source, T>,
     {
-        <Context<'source> as Provider<'source, T>>::get_mut(self, id)
+        <Context<'source> as Provider<'source, T>>::get_component_for_entity_mut(self, id)
     }
 }
-
-make_provider!(Context<'a>, Symbol<'a>, Symbol, symbols);
-make_provider!(Context<'a>, Call<ID>, Call, calls);
-make_provider!(Context<'a>, i64, I64, int64_values);
 
 impl<'source> Context<'source> {
     fn new() -> Self {
         Default::default()
+    }
+
+    fn add<T>(&mut self, value: T) -> ID
+    where
+        Self: ParserContext<ID, T, ECSError>,
+    {
+        <Self as ParserContext<ID, T, ECSError>>::add(self, value)
+    }
+
+    fn get<T>(&self, id: ID) -> Result<&T, ECSError>
+    where
+        Self: ParserContext<ID, T, ECSError>,
+    {
+        <Self as ParserContext<ID, T, ECSError>>::get(self, id)
+    }
+
+    fn get_mut<T>(&mut self, id: ID) -> Result<&mut T, ECSError>
+    where
+        Self: ParserContext<ID, T, ECSError>,
+    {
+        <Self as ParserContext<ID, T, ECSError>>::get_mut(self, id)
     }
 }
 
@@ -75,11 +107,11 @@ mod test {
         let world = ctx.add(Symbol::new("world"));
 
         assert_eq!(
-            format!("{:?}", ctx.get::<Symbol<'static>>(hello)),
+            format!("{:?}", ctx.get::<Symbol>(hello)),
             "Ok(Symbol { name: \"hello\" })"
         );
         assert_eq!(
-            format!("{:?}", ctx.get::<Symbol<'static>>(world)),
+            format!("{:?}", ctx.get::<Symbol>(world)),
             "Ok(Symbol { name: \"world\" })"
         );
     }
