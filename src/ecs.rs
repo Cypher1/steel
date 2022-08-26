@@ -34,7 +34,7 @@ impl<T> Clone for ComponentID<T> {
 #[derive(Debug, Copy, Clone)]
 enum Entity {
     Symbol(ComponentID<Symbol<'static>>),
-    Call(ComponentID<Call>),
+    Call(ComponentID<Call<ID>>),
     I64(ComponentID<i64>),
 }
 
@@ -42,7 +42,7 @@ enum Entity {
 struct Context<'source> {
     entities: Arena<Entity>,
     symbols: Arena<Symbol<'source>>,
-    calls: Arena<Call>,
+    calls: Arena<Call<ID>>,
     int64_values: Arena<i64>,
 }
 
@@ -148,7 +148,7 @@ macro_rules! make_provider {
 }
 
 make_provider!(Context<'a>, Symbol<'a>, Symbol, symbols);
-make_provider!(Context<'a>, Call, Call, calls);
+make_provider!(Context<'a>, Call<ID>, Call, calls);
 make_provider!(Context<'a>, i64, I64, int64_values);
 
 impl<'source> Context<'source> {
@@ -160,6 +160,7 @@ impl<'source> Context<'source> {
 #[cfg(test)]
 mod test {
     use super::*;
+    type Call = super::Call<ID>;
 
     #[test]
     fn can_construct_node() -> Result<(), ECSError> {

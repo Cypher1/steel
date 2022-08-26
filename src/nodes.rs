@@ -14,13 +14,13 @@ impl<'a> Symbol<'a> {
 }
 
 #[derive(Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
-pub struct Call {
-    pub callee: ID,
-    pub args: Vec<ID>,
+pub struct Call<P> {
+    pub callee: P,
+    pub args: Vec<P>,
 }
 
-impl Call {
-    pub fn new(callee: ID, args: Vec<ID>) -> Self {
+impl<P> Call<P> {
+    pub fn new(callee: P, args: Vec<P>) -> Self {
         Self { callee, args }
     }
 }
