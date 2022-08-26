@@ -1,4 +1,3 @@
-use crate::arena::Arena;
 use crate::nodes::*;
 
 impl<'a> From<Symbol<'a>> for Node<'a> {
@@ -29,6 +28,7 @@ pub enum Node<'a> {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::arena::Arena;
 
     #[test]
     fn can_construct_node() {

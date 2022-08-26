@@ -1,5 +1,6 @@
 mod arena;
 mod ast;
+mod ecs;
 mod error;
 mod nodes;
 mod parser;
