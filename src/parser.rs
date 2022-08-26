@@ -29,13 +29,19 @@ pub fn hex_color(input: &str) -> IResult<&str, Color> {
     Ok((input, Color { red, green, blue }))
 }
 
-pub fn number_i64(input: &str) -> IResult<&str, i64> {
+pub fn number_i64_raw(input: &str) -> IResult<&str, i64> {
     let (input, sign) = alt((tag("+"), tag("-"), tag("")))(input)?;
     let (input, value) = map_res(
         take_while1(&|c: char| c.is_ascii_digit()),
         &|input: &str| input.parse::<i64>(),
     )(input)?;
     Ok((input, if sign == "-" { -value } else { value }))
+}
+
+pub fn number_i64<'source, ID, C: ParserContext<ID, i64>>(context: &mut C, input: &'source str) -> IResult<&'source str, ID> {
+    let (input, value) = number_i64_raw(input)?;
+    let id = context.add(value);
+    Ok((input, id))
 }
 
 fn is_identifier_char(c: char) -> bool {
@@ -50,12 +56,17 @@ fn identifier_tail(input: &str) -> IResult<&str, &str> {
     take_while(is_identifier_char)(input)
 }
 
-pub fn symbol(og_input: &str) -> IResult<&str, Symbol> {
+pub fn symbol_raw(og_input: &str) -> IResult<&str, Symbol> {
     let (input, (head, tail)) = tuple((identifier_head, identifier_tail))(og_input)?;
 
     let name = &og_input[0..head.len() + tail.len()];
 
     Ok((input, Symbol { name }))
+}
+pub fn symbol<'source, ID, C: ParserContext<ID, Symbol<'source>>>(context: &mut C, input: &'source str) -> IResult<&'source str, ID> {
+    let (input, symbol) = symbol_raw(input)?;
+    let id = context.add(symbol);
+    Ok((input, id))
 }
 
 fn is_operator_char(c: char) -> bool {
@@ -65,6 +76,22 @@ fn is_operator_char(c: char) -> bool {
 pub fn operator(input: &str) -> IResult<&str, Symbol> {
     let (input, name) = take_while_m_n(1, 3, is_operator_char)(input)?;
     Ok((input, Symbol { name }))
+}
+
+pub trait ParserContext<ID, T> {
+    fn add(&self, value: T) -> ID;
+    fn get(&self, id: ID) -> T;
+    fn get_mut(&mut self, id: ID) -> &mut T;
+}
+
+pub fn expr<'source, ID, C: ParserContext<ID, Symbol<'source>> + ParserContext<ID, i64>>(context: &mut C, input: &'source str) -> IResult<&'source str, ID> {
+    if let Ok(res) = number_i64(context, input) {
+        return Ok(res);
+    }
+    if let Ok(res) = symbol(context, input) {
+        return Ok(res);
+    }
+    todo!("Unexpected '{}'", input);
 }
 
 #[cfg(test)]
@@ -98,23 +125,23 @@ mod test {
 
     #[test]
     fn parse_symbol() {
-        assert_eq!(symbol("hello"), Ok(("", Symbol { name: "hello" })));
+        assert_eq!(symbol_raw("hello"), Ok(("", Symbol { name: "hello" })));
     }
 
     #[test]
     fn parse_symbol_with_underscores() {
-        assert_eq!(symbol("he_llo"), Ok(("", Symbol { name: "he_llo" })));
-        assert_eq!(symbol("_e_llo"), Ok(("", Symbol { name: "_e_llo" })));
+        assert_eq!(symbol_raw("he_llo"), Ok(("", Symbol { name: "he_llo" })));
+        assert_eq!(symbol_raw("_e_llo"), Ok(("", Symbol { name: "_e_llo" })));
     }
 
     #[test]
     fn parse_non_symbol() {
         assert_err_is(
-            symbol("#lol"),
+            symbol_raw("#lol"),
             "Parsing Error: Error { input: \"#lol\", code: Tag }",
         );
         assert_err_is(
-            symbol("123"),
+            symbol_raw("123"),
             "Parsing Error: Error { input: \"123\", code: Tag }",
         );
     }
@@ -140,23 +167,23 @@ mod test {
 
     #[test]
     fn parse_number_i64() {
-        assert_eq!(number_i64("123"), Ok(("", 123i64)));
-        assert_eq!(number_i64("-0"), Ok(("", 0i64)));
-        assert_eq!(number_i64("-1"), Ok(("", -1i64)));
+        assert_eq!(number_i64_raw("123"), Ok(("", 123i64)));
+        assert_eq!(number_i64_raw("-0"), Ok(("", 0i64)));
+        assert_eq!(number_i64_raw("-1"), Ok(("", -1i64)));
     }
 
     #[test]
     fn parse_non_number_i64() {
         assert_err_is(
-            number_i64("#lol"),
+            number_i64_raw("#lol"),
             "Parsing Error: Error { input: \"#lol\", code: TakeWhile1 }",
         );
         assert_err_is(
-            number_i64("||"),
+            number_i64_raw("||"),
             "Parsing Error: Error { input: \"||\", code: TakeWhile1 }",
         );
         assert_err_is(
-            number_i64("e2"),
+            number_i64_raw("e2"),
             "Parsing Error: Error { input: \"e2\", code: TakeWhile1 }",
         );
     }

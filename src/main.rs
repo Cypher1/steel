@@ -13,13 +13,13 @@ mod primitives;
 mod assertions;
 
 use error::SteelErr;
-use parser::{hex_color, symbol};
+use parser::{hex_color, symbol_raw};
 
 fn main() -> Result<(), SteelErr<'static>> {
     println!("Hello, world!");
 
     dbg!(hex_color("#2F14DF")?);
-    dbg!(symbol("hello   ")?);
+    dbg!(symbol_raw("hello   ")?);
 
     Ok(())
 }
