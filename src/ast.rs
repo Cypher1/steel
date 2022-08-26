@@ -1,29 +1,25 @@
 use crate::nodes::*;
 
-impl<'a> From<Symbol<'a>> for Node<'a> {
-    fn from(it: Symbol<'a>) -> Self {
-        Node::Symbol(it)
-    }
-}
-
-impl<'a> From<Call> for Node<'a> {
-    fn from(it: Call) -> Self {
-        Node::Call(it)
-    }
-}
-
-impl<'a> From<i64> for Node<'a> {
-    fn from(it: i64) -> Self {
-        Node::I64(it)
-    }
-}
-
 #[derive(Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
 pub enum Node<'a> {
     Symbol(Symbol<'a>),
     Call(Call),
     I64(i64),
 }
+
+macro_rules! wrap_node {
+    ($ty: ty, $variant: tt) => {
+        impl<'a> From<$ty> for Node<'a> {
+            fn from(it: $ty) -> Self {
+                Node::$variant(it)
+            }
+        }
+    };
+}
+
+wrap_node!(Symbol<'a>, Symbol);
+wrap_node!(Call, Call);
+wrap_node!(i64, I64);
 
 #[cfg(test)]
 mod test {
