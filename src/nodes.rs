@@ -1,4 +1,4 @@
-use crate::arena::{/*Arena,*/ ID};
+use crate::arena::ID;
 
 #[derive(Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
 pub struct Symbol<'a> {
