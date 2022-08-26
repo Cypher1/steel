@@ -13,7 +13,10 @@ struct Ast<'source> {
 
 impl<'source> Ast<'source> {
     pub fn new() -> Self {
-        Self { members: Arena::new(), root: None }
+        Self {
+            members: Arena::new(),
+            root: None,
+        }
     }
 }
 
