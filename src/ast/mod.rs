@@ -1,12 +1,12 @@
 use crate::arena::{Arena, ArenaError, ID};
 use crate::nodes::*;
-use crate::parser::ParserContext;
+use crate::parser::{ParserContext, ParserStorage};
 use std::convert::Infallible;
 
 mod node;
 use node::*;
 
-struct Ast<'source> {
+pub struct Ast<'source> {
     members: Arena<Node<'source>>,
     root: Option<Ref<'source>>,
 }
@@ -20,7 +20,12 @@ impl<'source> Ast<'source> {
     }
 }
 
-impl<'source> ParserContext<Ref<'source>, Node<'source>, Infallible> for Ast<'source> {
+impl<'source> ParserContext<'source> for Ast<'source> {
+    type ID = Ref<'source>;
+    type E = Infallible;
+}
+
+impl<'source> ParserStorage<Ref<'source>, Node<'source>, Infallible> for Ast<'source> {
     fn add(&mut self, value: Node<'source>) -> Ref<'source> {
         let id = self.members.add(value);
         self.members

@@ -13,7 +13,7 @@ mod primitives;
 mod assertions;
 
 use error::SteelErr;
-use parser::{hex_color, symbol_raw};
+use parser::{expr, hex_color, symbol_raw};
 
 fn main() -> Result<(), SteelErr<'static>> {
     println!("Hello, world!");
@@ -21,5 +21,7 @@ fn main() -> Result<(), SteelErr<'static>> {
     dbg!(hex_color("#2F14DF")?);
     dbg!(symbol_raw("hello   ")?);
 
+    let ref mut ctx = ast::Ast::new();
+    dbg!(expr(ctx, "12+23")?);
     Ok(())
 }

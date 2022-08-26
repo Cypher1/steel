@@ -10,6 +10,21 @@ use nom::{
 use crate::nodes::{Call, Symbol};
 use crate::primitives::Color;
 
+pub trait ParserStorage<ID, T, E> {
+    fn add(&mut self, value: T) -> ID;
+    fn get(&self, id: ID) -> Result<&T, E>;
+    fn get_mut(&mut self, id: ID) -> Result<&mut T, E>;
+}
+
+pub trait ParserContext<'source>:
+    ParserStorage<Self::ID, Call<Self::ID>, Self::E>
+    + ParserStorage<Self::ID, Symbol<'source>, Self::E>
+    + ParserStorage<Self::ID, i64, Self::E>
+{
+    type ID;
+    type E;
+}
+
 fn from_hex(input: &str) -> Result<u8, std::num::ParseIntError> {
     u8::from_str_radix(input, 16)
 }
@@ -38,7 +53,7 @@ pub fn number_i64_raw(input: &str) -> IResult<&str, i64> {
     Ok((input, if sign == "-" { -value } else { value }))
 }
 
-pub fn number_i64<'source, ID, E, C: ParserContext<ID, i64, E>>(
+pub fn number_i64<'source, ID, E, C: ParserStorage<ID, i64, E>>(
     context: &mut C,
     input: &'source str,
 ) -> IResult<&'source str, ID> {
@@ -66,7 +81,7 @@ pub fn symbol_raw(og_input: &str) -> IResult<&str, Symbol> {
 
     Ok((input, Symbol { name }))
 }
-pub fn symbol<'source, ID, E, C: ParserContext<ID, Symbol<'source>, E>>(
+pub fn symbol<'source, ID, E, C: ParserStorage<ID, Symbol<'source>, E>>(
     context: &mut C,
     input: &'source str,
 ) -> IResult<&'source str, ID> {
@@ -83,7 +98,7 @@ pub fn operator_raw(input: &str) -> IResult<&str, Symbol> {
     let (input, name) = take_while_m_n(1, 3, is_operator_char)(input)?;
     Ok((input, Symbol { name }))
 }
-pub fn operator<'source, ID, E, C: ParserContext<ID, Symbol<'source>, E>>(
+pub fn operator<'source, ID, E, C: ParserStorage<ID, Symbol<'source>, E>>(
     context: &mut C,
     input: &'source str,
 ) -> IResult<&'source str, ID> {
@@ -92,23 +107,10 @@ pub fn operator<'source, ID, E, C: ParserContext<ID, Symbol<'source>, E>>(
     Ok((input, id))
 }
 
-pub trait ParserContext<ID, T, E> {
-    fn add(&mut self, value: T) -> ID;
-    fn get(&self, id: ID) -> Result<&T, E>;
-    fn get_mut(&mut self, id: ID) -> Result<&mut T, E>;
-}
-
-pub fn expr<
-    'source,
-    ID,
-    E,
-    C: ParserContext<ID, Call<ID>, E>
-        + ParserContext<ID, Symbol<'source>, E>
-        + ParserContext<ID, i64, E>,
->(
+pub fn expr<'source, C: ParserContext<'source>>(
     context: &mut C,
     input: &'source str,
-) -> IResult<&'source str, ID> {
+) -> IResult<&'source str, C::ID> {
     if let Ok((input, _)) = tag::<&str, &str, nom::error::Error<_>>("(")(input) {
         let (input, left) = expr(context, input)?;
         let (input, op) = operator(context, input)?;
