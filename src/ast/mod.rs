@@ -3,32 +3,18 @@ use crate::nodes::*;
 use crate::parser::ParserContext;
 use std::convert::Infallible;
 
-type Ref<'source> = *mut Node<'source>;
-
-#[derive(Debug)]
-pub enum Node<'source> {
-    Symbol(Symbol<'source>),
-    Call(Call<Ref<'source>>),
-    I64(i64),
-}
-
-macro_rules! wrap_node {
-    ($ty: ty, $variant: tt) => {
-        impl<'source> From<$ty> for Node<'source> {
-            fn from(it: $ty) -> Self {
-                Node::$variant(it)
-            }
-        }
-    };
-}
-
-wrap_node!(Symbol<'source>, Symbol);
-wrap_node!(Call<Ref<'source>>, Call);
-wrap_node!(i64, I64);
+mod node;
+use node::*;
 
 struct Ast<'source> {
     members: Arena<Node<'source>>,
     root: Option<Ref<'source>>,
+}
+
+impl<'source> Ast<'source> {
+    pub fn new() -> Self {
+        Self { members: Arena::new(), root: None }
+    }
 }
 
 impl<'source> ParserContext<Ref<'source>, Node<'source>, Infallible> for Ast<'source> {
@@ -54,9 +40,9 @@ mod test {
 
     #[test]
     fn can_construct_node() {
-        let mut ctx: Arena<Node<'static>> = Arena::new();
+        let mut ctx: Ast<'static> = Ast::new();
 
-        let hello = ctx.add(Symbol::new("hello"));
+        let hello = ctx.add(Symbol::new("hello").into());
 
         assert_eq!(
             format!("{:?}", ctx.get(hello)),
@@ -66,10 +52,10 @@ mod test {
 
     #[test]
     fn can_construct_nodes() {
-        let mut ctx: Arena<Node<'static>> = Arena::new();
+        let mut ctx: Ast<'static> = Ast::new();
 
-        let hello = ctx.add(Symbol::new("hello"));
-        let world = ctx.add(Symbol::new("world"));
+        let hello = ctx.add(Symbol::new("hello").into());
+        let world = ctx.add(Symbol::new("world").into());
 
         assert_eq!(
             format!("{:?}", ctx.get(hello)),
@@ -85,9 +71,9 @@ mod test {
     #[test]
     fn can_construct_nodes_with_self_reference() {
         // TODO: Work out how to do self references...
-        let mut ctx: Arena<Node<'static>> = Arena::new();
+        let mut ctx: Ast<'static> = Ast::new();
 
-        let reference = ctx.add_with_id(|id| Call::new(id, vec![]));
+        let reference = ctx.add_with_id(|id| Call::new(id, vec![]).into());
 
         assert_eq!(
             format!("{:?}", ctx.get(reference)),
@@ -97,14 +83,14 @@ mod test {
     */
 
     #[test]
-    fn can_construct_nodes_with_cross_reference() -> Result<(), ArenaError> {
-        let mut ctx: Arena<Node<'static>> = Arena::new();
+    fn can_construct_nodes_with_cross_reference() -> Result<(), Infallible> {
+        let mut ctx: Ast<'static> = Ast::new();
 
-        let hello = ctx.add(Symbol::new("hello"));
-        let world = ctx.add(Symbol::new("world"));
+        let hello = ctx.add(Symbol::new("hello").into());
+        let world = ctx.add(Symbol::new("world").into());
         let hello: Ref<'static> = ctx.get_mut(hello)?;
         let world: Ref<'static> = ctx.get_mut(world)?;
-        let reference = ctx.add(Call::new(hello, vec![world]));
+        let reference = ctx.add(Call::new(hello, vec![world]).into());
 
         assert_eq!(
             format!("{:?}", ctx.get(reference)),
@@ -117,16 +103,16 @@ mod test {
     }
 
     #[test]
-    fn can_construct_values() -> Result<(), ArenaError> {
-        let mut ctx: Arena<Node<'static>> = Arena::new();
+    fn can_construct_values() -> Result<(), Infallible> {
+        let mut ctx: Ast<'static> = Ast::new();
 
-        let plus = ctx.add(Symbol::new("plus"));
-        let a = ctx.add(32i64);
-        let b = ctx.add(12i64);
+        let plus = ctx.add(Symbol::new("plus").into());
+        let a = ctx.add(32i64.into());
+        let b = ctx.add(12i64.into());
         let plus: Ref<'static> = ctx.get_mut(plus)?;
         let a: Ref<'static> = ctx.get_mut(a)?;
         let b: Ref<'static> = ctx.get_mut(b)?;
-        let reference = ctx.add(Call::new(plus, vec![a, b]));
+        let reference = ctx.add(Call::new(plus, vec![a, b]).into());
 
         assert_eq!(
             format!("{:?}", ctx.get(reference)),
