@@ -15,7 +15,7 @@ mod tests;
 
 use crate::parser::ParserContext;
 use error::SteelErr;
-use parser::expr;
+use parser::program;
 
 fn main() -> Result<(), SteelErr> {
     let args = std::env::args();
@@ -28,13 +28,13 @@ fn main() -> Result<(), SteelErr> {
         {
             let line = line.clone();
             let mut ast = ast::Ast::new();
-            let (_ast_out_input, ast_out) = expr(&mut ast, &line)?;
+            let (_ast_out_input, ast_out) = program(&mut ast, &line)?;
             println!("ast expr: {:?}", ast.pretty(ast_out));
         }
         {
             let line = line.clone();
             let mut ecs = ecs::Ecs::new();
-            let (_ecs_out_input, ecs_out) = expr(&mut ecs, &line)?;
+            let (_ecs_out_input, ecs_out) = program(&mut ecs, &line)?;
             println!("ecs expr: {:?}", ecs.pretty(ecs_out));
         }
     }

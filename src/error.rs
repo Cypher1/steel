@@ -6,6 +6,7 @@ pub enum SteelErr {
     ParseErrorParseInt(String, std::num::ParseIntError),
     AstError(crate::ast::AstError),
     EcsError(crate::ecs::EcsError),
+    PrecedenceError{ precendence: i32 },
     Error { input: String, code: nom::error::ErrorKind }, // Parse
     Multi(Box<SteelErr>, Box<SteelErr>),
 }
@@ -13,6 +14,7 @@ pub enum SteelErr {
 impl std::fmt::Display for SteelErr {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
+            PrecedenceError{ precendence } => write!(f, "Unexpected operator due to max precendence setting ({})", precendence),
             ParseErrorParseInt(input, error) => write!(f, "Failed to parse int due to {:?} in {}", error, input),
             Error{input, code} => write!(f, "Failed in {:?} while parsing {}", code, input),
             AstError(e) => write!(f, "{:?}", e),
@@ -33,13 +35,17 @@ impl From<std::convert::Infallible> for SteelErr {
 
 impl Into<nom::Err<SteelErr>> for SteelErr {
     fn into(self) -> nom::Err<Self> {
-        todo!()
+        panic!("{:?}", self)
     }
 }
 
-impl<T> From<nom::Err<T>> for SteelErr {
-    fn from(_err: nom::Err<T>) -> Self {
-        todo!()//ParseError(err)
+impl From<nom::Err<SteelErr>> for SteelErr {
+    fn from(err: nom::Err<SteelErr>) -> Self {
+        match err {
+            nom::Err::Error(e) => e,
+            nom::Err::Failure(e) => e, // HMM.....
+            nom::Err::Incomplete(_needed) => todo!("Handle incomplete input"),
+        }
     }
 }
 

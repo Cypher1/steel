@@ -9,13 +9,12 @@ use nom::{
 
 type SResult<'a, T> = std::result::Result<(&'a str, T), nom::Err<SteelErr>>;
 
-// Automatically ignore whitespace by default...
-// TODO: Consider only ignoring some whitespace...
-pub fn tag(
+fn tag(
     raw: &str
 ) -> impl Fn(&str) -> SResult<&str> + '_ {
+    // TODO: Consider only ignoring some whitespace...
     move |input: &str| {
-        let (input, _) = space0::<&str, SteelErr>(input)?;
+        // let (input, _) = space0::<&str, SteelErr>(input)?;
         raw_tag::<&str, &str, SteelErr>(raw)(input)
             // TODO: This might be expensive?
             //Err(_) => Err(SteelErr::ParseErrorExpected(raw.to_string(), input.to_string())),
@@ -157,49 +156,74 @@ fn is_operator_char(c: char) -> bool {
     "~!@$%^&*-+=|?/\\:".contains(c)
 }
 
-pub fn operator_raw(input: &str) -> SResult<Symbol> {
+type Precedence = i32;
+const MIN_PRECENDENCE: Precedence = Precedence::MIN;
+const MAX_PRECENDENCE: Precedence = Precedence::MAX;
+const INIT_PRECENDENCE: Precedence = MIN_PRECENDENCE;
+const MUL_PRECENDENCE: Precedence = 2;
+const PLUS_PRECENDENCE: Precedence = 1;
+
+pub fn operator_raw<'source>(
+    input: &'source str,
+    min_prec: &mut Precedence // TODO: reject operators of the wrong prec...
+) -> SResult<'source, Symbol<'source>> {
     let (input, name) = take_while_m_n(1, 3, is_operator_char)(input)?;
+    let precendence = match name {
+        "+" => PLUS_PRECENDENCE,
+        "*" => MUL_PRECENDENCE,
+        _ => MAX_PRECENDENCE,
+    };
+    if precendence < *min_prec {
+        return Err(nom::Err::Error(SteelErr::PrecedenceError { precendence }));
+    }
+    eprintln!("RAISE PREC FROM {:?} TO {:?} ", min_prec, precendence);
+    *min_prec = precendence; // otherwise raise the precendence.
     Ok((input, Symbol::operator(name)))
 }
+
 pub fn operator<'source, ID, E: Into<SteelErr>, C: ParserStorage<'source, ID, Symbol<'source>, E>>(
     context: &mut C,
     input: &'source str,
+    min_prec: &mut Precedence
 ) -> SResult<'source, ID> {
-    let (input, _) = space0(input)?;
-    let (input, symbol) = operator_raw(input)?;
-    let id = context.add(symbol);
+    let (input, name) = operator_raw(input, min_prec)?;
+    let id = context.add(name);
     Ok((input, id))
 }
 
-pub fn args<'source, C: ParserContext<'source>>(
+fn args<'source, C: ParserContext<'source>>(
     context: &mut C,
     input: &'source str,
 ) -> SResult<'source, Vec<C::ID>> where <C as ParserContext<'source>>::E: Into<SteelErr> {
     let (input, _) = tag("(")(input)?;
-    let (input, args) = separated_list0(tag(","), |input|expr(context, input))(input)?;
+    let (input, args) = separated_list0(tag(","), |input|{
+        let mut ignore_prec = INIT_PRECENDENCE;
+        expr(context, input, &mut ignore_prec)
+    })(input)?;
     let (input, _) = tag(")")(input)?;
     return Ok((input, args));
 }
 
-pub fn led<'source, C: ParserContext<'source>>(
+fn led<'source, C: ParserContext<'source>>(
     context: &mut C,
     left: C::ID,
     input: &'source str,
+    min_prec: &mut Precedence,
 ) -> SResult<'source, C::ID> where <C as ParserContext<'source>>::E: Into<SteelErr> {
-    // try precedence(less) parsing...
-    // TODO: add precedence...
-    let (input, op) = operator(context, input)?;
-    let (input, right) = expr(context, input)?;
+    let (input, op) = operator(context, input, min_prec)?;
+    let (input, right) = expr(context, input, min_prec)?;
     let call = context.add(Call::new(op, vec![left, right]));
     return Ok((input, call));
 }
 
-pub fn nud<'source, C: ParserContext<'source>>(
+fn nud<'source, C: ParserContext<'source>>(
     context: &mut C,
     input: &'source str,
 ) -> SResult<'source, C::ID> where <C as ParserContext<'source>>::E: Into<SteelErr> {
+    let (input, _) = space0(input)?;
     if let Ok((input, _)) = tag("(")(input) {
-        let (input, wrapped) = expr(context, input)?;
+        let mut ignore_prec = INIT_PRECENDENCE;
+        let (input, wrapped) = expr(context, input, &mut ignore_prec)?;
         let (input, _) = tag(")")(input)?;
         return Ok((input, wrapped));
     }
@@ -211,7 +235,8 @@ pub fn nud<'source, C: ParserContext<'source>>(
         }
         return Ok((input, sym));
     }
-    if let Ok((input, op)) = operator(context, input) {
+    let mut ignore_prec = INIT_PRECENDENCE;
+    if let Ok((input, op)) = operator(context, input, &mut ignore_prec) {
         // Unified calling syntax for a prefix operator
         if let Ok((input, args)) = args(context, input) {
             // Function call
@@ -222,7 +247,8 @@ pub fn nud<'source, C: ParserContext<'source>>(
             return Ok((input, call));
         }
         // Prefix operator
-        let (input, right) = expr(context, input)?;
+        let mut ignore_prec = INIT_PRECENDENCE;
+        let (input, right) = expr(context, input, &mut ignore_prec)?;
         let call = context.add(Call::new(op, vec![right]));
         return Ok((input, call));
     }
@@ -233,15 +259,42 @@ pub fn nud<'source, C: ParserContext<'source>>(
 pub fn expr<'context, 'source: 'context, C: ParserContext<'source>>(
     context: &'context mut C,
     input: &'source str,
+    min_prec: &mut Precedence
 ) -> SResult<'source, C::ID> where <C as ParserContext<'source>>::E: Into<SteelErr> {
     let mut state = nud(context, input)?;
     loop {
-        let update = led(context, state.1, state.0);
+        let update = led(context, state.1, state.0, min_prec);
         match update {
             Ok(new_state) => {
                 state = new_state;
             }
             Err(_) => return Ok(state),
+        }
+    }
+}
+
+pub fn program<'context, 'source: 'context, C: ParserContext<'source>>(
+    context: &'context mut C,
+    input: &'source str,
+) -> SResult<'source, C::ID> where <C as ParserContext<'source>>::E: Into<SteelErr> {
+    let mut min_prec = INIT_PRECENDENCE;
+    let (mut input, mut left) = expr(context, input, &mut min_prec)?;
+    loop {
+        if input == "" {
+            return Ok((input, left));
+        }
+        // dbg!(&state);
+        match led(context, left, input, &mut min_prec) {
+            Ok((new_input, new_left)) => {
+                input = new_input;
+                left = new_left;
+            }
+            Err(nom::Err::Error(SteelErr::PrecedenceError { precendence })) => {
+                // go back down and try again
+                eprintln!("TRY AGAIN {:?}", precendence);
+                min_prec = precendence;
+            }
+            Err(e) => return Err(e),
         }
     }
 }
@@ -300,19 +353,37 @@ mod test {
 
     #[test]
     fn parse_operator() {
-        assert_eq!(operator_raw("||").unwrap(), ("", Symbol::operator("||")));
-        assert_eq!(operator_raw("+").unwrap(), ("", Symbol::operator("+")));
-        assert_eq!(operator_raw("*").unwrap(), ("", Symbol::operator("*")));
+        let mut prec = INIT_PRECENDENCE;
+        assert_eq!(operator_raw("||", &mut prec).unwrap(), ("", Symbol::operator("||")));
+        let mut prec = INIT_PRECENDENCE;
+        assert_eq!(operator_raw("+", &mut prec).unwrap(), ("", Symbol::operator("+")));
+        let mut prec = MUL_PRECENDENCE;
+        assert_eq!(operator_raw("*", &mut prec).unwrap(), ("", Symbol::operator("*")));
+        let mut prec = PLUS_PRECENDENCE;
+        assert_eq!(operator_raw("*", &mut prec).unwrap(), ("", Symbol::operator("*")));
+        let mut prec = INIT_PRECENDENCE;
+        assert_eq!(operator_raw("*", &mut prec).unwrap(), ("", Symbol::operator("*")));
+    }
+
+    #[test]
+    fn parse_operator_in_wrong_precendence() {
+        let mut prec = MUL_PRECENDENCE;
+        assert_err_is(
+            operator_raw("+", &mut prec),
+            &format!("Parsing Error: PrecedenceError {{ precendence: {} }}", PLUS_PRECENDENCE),
+        );
     }
 
     #[test]
     fn parse_non_operator() {
+        let mut prec = INIT_PRECENDENCE;
         assert_err_is(
-            operator_raw("#lol"),
+            operator_raw("#lol", &mut prec),
             "Parsing Error: Error { input: \"#lol\", code: TakeWhileMN }",
         );
+        let mut prec = INIT_PRECENDENCE;
         assert_err_is(
-            operator_raw("123"),
+            operator_raw("123", &mut prec),
             "Parsing Error: Error { input: \"123\", code: TakeWhileMN }",
         );
     }
