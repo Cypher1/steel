@@ -5,17 +5,20 @@ use nom::{
     combinator::map_res,
     sequence::tuple,
     multi::separated_list0,
-    IResult,
 };
+
+type SResult<'a, T> = std::result::Result<(&'a str, T), nom::Err<SteelErr>>;
 
 // Automatically ignore whitespace by default...
 // TODO: Consider only ignoring some whitespace...
 pub fn tag(
     raw: &str
-) -> impl Fn(&str) -> IResult<&str, &str> + '_ {
+) -> impl Fn(&str) -> SResult<&str> + '_ {
     move |input: &str| {
-        let (input, _) = space0(input)?;
-        raw_tag::<&str, &str, nom::error::Error<_>>(raw)(input)
+        let (input, _) = space0::<&str, SteelErr>(input)?;
+        raw_tag::<&str, &str, SteelErr>(raw)(input)
+            // TODO: This might be expensive?
+            //Err(_) => Err(SteelErr::ParseErrorExpected(raw.to_string(), input.to_string())),
     }
 }
 
@@ -92,18 +95,18 @@ fn is_hex_digit(c: char) -> bool {
     c.is_ascii_hexdigit()
 }
 
-fn hex_primary(input: &str) -> IResult<&str, u8> {
+fn hex_primary(input: &str) -> SResult<u8> {
     map_res(take_while_m_n(2, 2, is_hex_digit), from_hex)(input)
 }
 
-pub fn hex_color(input: &str) -> IResult<&str, Color> {
+pub fn hex_color(input: &str) -> SResult<Color> {
     let (input, _) = tag("#")(input)?;
     let (input, (red, green, blue)) = tuple((hex_primary, hex_primary, hex_primary))(input)?;
 
     Ok((input, Color { red, green, blue }))
 }
 
-pub fn number_i64_raw(input: &str) -> IResult<&str, i64> {
+pub fn number_i64_raw(input: &str) -> SResult<i64> {
     let (input, sign) = alt((tag("+"), tag("-"), tag("")))(input)?;
     let (input, value) = map_res(
         take_while1(&|c: char| c.is_ascii_digit()),
@@ -112,10 +115,10 @@ pub fn number_i64_raw(input: &str) -> IResult<&str, i64> {
     Ok((input, if sign == "-" { -value } else { value }))
 }
 
-pub fn number_i64<'source, ID, E: Into<SteelErr<'source>>, C: ParserStorage<'source, ID, i64, E>>(
+pub fn number_i64<'source, ID, E: Into<SteelErr>, C: ParserStorage<'source, ID, i64, E>>(
     context: &mut C,
     input: &'source str,
-) -> IResult<&'source str, ID> {
+) -> SResult<'source, ID> {
     let (input, value) = number_i64_raw(input)?;
     let id = context.add(value);
     Ok((input, id))
@@ -125,25 +128,25 @@ fn is_identifier_char(c: char) -> bool {
     c.is_alphanumeric() || (c == '_')
 }
 
-fn identifier_head(input: &str) -> IResult<&str, &str> {
+fn identifier_head(input: &str) -> SResult<&str> {
     alt((alpha1, tag("_")))(input)
 }
 
-fn identifier_tail(input: &str) -> IResult<&str, &str> {
+fn identifier_tail(input: &str) -> SResult<&str> {
     take_while(is_identifier_char)(input)
 }
 
-pub fn symbol_raw(og_input: &str) -> IResult<&str, Symbol> {
+pub fn symbol_raw(og_input: &str) -> SResult<Symbol> {
     let (input, (head, tail)) = tuple((identifier_head, identifier_tail))(og_input)?;
 
     let name = &og_input[0..head.len() + tail.len()];
 
     Ok((input, Symbol::new(name)))
 }
-pub fn symbol<'source, ID, E: Into<SteelErr<'source>>, C: ParserStorage<'source, ID, Symbol<'source>, E>>(
+pub fn symbol<'source, ID, E: Into<SteelErr>, C: ParserStorage<'source, ID, Symbol<'source>, E>>(
     context: &mut C,
     input: &'source str,
-) -> IResult<&'source str, ID> {
+) -> SResult<'source, ID> {
     let (input, _) = space0(input)?;
     let (input, symbol) = symbol_raw(input)?;
     let id = context.add(symbol);
@@ -154,14 +157,14 @@ fn is_operator_char(c: char) -> bool {
     "~!@$%^&*-+=|?/\\:".contains(c)
 }
 
-pub fn operator_raw(input: &str) -> IResult<&str, Symbol> {
+pub fn operator_raw(input: &str) -> SResult<Symbol> {
     let (input, name) = take_while_m_n(1, 3, is_operator_char)(input)?;
     Ok((input, Symbol::operator(name)))
 }
-pub fn operator<'source, ID, E: Into<SteelErr<'source>>, C: ParserStorage<'source, ID, Symbol<'source>, E>>(
+pub fn operator<'source, ID, E: Into<SteelErr>, C: ParserStorage<'source, ID, Symbol<'source>, E>>(
     context: &mut C,
     input: &'source str,
-) -> IResult<&'source str, ID> {
+) -> SResult<'source, ID> {
     let (input, _) = space0(input)?;
     let (input, symbol) = operator_raw(input)?;
     let id = context.add(symbol);
@@ -171,7 +174,7 @@ pub fn operator<'source, ID, E: Into<SteelErr<'source>>, C: ParserStorage<'sourc
 pub fn args<'source, C: ParserContext<'source>>(
     context: &mut C,
     input: &'source str,
-) -> IResult<&'source str, Vec<C::ID>> where <C as ParserContext<'source>>::E: Into<SteelErr<'source>> {
+) -> SResult<'source, Vec<C::ID>> where <C as ParserContext<'source>>::E: Into<SteelErr> {
     let (input, _) = tag("(")(input)?;
     let (input, args) = separated_list0(tag(","), |input|expr(context, input))(input)?;
     let (input, _) = tag(")")(input)?;
@@ -182,7 +185,7 @@ pub fn led<'source, C: ParserContext<'source>>(
     context: &mut C,
     left: C::ID,
     input: &'source str,
-) -> IResult<&'source str, C::ID> where <C as ParserContext<'source>>::E: Into<SteelErr<'source>> {
+) -> SResult<'source, C::ID> where <C as ParserContext<'source>>::E: Into<SteelErr> {
     // try precedence(less) parsing...
     // TODO: add precedence...
     let (input, op) = operator(context, input)?;
@@ -194,7 +197,7 @@ pub fn led<'source, C: ParserContext<'source>>(
 pub fn nud<'source, C: ParserContext<'source>>(
     context: &mut C,
     input: &'source str,
-) -> IResult<&'source str, C::ID> where <C as ParserContext<'source>>::E: Into<SteelErr<'source>> {
+) -> SResult<'source, C::ID> where <C as ParserContext<'source>>::E: Into<SteelErr> {
     if let Ok((input, _)) = tag("(")(input) {
         let (input, wrapped) = expr(context, input)?;
         let (input, _) = tag(")")(input)?;
@@ -227,10 +230,10 @@ pub fn nud<'source, C: ParserContext<'source>>(
     number_i64(context, input)
 }
 
-pub fn expr<'source, C: ParserContext<'source>>(
-    context: &mut C,
+pub fn expr<'context, 'source: 'context, C: ParserContext<'source>>(
+    context: &'context mut C,
     input: &'source str,
-) -> IResult<&'source str, C::ID> where <C as ParserContext<'source>>::E: Into<SteelErr<'source>> {
+) -> SResult<'source, C::ID> where <C as ParserContext<'source>>::E: Into<SteelErr> {
     let mut state = nud(context, input)?;
     loop {
         let update = led(context, state.1, state.0);
@@ -251,15 +254,15 @@ mod test {
     #[test]
     fn parse_color() {
         assert_eq!(
-            hex_color("#2F14DF"),
-            Ok((
+            hex_color("#2F14DF").expect("Should parse"),
+            (
                 "",
                 Color {
                     red: 47,
                     green: 20,
                     blue: 223,
                 }
-            ))
+            )
         );
     }
 
@@ -274,13 +277,13 @@ mod test {
 
     #[test]
     fn parse_symbol() {
-        assert_eq!(symbol_raw("hello"), Ok(("", Symbol::new("hello"))));
+        assert_eq!(symbol_raw("hello").unwrap(), ("", Symbol::new("hello")));
     }
 
     #[test]
     fn parse_symbol_with_underscores() {
-        assert_eq!(symbol_raw("he_llo"), Ok(("", Symbol::new("he_llo"))));
-        assert_eq!(symbol_raw("_e_llo"), Ok(("", Symbol::new("_e_llo"))));
+        assert_eq!(symbol_raw("he_llo").unwrap(), ("", Symbol::new("he_llo")));
+        assert_eq!(symbol_raw("_e_llo").unwrap(), ("", Symbol::new("_e_llo")));
     }
 
     #[test]
@@ -297,9 +300,9 @@ mod test {
 
     #[test]
     fn parse_operator() {
-        assert_eq!(operator_raw("||"), Ok(("", Symbol::operator("||"))));
-        assert_eq!(operator_raw("+"), Ok(("", Symbol::operator("+"))));
-        assert_eq!(operator_raw("*"), Ok(("", Symbol::operator("*"))));
+        assert_eq!(operator_raw("||").unwrap(), ("", Symbol::operator("||")));
+        assert_eq!(operator_raw("+").unwrap(), ("", Symbol::operator("+")));
+        assert_eq!(operator_raw("*").unwrap(), ("", Symbol::operator("*")));
     }
 
     #[test]
@@ -316,9 +319,9 @@ mod test {
 
     #[test]
     fn parse_number_i64() {
-        assert_eq!(number_i64_raw("123"), Ok(("", 123i64)));
-        assert_eq!(number_i64_raw("-0"), Ok(("", 0i64)));
-        assert_eq!(number_i64_raw("-1"), Ok(("", -1i64)));
+        assert_eq!(number_i64_raw("123").unwrap(), ("", 123i64));
+        assert_eq!(number_i64_raw("-0").unwrap(), ("", 0i64));
+        assert_eq!(number_i64_raw("-1").unwrap(), ("", -1i64));
     }
 
     #[test]
