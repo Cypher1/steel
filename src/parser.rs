@@ -45,9 +45,20 @@ pub trait ParserContext<'source>:
             return format!("{}", s.name);
         }
         if let Ok(c) = self.get_call(id) {
+            let callee = self.pretty(c.callee);
+            let is_operator_call = if let Ok(sym) = self.get_symbol(c.callee) {
+                sym.is_operator
+            } else {
+                false
+            };
+            if is_operator_call {
+                let args: Vec<String> = c.args.iter().map(|arg| self.pretty(*arg)).collect();
+                let args = args.join(&callee);
+                return format!("({}{})", if c.args.len() < 2 { &callee } else { "" }, args);
+            }
             let args: Vec<String> = c.args.iter().map(|arg| self.pretty(*arg)).collect();
             let args = args.join(", ");
-            return format!("{}({})", self.pretty(c.callee), args);
+            return format!("{}({})", callee, args);
         }
         format!("unknown node: {:?}", id)
     }
