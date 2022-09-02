@@ -129,6 +129,7 @@ pub fn expr<'source, C: ParserContext<'source>>(
         let (input, op) = operator(context, input)?;
         let (input, right) = expr(context, input)?;
         let call = context.add(Call::new(op, vec![left, right]));
+        let (input, _) = tag::<&str, &str, nom::error::Error<_>>(")")(input)?;
         return Ok((input, call));
     }
     if let Ok(res) = number_i64(context, input) {

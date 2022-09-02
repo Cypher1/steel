@@ -1,3 +1,4 @@
+#[must_use]
 #[derive(Debug)]
 pub enum SteelErr<'a> {
     ParseError(nom::Err<nom::error::Error<&'a str>>),
