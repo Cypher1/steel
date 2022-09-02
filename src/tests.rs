@@ -88,6 +88,7 @@ macro_rules! make_test {
     };
 }
 
+make_test!(handle_white_space, "-123\n", prints_as "(-123)");
 make_test!(simple_plus, "(12+23)");
 make_test!(simple_plus_with_trailing, "(12+23)");
 make_test!(unary_in_parens, "(*12)");
