@@ -2,7 +2,6 @@ use crate::arena::{Arena, ArenaError, ID};
 use crate::nodes::*;
 use crate::parser::ParserContext;
 use std::convert::Infallible;
-
 pub type Ref<'source> = *mut Node<'source>;
 
 #[derive(Debug)]
@@ -11,20 +10,6 @@ pub enum Node<'source> {
     Call(Call<Ref<'source>>),
     I64(i64),
 }
-
-macro_rules! wrap_node {
-    ($ty: ty, $variant: tt) => {
-        impl<'source> From<$ty> for Node<'source> {
-            fn from(it: $ty) -> Self {
-                Node::$variant(it)
-            }
-        }
-    };
-}
-
-wrap_node!(Symbol<'source>, Symbol);
-wrap_node!(Call<Ref<'source>>, Call);
-wrap_node!(i64, I64);
 
 #[cfg(test)]
 mod test {
