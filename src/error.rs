@@ -43,9 +43,9 @@ impl From<std::convert::Infallible> for SteelErr {
     }
 }
 
-impl Into<nom::Err<SteelErr>> for SteelErr {
-    fn into(self) -> nom::Err<Self> {
-        panic!("{:?}", self)
+impl From<SteelErr> for nom::Err<SteelErr> {
+    fn from(err: SteelErr) -> Self {
+        nom::Err::Error(err)
     }
 }
 
@@ -53,7 +53,7 @@ impl From<nom::Err<SteelErr>> for SteelErr {
     fn from(err: nom::Err<SteelErr>) -> Self {
         match err {
             nom::Err::Error(e) => e,
-            nom::Err::Failure(e) => e, // HMM.....
+            nom::Err::Failure(e) => e,
             nom::Err::Incomplete(_needed) => todo!("Handle incomplete input"),
         }
     }
@@ -79,10 +79,7 @@ impl ParseError<&str> for SteelErr {
     fn append(input: &str, kind: nom::error::ErrorKind, other: Self) -> Self {
         // TODO: !?
         match other {
-            Error { input, code } => Error {
-                input: input.to_string(),
-                code,
-            },
+            Error { input, code } => Error { input, code },
             _ => Multi(
                 Box::new(Self::from_error_kind(input, kind)),
                 Box::new(other),

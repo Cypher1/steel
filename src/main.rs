@@ -21,8 +21,11 @@ fn main() -> Result<(), SteelErr> {
     for arg in args {
         println!("arg: {}", arg);
     }
-    for line in std::io::stdin().lines() {
-        let line = line.expect("Couldn't read from stdin");
+    loop {
+        let mut line = String::new();
+        std::io::stdin()
+            .read_line(&mut line)
+            .expect("Stdio should be accessible");
         println!("line: {}", line);
         {
             let line = line.clone();
@@ -37,5 +40,4 @@ fn main() -> Result<(), SteelErr> {
             println!("ecs expr: {:?}", ecs.pretty(ecs_out));
         }
     }
-    Ok(())
 }

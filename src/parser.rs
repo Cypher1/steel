@@ -61,7 +61,7 @@ pub trait ParserContext<'source>:
             return format!("{}", v);
         }
         if let Ok(s) = self.get_symbol(id) {
-            return format!("{}", s.name);
+            return s.name.to_string();
         }
         if let Ok(c) = self.get_call(id) {
             let callee = self.pretty(c.callee);
@@ -187,7 +187,7 @@ where
         expr(context, input, &mut ignore_prec)
     })(input)?;
     let (input, _) = tag(")")(input)?;
-    return Ok((input, args));
+    Ok((input, args))
 }
 
 fn led<'source, C: ParserContext<'source>>(
@@ -202,7 +202,7 @@ where
     let (input, op) = operator(context, input, min_prec)?;
     let (input, right) = expr(context, input, min_prec)?;
     let call = context.add(Call::new(op, vec![left, right]));
-    return Ok((input, call));
+    Ok((input, call))
 }
 
 fn nud<'source, C: ParserContext<'source>>(
@@ -279,7 +279,7 @@ where
     let mut min_prec = INIT_PRECENDENCE;
     let (mut input, mut left) = expr(context, input, &mut min_prec)?;
     loop {
-        if input == "" {
+        if input.is_empty() {
             return Ok((input, left));
         }
         // dbg!(&state);
@@ -301,7 +301,7 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::assertions::{assert_err_is, assert_is_err};
+    use crate::assertions::assert_err_is;
 
     #[test]
     fn parse_symbol() {
