@@ -7,10 +7,10 @@ mod node;
 use node::*;
 
 #[derive(Debug)]
-pub enum ASTError<'source> {
+pub enum AstError<'source> {
     NodeOfWrongKindError(Ref<'source>, &'static str),
 }
-use ASTError::*;
+use AstError::*;
 
 pub struct Ast<'source> {
     members: Arena<Node<'source>>,
@@ -26,12 +26,12 @@ impl<'source> Ast<'source> {
 
 impl<'source> ParserContext<'source> for Ast<'source>
 where
-    Self: ParserStorage<Ref<'source>, i64, ASTError<'source>>,
-    Self: ParserStorage<Ref<'source>, Symbol<'source>, ASTError<'source>>,
-    Self: ParserStorage<Ref<'source>, Call<Ref<'source>>, ASTError<'source>>,
+    Self: ParserStorage<'source, Ref<'source>, i64, AstError<'source>>,
+    Self: ParserStorage<'source, Ref<'source>, Symbol<'source>, AstError<'source>>,
+    Self: ParserStorage<'source, Ref<'source>, Call<Ref<'source>>, AstError<'source>>,
 {
     type ID = Ref<'source>;
-    type E = ASTError<'source>;
+    type E = AstError<'source>;
 
     fn active_mem_usage(&self) -> usize {
         std::mem::size_of::<Self>() + self.members.active_mem_usage()
@@ -42,7 +42,7 @@ where
     }
 }
 
-impl<'source> ParserStorage<Ref<'source>, Node<'source>, Infallible> for Ast<'source> {
+impl<'source> ParserStorage<'source, Ref<'source>, Node<'source>, Infallible> for Ast<'source> {
     fn add(&mut self, value: Node<'source>) -> Ref<'source> {
         let id = self.members.add(value);
         self.members
@@ -66,18 +66,18 @@ macro_rules! wrap_node {
                 Node::$variant(it)
             }
         }
-        impl<'source> ParserStorage<Ref<'source>, $ty, ASTError<'source>> for Ast<'source> {
+        impl<'source> ParserStorage<'source, Ref<'source>, $ty, AstError<'source>> for Ast<'source> {
             fn add(&mut self, value: $ty) -> Ref<'source> {
                 self.add(std::convert::Into::<Node<'source>>::into(value))
             }
-            fn get(&self, id: Ref<'source>) -> Result<&$ty, ASTError<'source>> {
+            fn get(&self, id: Ref<'source>) -> Result<&$ty, AstError<'source>> {
                 if let Node::$variant(ref value) = unsafe { &*id } {
                     Ok(value)
                 } else {
                     Err(NodeOfWrongKindError(id, stringify!($variant)))
                 }
             }
-            fn get_mut(&mut self, id: Ref<'source>) -> Result<&mut $ty, ASTError<'source>> {
+            fn get_mut(&mut self, id: Ref<'source>) -> Result<&mut $ty, AstError<'source>> {
                 if let Node::$variant(ref mut value) = unsafe { &mut *id } {
                     Ok(value)
                 } else {

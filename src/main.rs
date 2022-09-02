@@ -18,8 +18,13 @@ use parser::expr;
 fn test<'a, T: ParserContext<'a>>(name: &str, ref mut ctx: T) -> Result<(), SteelErr<'a>>
 where
     <T as ParserContext<'a>>::ID: std::fmt::Debug,
+    SteelErr<'a>: From<<T as ParserContext<'a>>::E>,
 {
-    eprintln!("{} expr: {:?}", name, expr(ctx, "(12+23)")?);
+    let (left_over, result) = expr(ctx, "(12+23)")?;
+    assert_eq!(left_over, "");
+    eprint!("{} expr: ref={:?}", name, result);
+    eprintln!(" value={:?}", ctx.get_call(result)?);
+    eprintln!(" as_tree={:?}", ctx.pretty(result));
     eprintln!(
         "    Mem usage: {:?}/{:?}",
         ctx.active_mem_usage(),

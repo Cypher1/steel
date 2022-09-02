@@ -8,6 +8,8 @@ use component::*;
 mod providers;
 use providers::*;
 
+pub use component::EcsError;
+
 // In future there may be other kinds of Providers.
 #[macro_use]
 mod arena_providers;
@@ -46,7 +48,7 @@ impl<'source> ParserContext<'source> for Ecs<'source> {
     }
 }
 
-impl<'source, T: 'source> ParserStorage<ID, T, EcsError> for Ecs<'source>
+impl<'source, T: 'source> ParserStorage<'source, ID, T, EcsError> for Ecs<'source>
 where
     Self: Provider<'source, T>,
 {
@@ -74,17 +76,17 @@ impl<'source> Ecs<'source> {
     #[cfg(test)]
     fn add<T>(&mut self, value: T) -> ID
     where
-        Self: ParserStorage<ID, T, EcsError>,
+        Self: ParserStorage<'source, ID, T, EcsError>,
     {
-        <Self as ParserStorage<ID, T, EcsError>>::add(self, value)
+        <Self as ParserStorage<'source, ID, T, EcsError>>::add(self, value)
     }
 
     #[cfg(test)]
     fn get<T>(&self, id: ID) -> Result<&T, EcsError>
     where
-        Self: ParserStorage<ID, T, EcsError>,
+        Self: ParserStorage<'source, ID, T, EcsError>,
     {
-        <Self as ParserStorage<ID, T, EcsError>>::get(self, id)
+        <Self as ParserStorage<'source, ID, T, EcsError>>::get(self, id)
     }
 }
 

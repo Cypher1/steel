@@ -9,19 +9,20 @@ use nom::{
 
 use crate::nodes::{Call, Symbol};
 use crate::primitives::Color;
+use crate::error::SteelErr;
 
-pub trait ParserStorage<ID, T, E> {
+pub trait ParserStorage<'source, ID, T, E> {
     fn add(&mut self, value: T) -> ID;
     fn get(&self, id: ID) -> Result<&T, E>;
     fn get_mut(&mut self, id: ID) -> Result<&mut T, E>;
 }
 
 pub trait ParserContext<'source>:
-    ParserStorage<Self::ID, Call<Self::ID>, Self::E>
-    + ParserStorage<Self::ID, Symbol<'source>, Self::E>
-    + ParserStorage<Self::ID, i64, Self::E>
+    ParserStorage<'source, Self::ID, Call<Self::ID>, Self::E>
+    + ParserStorage<'source, Self::ID, Symbol<'source>, Self::E>
+    + ParserStorage<'source, Self::ID, i64, Self::E>
 {
-    type ID;
+    type ID: Copy + std::fmt::Debug;
     type E;
 
     fn get_symbol(&self, id: Self::ID) -> Result<&Symbol<'source>, Self::E> {
@@ -36,6 +37,20 @@ pub trait ParserContext<'source>:
 
     fn active_mem_usage(&self) -> usize;
     fn mem_usage(&self) -> usize;
+    fn pretty(&self, id: Self::ID) -> String {
+        if let Ok(v) = self.get_i64(id) {
+            return format!("{}", v);
+        }
+        if let Ok(s) = self.get_symbol(id) {
+            return format!("{}", s.name);
+        }
+        if let Ok(c) = self.get_call(id) {
+            let args: Vec<String> = c.args.iter().map(|arg| self.pretty(*arg)).collect();
+            let args = args.join(", ");
+            return format!("{}({})", self.pretty(c.callee), args);
+        }
+        format!("unknown node: {:?}", id)
+    }
 }
 
 fn from_hex(input: &str) -> Result<u8, std::num::ParseIntError> {
@@ -66,7 +81,7 @@ pub fn number_i64_raw(input: &str) -> IResult<&str, i64> {
     Ok((input, if sign == "-" { -value } else { value }))
 }
 
-pub fn number_i64<'source, ID, E, C: ParserStorage<ID, i64, E>>(
+pub fn number_i64<'source, ID, E: Into<SteelErr<'source>>, C: ParserStorage<'source, ID, i64, E>>(
     context: &mut C,
     input: &'source str,
 ) -> IResult<&'source str, ID> {
@@ -94,7 +109,7 @@ pub fn symbol_raw(og_input: &str) -> IResult<&str, Symbol> {
 
     Ok((input, Symbol::new(name)))
 }
-pub fn symbol<'source, ID, E, C: ParserStorage<ID, Symbol<'source>, E>>(
+pub fn symbol<'source, ID, E: Into<SteelErr<'source>>, C: ParserStorage<'source, ID, Symbol<'source>, E>>(
     context: &mut C,
     input: &'source str,
 ) -> IResult<&'source str, ID> {
@@ -111,7 +126,7 @@ pub fn operator_raw(input: &str) -> IResult<&str, Symbol> {
     let (input, name) = take_while_m_n(1, 3, is_operator_char)(input)?;
     Ok((input, Symbol::new(name)))
 }
-pub fn operator<'source, ID, E, C: ParserStorage<ID, Symbol<'source>, E>>(
+pub fn operator<'source, ID, E: Into<SteelErr<'source>>, C: ParserStorage<'source, ID, Symbol<'source>, E>>(
     context: &mut C,
     input: &'source str,
 ) -> IResult<&'source str, ID> {
@@ -123,7 +138,7 @@ pub fn operator<'source, ID, E, C: ParserStorage<ID, Symbol<'source>, E>>(
 pub fn expr<'source, C: ParserContext<'source>>(
     context: &mut C,
     input: &'source str,
-) -> IResult<&'source str, C::ID> {
+) -> IResult<&'source str, C::ID> where <C as ParserContext<'source>>::E: Into<SteelErr<'source>> {
     if let Ok((input, _)) = tag::<&str, &str, nom::error::Error<_>>("(")(input) {
         let (input, left) = expr(context, input)?;
         let (input, op) = operator(context, input)?;

@@ -2,7 +2,7 @@
 pub struct Symbol<'a> {
     // TODO: Intern strings
     // TODO: Locations
-    name: &'a str,
+    pub name: &'a str,
 }
 
 impl<'a> Symbol<'a> {
