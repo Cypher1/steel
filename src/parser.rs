@@ -307,7 +307,7 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::assertions::assert_err_is;
+    use crate::assert_err_is;
 
     #[test]
     fn parse_symbol() {
@@ -322,11 +322,11 @@ mod test {
 
     #[test]
     fn parse_non_symbol() {
-        assert_err_is(
+        assert_err_is!(
             symbol_raw("#lol"),
             "Parsing Error: ParserError { input: \"#lol\", code: Tag }",
         );
-        assert_err_is(
+        assert_err_is!(
             symbol_raw("123"),
             "Parsing Error: ParserError { input: \"123\", code: Tag }",
         );
@@ -364,7 +364,7 @@ mod test {
     #[test]
     fn parse_operator_in_wrong_precendence() {
         let mut prec = MUL_PRECENDENCE;
-        assert_err_is(
+        assert_err_is!(
             operator_raw("+", &mut prec),
             &format!(
                 "Parsing Error: PrecedenceError {{ precendence: {} }}",
@@ -376,12 +376,12 @@ mod test {
     #[test]
     fn parse_non_operator() {
         let mut prec = INIT_PRECENDENCE;
-        assert_err_is(
+        assert_err_is!(
             operator_raw("#lol", &mut prec),
             "Parsing Error: ParserError { input: \"#lol\", code: TakeWhileMN }",
         );
         let mut prec = INIT_PRECENDENCE;
-        assert_err_is(
+        assert_err_is!(
             operator_raw("123", &mut prec),
             "Parsing Error: ParserError { input: \"123\", code: TakeWhileMN }",
         );
@@ -396,15 +396,15 @@ mod test {
 
     #[test]
     fn parse_non_number_i64() {
-        assert_err_is(
+        assert_err_is!(
             number_i64_raw("#lol"),
             "Parsing Error: ParserError { input: \"#lol\", code: TakeWhile1 }",
         );
-        assert_err_is(
+        assert_err_is!(
             number_i64_raw("||"),
             "Parsing Error: ParserError { input: \"||\", code: TakeWhile1 }",
         );
-        assert_err_is(
+        assert_err_is!(
             number_i64_raw("e2"),
             "Parsing Error: ParserError { input: \"e2\", code: TakeWhile1 }",
         );

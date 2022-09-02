@@ -8,6 +8,7 @@ mod nodes;
 mod parser;
 
 #[cfg(test)]
+#[macro_use]
 mod assertions;
 #[cfg(test)]
 mod tests;
