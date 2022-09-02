@@ -14,23 +14,23 @@ mod arena_providers;
 use arena_providers::*;
 
 #[derive(Debug, Default)]
-pub struct ECS<'source> {
+pub struct Ecs<'source> {
     entities: Arena<Entity>,
     symbols: Arena<Symbol<'source>>,
     calls: Arena<Call<ID>>,
     int64_values: Arena<i64>,
 }
 
-make_arena_provider!(ECS<'a>, Symbol<'a>, Symbol, symbols);
-make_arena_provider!(ECS<'a>, Call<ID>, Call, calls);
-make_arena_provider!(ECS<'a>, i64, I64, int64_values);
+make_arena_provider!(Ecs<'a>, Symbol<'a>, Symbol, symbols);
+make_arena_provider!(Ecs<'a>, Call<ID>, Call, calls);
+make_arena_provider!(Ecs<'a>, i64, I64, int64_values);
 
-impl<'source> ParserContext<'source> for ECS<'source> {
+impl<'source> ParserContext<'source> for Ecs<'source> {
     type ID = ID;
-    type E = ECSError;
+    type E = EcsError;
 }
 
-impl<'source, T: 'source> ParserStorage<ID, T, ECSError> for ECS<'source>
+impl<'source, T: 'source> ParserStorage<ID, T, EcsError> for Ecs<'source>
 where
     Self: Provider<'source, T>,
 {
@@ -38,42 +38,42 @@ where
         self.add_component(value)
     }
 
-    fn get(&self, id: ID) -> Result<&T, ECSError> {
-        <ECS<'source> as Provider<'source, T>>::get_component_for_entity(self, id)
+    fn get(&self, id: ID) -> Result<&T, EcsError> {
+        <Ecs<'source> as Provider<'source, T>>::get_component_for_entity(self, id)
     }
     #[allow(unused)]
-    fn get_mut(&mut self, id: ID) -> Result<&mut T, ECSError>
+    fn get_mut(&mut self, id: ID) -> Result<&mut T, EcsError>
     where
         Self: Provider<'source, T>,
     {
-        <ECS<'source> as Provider<'source, T>>::get_component_for_entity_mut(self, id)
+        <Ecs<'source> as Provider<'source, T>>::get_component_for_entity_mut(self, id)
     }
 }
 
-impl<'source> ECS<'source> {
+impl<'source> Ecs<'source> {
     pub fn new() -> Self {
         Default::default()
     }
 
     fn add<T>(&mut self, value: T) -> ID
     where
-        Self: ParserStorage<ID, T, ECSError>,
+        Self: ParserStorage<ID, T, EcsError>,
     {
-        <Self as ParserStorage<ID, T, ECSError>>::add(self, value)
+        <Self as ParserStorage<ID, T, EcsError>>::add(self, value)
     }
 
-    fn get<T>(&self, id: ID) -> Result<&T, ECSError>
+    fn get<T>(&self, id: ID) -> Result<&T, EcsError>
     where
-        Self: ParserStorage<ID, T, ECSError>,
+        Self: ParserStorage<ID, T, EcsError>,
     {
-        <Self as ParserStorage<ID, T, ECSError>>::get(self, id)
+        <Self as ParserStorage<ID, T, EcsError>>::get(self, id)
     }
 
-    fn get_mut<T>(&mut self, id: ID) -> Result<&mut T, ECSError>
+    fn get_mut<T>(&mut self, id: ID) -> Result<&mut T, EcsError>
     where
-        Self: ParserStorage<ID, T, ECSError>,
+        Self: ParserStorage<ID, T, EcsError>,
     {
-        <Self as ParserStorage<ID, T, ECSError>>::get_mut(self, id)
+        <Self as ParserStorage<ID, T, EcsError>>::get_mut(self, id)
     }
 }
 
@@ -83,8 +83,8 @@ mod test {
     type Call = super::Call<ID>;
 
     #[test]
-    fn can_construct_node() -> Result<(), ECSError> {
-        let mut ctx: ECS<'static> = ECS::new();
+    fn can_construct_node() -> Result<(), EcsError> {
+        let mut ctx: Ecs<'static> = Ecs::new();
 
         let hello = ctx.add(Symbol::new("hello"));
 
@@ -95,9 +95,9 @@ mod test {
 
     #[test]
     fn cannot_access_incorrect_node() {
-        let mut ctx: ECS<'static> = ECS::new();
+        let mut ctx: Ecs<'static> = Ecs::new();
         let hello = ctx.add(Symbol::new("hello"));
-        let call: Result<&Call, ECSError> = ctx.get(hello);
+        let call: Result<&Call, EcsError> = ctx.get(hello);
         assert_eq!(
             format!("{:?}", call),
             format!("Err(ComponentNotFound({:?}))", hello)
@@ -106,7 +106,7 @@ mod test {
 
     #[test]
     fn can_construct_nodes() {
-        let mut ctx: ECS<'static> = ECS::new();
+        let mut ctx: Ecs<'static> = Ecs::new();
 
         let hello = ctx.add(Symbol::new("hello"));
         let world = ctx.add(Symbol::new("world"));
@@ -123,7 +123,7 @@ mod test {
 
     #[test]
     fn can_construct_nodes_with_self_reference() {
-        let mut ctx: ECS<'static> = ECS::new();
+        let mut ctx: Ecs<'static> = Ecs::new();
 
         let reference = ctx.add_with_id(|id| Call::new(id, vec![]));
 
@@ -135,7 +135,7 @@ mod test {
 
     #[test]
     fn can_construct_nodes_with_cross_reference() {
-        let mut ctx: ECS<'static> = ECS::new();
+        let mut ctx: Ecs<'static> = Ecs::new();
 
         let hello = ctx.add(Symbol::new("hello"));
         let world = ctx.add(Symbol::new("world"));
@@ -149,7 +149,7 @@ mod test {
 
     #[test]
     fn can_construct_values() {
-        let mut ctx: ECS<'static> = ECS::new();
+        let mut ctx: Ecs<'static> = Ecs::new();
 
         let plus = ctx.add(Symbol::new("plus"));
         let a = ctx.add(32i64);

@@ -1,4 +1,4 @@
-use super::component::{ComponentID, ECSError, Entity};
+use super::component::{ComponentID, EcsError, Entity};
 use super::providers::Provider;
 use crate::arena::{Arena, ArenaError, ID};
 
@@ -9,8 +9,8 @@ pub trait ArenaProvider<'a, T> {
     fn make_entity(id: ID) -> Entity;
     fn arena(&self) -> (&Arena<Entity>, &Arena<T>);
     fn arena_mut(&mut self) -> (&mut Arena<Entity>, &mut Arena<T>);
-    fn get_impl(&self, id: ID) -> Result<&T, ECSError>;
-    fn get_mut_impl(&mut self, id: ID) -> Result<&mut T, ECSError>;
+    fn get_impl(&self, id: ID) -> Result<&T, EcsError>;
+    fn get_mut_impl(&mut self, id: ID) -> Result<&mut T, EcsError>;
 }
 
 impl<'a, T: 'a, S: ArenaProvider<'a, T>> Provider<'a, T> for S {
@@ -22,16 +22,16 @@ impl<'a, T: 'a, S: ArenaProvider<'a, T>> Provider<'a, T> for S {
             Self::make_entity(node)
         })
     }
-    fn get_component(&self, id: Self::ID) -> Result<&T, ECSError> {
+    fn get_component(&self, id: Self::ID) -> Result<&T, EcsError> {
         Ok(self.arena().1.get(id.id)?)
     }
-    fn get_component_mut(&mut self, id: Self::ID) -> Result<&mut T, ECSError> {
+    fn get_component_mut(&mut self, id: Self::ID) -> Result<&mut T, EcsError> {
         Ok(self.arena_mut().1.get_mut(id.id)?)
     }
-    fn get_component_for_entity(&self, id: ID) -> Result<&T, ECSError> {
+    fn get_component_for_entity(&self, id: ID) -> Result<&T, EcsError> {
         self.get_impl(id)
     }
-    fn get_component_for_entity_mut(&mut self, id: ID) -> Result<&mut T, ECSError> {
+    fn get_component_for_entity_mut(&mut self, id: ID) -> Result<&mut T, EcsError> {
         self.get_mut_impl(id)
     }
 }
@@ -58,18 +58,18 @@ macro_rules! make_arena_provider {
             fn arena_mut(&mut self) -> (&mut Arena<Entity>, &mut Arena<$type>) {
                 (&mut self.entities, &mut self.$accessor)
             }
-            fn get_impl(&self, id: ID) -> Result<&$type, ECSError> {
+            fn get_impl(&self, id: ID) -> Result<&$type, EcsError> {
                 let ent = self.entities.get(id)?;
                 match ent {
                     Entity::$kind(component_id) => Ok(self.get_component(*component_id)?),
-                    _ => Err(ECSError::ComponentNotFound(id)),
+                    _ => Err(EcsError::ComponentNotFound(id)),
                 }
             }
-            fn get_mut_impl(&mut self, id: ID) -> Result<&mut $type, ECSError> {
+            fn get_mut_impl(&mut self, id: ID) -> Result<&mut $type, EcsError> {
                 let ent = self.entities.get(id)?;
                 match ent {
                     Entity::$kind(component_id) => Ok(self.get_component_mut(*component_id)?),
-                    _ => Err(ECSError::ComponentNotFound(id)),
+                    _ => Err(EcsError::ComponentNotFound(id)),
                 }
             }
         }

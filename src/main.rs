@@ -26,7 +26,7 @@ fn main() -> Result<(), SteelErr<'static>> {
         dbg!(expr(ctx, "12+23")?);
     }
     {
-        let ref mut ctx = ecs::ECS::new();
+        let ref mut ctx = ecs::Ecs::new();
         dbg!(expr(ctx, "12+23")?);
     }
     Ok(())

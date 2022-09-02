@@ -3,13 +3,13 @@ use crate::nodes::*;
 use std::marker::PhantomData;
 
 #[derive(Debug)]
-pub enum ECSError {
+pub enum EcsError {
     InternalError(ArenaError),
     ComponentNotFound(ID),
 }
-use ECSError::*;
+use EcsError::*;
 
-impl From<ArenaError> for ECSError {
+impl From<ArenaError> for EcsError {
     fn from(it: ArenaError) -> Self {
         InternalError(it)
     }
