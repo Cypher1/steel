@@ -170,7 +170,7 @@ pub fn args<'source, C: ParserContext<'source>>(
     return Ok((input, args));
 }
 
-pub fn complex_expr<'source, C: ParserContext<'source>>(
+pub fn led<'source, C: ParserContext<'source>>(
     context: &mut C,
     left: C::ID,
     input: &'source str,
@@ -183,7 +183,7 @@ pub fn complex_expr<'source, C: ParserContext<'source>>(
     return Ok((input, call));
 }
 
-pub fn simple_expr<'source, C: ParserContext<'source>>(
+pub fn nud<'source, C: ParserContext<'source>>(
     context: &mut C,
     input: &'source str,
 ) -> IResult<&'source str, C::ID> where <C as ParserContext<'source>>::E: Into<SteelErr<'source>> {
@@ -222,9 +222,9 @@ pub fn expr<'source, C: ParserContext<'source>>(
     context: &mut C,
     input: &'source str,
 ) -> IResult<&'source str, C::ID> where <C as ParserContext<'source>>::E: Into<SteelErr<'source>> {
-    let mut state = simple_expr(context, input)?;
+    let mut state = nud(context, input)?;
     loop {
-        let update = complex_expr(context, state.1, state.0);
+        let update = led(context, state.1, state.0);
         match update {
             Ok(new_state) => {
                 state = new_state;
