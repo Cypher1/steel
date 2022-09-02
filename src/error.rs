@@ -4,6 +4,7 @@ use nom::error::ParseError;
 #[derive(Debug)]
 pub enum SteelErr {
     ParseErrorParseInt(String, std::num::ParseIntError),
+    IOError(std::io::Error),
     AstError(crate::ast::AstError),
     EcsError(crate::ecs::EcsError),
     PrecedenceError {
@@ -29,9 +30,12 @@ impl std::fmt::Display for SteelErr {
             ParseErrorParseInt(input, error) => {
                 write!(f, "Failed to parse int due to {:?} in {}", error, input)
             }
+            IOError(e) => write!(f, "Error while performing input/output: {}", e),
             UnexpectedEndOfInput => write!(f, "Expected an expression, found nothing"),
             MalformedExpression(input) => write!(f, "Expected an expression, found {:?}", input),
-            ParserError { input, code } => write!(f, "Failed in {:?} while parsing {}", code, input),
+            ParserError { input, code } => {
+                write!(f, "Failed in {:?} while parsing {}", code, input)
+            }
             AstError(e) => write!(f, "{:?}", e),
             EcsError(e) => write!(f, "{:?}", e),
             Multi(a, b) => write!(f, "{}\nand {}", a, b),
@@ -40,6 +44,12 @@ impl std::fmt::Display for SteelErr {
 }
 
 use SteelErr::*;
+
+impl From<std::io::Error> for SteelErr {
+    fn from(err: std::io::Error) -> Self {
+        IOError(err)
+    }
+}
 
 impl From<std::convert::Infallible> for SteelErr {
     fn from(err: std::convert::Infallible) -> Self {

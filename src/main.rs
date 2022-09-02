@@ -16,6 +16,22 @@ use crate::parser::ParserContext;
 use error::SteelErr;
 use parser::program;
 
+fn handle<'a, S: ParserContext<'a>>(line: &'a str)
+where
+    S::E: Into<SteelErr>,
+{
+    let mut store = S::new();
+    match program(&mut store, line) {
+        Ok((_input, program)) => {
+            eprintln!("ast expr: {:?}", store.pretty(program));
+        }
+        Err(e) => {
+            eprintln!("{}", e);
+            std::process::exit(1);
+        }
+    }
+}
+
 fn main() -> Result<(), SteelErr> {
     let args = std::env::args();
     for arg in args {
@@ -23,21 +39,11 @@ fn main() -> Result<(), SteelErr> {
     }
     loop {
         let mut line = String::new();
-        std::io::stdin()
-            .read_line(&mut line)
-            .expect("Stdio should be accessible");
+        if std::io::stdin().read_line(&mut line)? == 0 {
+            return Ok(());
+        }
         eprintln!("line: {}", line);
-        {
-            let line = line.clone();
-            let mut ast = ast::Ast::new();
-            let (_ast_out_input, ast_out) = program(&mut ast, &line)?;
-            eprintln!("ast expr: {:?}", ast.pretty(ast_out));
-        }
-        {
-            let line = line.clone();
-            let mut ecs = ecs::Ecs::new();
-            let (_ecs_out_input, ecs_out) = program(&mut ecs, &line)?;
-            eprintln!("ecs expr: {:?}", ecs.pretty(ecs_out));
-        }
+        handle::<ast::Ast>(&line);
+        handle::<ecs::Ecs>(&line);
     }
 }

@@ -249,7 +249,9 @@ where
     if input.is_empty() {
         Err(nom::Err::Error(SteelErr::UnexpectedEndOfInput))
     } else {
-        Err(nom::Err::Error(SteelErr::MalformedExpression(input.to_string())))
+        Err(nom::Err::Error(SteelErr::MalformedExpression(
+            input.to_string(),
+        )))
     }
 }
 
