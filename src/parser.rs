@@ -124,7 +124,7 @@ fn is_operator_char(c: char) -> bool {
 
 pub fn operator_raw(input: &str) -> IResult<&str, Symbol> {
     let (input, name) = take_while_m_n(1, 3, is_operator_char)(input)?;
-    Ok((input, Symbol::new(name)))
+    Ok((input, Symbol::operator(name)))
 }
 pub fn operator<'source, ID, E: Into<SteelErr<'source>>, C: ParserStorage<'source, ID, Symbol<'source>, E>>(
     context: &mut C,
@@ -210,9 +210,9 @@ mod test {
 
     #[test]
     fn parse_operator() {
-        assert_eq!(operator_raw("||"), Ok(("", Symbol::new("||"))));
-        assert_eq!(operator_raw("+"), Ok(("", Symbol::new("+"))));
-        assert_eq!(operator_raw("*"), Ok(("", Symbol::new("*"))));
+        assert_eq!(operator_raw("||"), Ok(("", Symbol::operator("||"))));
+        assert_eq!(operator_raw("+"), Ok(("", Symbol::operator("+"))));
+        assert_eq!(operator_raw("*"), Ok(("", Symbol::operator("*"))));
     }
 
     #[test]

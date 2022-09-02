@@ -104,7 +104,7 @@ mod test {
 
         assert_eq!(
             format!("{:?}", ctx.get_symbol(hello)),
-            "Ok(Symbol { name: \"hello\" })"
+            "Ok(Symbol { name: \"hello\", is_operator: false })"
         );
     }
 
@@ -117,11 +117,11 @@ mod test {
 
         assert_eq!(
             format!("{:?}", ctx.get_symbol(hello)),
-            "Ok(Symbol { name: \"hello\" })"
+            "Ok(Symbol { name: \"hello\", is_operator: false })"
         );
         assert_eq!(
             format!("{:?}", ctx.get_symbol(world)),
-            "Ok(Symbol { name: \"world\" })"
+            "Ok(Symbol { name: \"world\", is_operator: false })"
         );
     }
 

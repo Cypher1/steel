@@ -3,11 +3,15 @@ pub struct Symbol<'a> {
     // TODO: Intern strings
     // TODO: Locations
     pub name: &'a str,
+    pub is_operator: bool,
 }
 
 impl<'a> Symbol<'a> {
     pub fn new(name: &'a str) -> Self {
-        Self { name }
+        Self { name, is_operator: false }
+    }
+    pub fn operator(name: &'a str) -> Self {
+        Self { name, is_operator: true }
     }
 }
 

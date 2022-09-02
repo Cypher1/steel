@@ -102,7 +102,7 @@ mod test {
         let hello = ctx.add(Symbol::new("hello"));
 
         let sym: &Symbol<'static> = ctx.get(hello)?;
-        assert_eq!(format!("{:?}", sym), "Symbol { name: \"hello\" }");
+        assert_eq!(format!("{:?}", sym), "Symbol { name: \"hello\", is_operator: false }");
         Ok(())
     }
 
@@ -126,11 +126,11 @@ mod test {
 
         assert_eq!(
             format!("{:?}", ctx.get::<Symbol>(hello)),
-            "Ok(Symbol { name: \"hello\" })"
+            "Ok(Symbol { name: \"hello\", is_operator: false })"
         );
         assert_eq!(
             format!("{:?}", ctx.get::<Symbol>(world)),
-            "Ok(Symbol { name: \"world\" })"
+            "Ok(Symbol { name: \"world\", is_operator: false })"
         );
     }
 
