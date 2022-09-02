@@ -8,10 +8,16 @@ pub struct Symbol<'a> {
 
 impl<'a> Symbol<'a> {
     pub fn new(name: &'a str) -> Self {
-        Self { name, is_operator: false }
+        Self {
+            name,
+            is_operator: false,
+        }
     }
     pub fn operator(name: &'a str) -> Self {
-        Self { name, is_operator: true }
+        Self {
+            name,
+            is_operator: true,
+        }
     }
 }
 

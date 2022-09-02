@@ -1,29 +1,27 @@
 use nom::{
     branch::alt,
     bytes::complete::{tag as raw_tag, take_while, take_while1, take_while_m_n},
-    character::complete::{space0, alpha1},
+    character::complete::{alpha1, space0},
     combinator::map_res,
-    sequence::tuple,
     multi::separated_list0,
+    sequence::tuple,
 };
 
 type SResult<'a, T> = std::result::Result<(&'a str, T), nom::Err<SteelErr>>;
 
-fn tag(
-    raw: &str
-) -> impl Fn(&str) -> SResult<&str> + '_ {
+fn tag(raw: &str) -> impl Fn(&str) -> SResult<&str> + '_ {
     // TODO: Consider only ignoring some whitespace...
     move |input: &str| {
         // let (input, _) = space0::<&str, SteelErr>(input)?;
         raw_tag::<&str, &str, SteelErr>(raw)(input)
-            // TODO: This might be expensive?
-            //Err(_) => Err(SteelErr::ParseErrorExpected(raw.to_string(), input.to_string())),
+        // TODO: This might be expensive?
+        //Err(_) => Err(SteelErr::ParseErrorExpected(raw.to_string(), input.to_string())),
     }
 }
 
+use crate::error::SteelErr;
 use crate::nodes::{Call, Symbol};
 use crate::primitives::Color;
-use crate::error::SteelErr;
 
 pub trait ParserStorage<'source, ID, T, E> {
     fn add(&mut self, value: T) -> ID;
@@ -165,7 +163,7 @@ const PLUS_PRECENDENCE: Precedence = 1;
 
 pub fn operator_raw<'source>(
     input: &'source str,
-    min_prec: &mut Precedence // TODO: reject operators of the wrong prec...
+    min_prec: &mut Precedence, // TODO: reject operators of the wrong prec...
 ) -> SResult<'source, Symbol<'source>> {
     let (input, name) = take_while_m_n(1, 3, is_operator_char)(input)?;
     let precendence = match name {
@@ -181,10 +179,15 @@ pub fn operator_raw<'source>(
     Ok((input, Symbol::operator(name)))
 }
 
-pub fn operator<'source, ID, E: Into<SteelErr>, C: ParserStorage<'source, ID, Symbol<'source>, E>>(
+pub fn operator<
+    'source,
+    ID,
+    E: Into<SteelErr>,
+    C: ParserStorage<'source, ID, Symbol<'source>, E>,
+>(
     context: &mut C,
     input: &'source str,
-    min_prec: &mut Precedence
+    min_prec: &mut Precedence,
 ) -> SResult<'source, ID> {
     let (input, name) = operator_raw(input, min_prec)?;
     let id = context.add(name);
@@ -194,9 +197,12 @@ pub fn operator<'source, ID, E: Into<SteelErr>, C: ParserStorage<'source, ID, Sy
 fn args<'source, C: ParserContext<'source>>(
     context: &mut C,
     input: &'source str,
-) -> SResult<'source, Vec<C::ID>> where <C as ParserContext<'source>>::E: Into<SteelErr> {
+) -> SResult<'source, Vec<C::ID>>
+where
+    <C as ParserContext<'source>>::E: Into<SteelErr>,
+{
     let (input, _) = tag("(")(input)?;
-    let (input, args) = separated_list0(tag(","), |input|{
+    let (input, args) = separated_list0(tag(","), |input| {
         let mut ignore_prec = INIT_PRECENDENCE;
         expr(context, input, &mut ignore_prec)
     })(input)?;
@@ -209,7 +215,10 @@ fn led<'source, C: ParserContext<'source>>(
     left: C::ID,
     input: &'source str,
     min_prec: &mut Precedence,
-) -> SResult<'source, C::ID> where <C as ParserContext<'source>>::E: Into<SteelErr> {
+) -> SResult<'source, C::ID>
+where
+    <C as ParserContext<'source>>::E: Into<SteelErr>,
+{
     let (input, op) = operator(context, input, min_prec)?;
     let (input, right) = expr(context, input, min_prec)?;
     let call = context.add(Call::new(op, vec![left, right]));
@@ -219,7 +228,10 @@ fn led<'source, C: ParserContext<'source>>(
 fn nud<'source, C: ParserContext<'source>>(
     context: &mut C,
     input: &'source str,
-) -> SResult<'source, C::ID> where <C as ParserContext<'source>>::E: Into<SteelErr> {
+) -> SResult<'source, C::ID>
+where
+    <C as ParserContext<'source>>::E: Into<SteelErr>,
+{
     let (input, _) = space0(input)?;
     if let Ok((input, _)) = tag("(")(input) {
         let mut ignore_prec = INIT_PRECENDENCE;
@@ -240,7 +252,8 @@ fn nud<'source, C: ParserContext<'source>>(
         // Unified calling syntax for a prefix operator
         if let Ok((input, args)) = args(context, input) {
             // Function call
-            if let Ok(op) = context.get_symbol_mut(op) { // TODO: WHAT!?
+            if let Ok(op) = context.get_symbol_mut(op) {
+                // TODO: WHAT!?
                 op.is_operator = false;
             }
             let call = context.add(Call::new(op, args));
@@ -259,8 +272,11 @@ fn nud<'source, C: ParserContext<'source>>(
 pub fn expr<'context, 'source: 'context, C: ParserContext<'source>>(
     context: &'context mut C,
     input: &'source str,
-    min_prec: &mut Precedence
-) -> SResult<'source, C::ID> where <C as ParserContext<'source>>::E: Into<SteelErr> {
+    min_prec: &mut Precedence,
+) -> SResult<'source, C::ID>
+where
+    <C as ParserContext<'source>>::E: Into<SteelErr>,
+{
     let mut state = nud(context, input)?;
     loop {
         let update = led(context, state.1, state.0, min_prec);
@@ -276,7 +292,10 @@ pub fn expr<'context, 'source: 'context, C: ParserContext<'source>>(
 pub fn program<'context, 'source: 'context, C: ParserContext<'source>>(
     context: &'context mut C,
     input: &'source str,
-) -> SResult<'source, C::ID> where <C as ParserContext<'source>>::E: Into<SteelErr> {
+) -> SResult<'source, C::ID>
+where
+    <C as ParserContext<'source>>::E: Into<SteelErr>,
+{
     let mut min_prec = INIT_PRECENDENCE;
     let (mut input, mut left) = expr(context, input, &mut min_prec)?;
     loop {
@@ -354,15 +373,30 @@ mod test {
     #[test]
     fn parse_operator() {
         let mut prec = INIT_PRECENDENCE;
-        assert_eq!(operator_raw("||", &mut prec).unwrap(), ("", Symbol::operator("||")));
+        assert_eq!(
+            operator_raw("||", &mut prec).unwrap(),
+            ("", Symbol::operator("||"))
+        );
         let mut prec = INIT_PRECENDENCE;
-        assert_eq!(operator_raw("+", &mut prec).unwrap(), ("", Symbol::operator("+")));
+        assert_eq!(
+            operator_raw("+", &mut prec).unwrap(),
+            ("", Symbol::operator("+"))
+        );
         let mut prec = MUL_PRECENDENCE;
-        assert_eq!(operator_raw("*", &mut prec).unwrap(), ("", Symbol::operator("*")));
+        assert_eq!(
+            operator_raw("*", &mut prec).unwrap(),
+            ("", Symbol::operator("*"))
+        );
         let mut prec = PLUS_PRECENDENCE;
-        assert_eq!(operator_raw("*", &mut prec).unwrap(), ("", Symbol::operator("*")));
+        assert_eq!(
+            operator_raw("*", &mut prec).unwrap(),
+            ("", Symbol::operator("*"))
+        );
         let mut prec = INIT_PRECENDENCE;
-        assert_eq!(operator_raw("*", &mut prec).unwrap(), ("", Symbol::operator("*")));
+        assert_eq!(
+            operator_raw("*", &mut prec).unwrap(),
+            ("", Symbol::operator("*"))
+        );
     }
 
     #[test]
@@ -370,7 +404,10 @@ mod test {
         let mut prec = MUL_PRECENDENCE;
         assert_err_is(
             operator_raw("+", &mut prec),
-            &format!("Parsing Error: PrecedenceError {{ precendence: {} }}", PLUS_PRECENDENCE),
+            &format!(
+                "Parsing Error: PrecedenceError {{ precendence: {} }}",
+                PLUS_PRECENDENCE
+            ),
         );
     }
 

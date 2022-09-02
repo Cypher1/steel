@@ -1,4 +1,4 @@
-use crate::arena::{Arena, ID, ArenaError};
+use crate::arena::{Arena, ArenaError, ID};
 use crate::nodes::*;
 use crate::parser::{ParserContext, ParserStorage};
 
@@ -73,14 +73,20 @@ macro_rules! wrap_node {
                 self.add(std::convert::Into::<Node<'source>>::into(value))
             }
             fn get(&self, id: ID) -> Result<&$ty, AstError> {
-                if let Node::$variant(ref value) = <Self as ParserStorage<'source, ID, Node<'source>, ArenaError>>::get(self, id)? {
+                if let Node::$variant(ref value) =
+                    <Self as ParserStorage<'source, ID, Node<'source>, ArenaError>>::get(self, id)?
+                {
                     Ok(value)
                 } else {
                     Err(NodeOfWrongKindError(id, stringify!($variant)))
                 }
             }
             fn get_mut(&mut self, id: ID) -> Result<&mut $ty, AstError> {
-                if let Node::$variant(ref mut value) = <Self as ParserStorage<'source, ID, Node<'source>, ArenaError>>::get_mut(self, id)? {
+                if let Node::$variant(ref mut value) =
+                    <Self as ParserStorage<'source, ID, Node<'source>, ArenaError>>::get_mut(
+                        self, id,
+                    )?
+                {
                     Ok(value)
                 } else {
                     Err(NodeOfWrongKindError(id, stringify!($variant)))

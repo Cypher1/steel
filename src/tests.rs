@@ -1,8 +1,8 @@
-use crate::parser::ParserContext;
-use crate::error::SteelErr;
-use crate::ecs::Ecs;
 use crate::ast::Ast;
+use crate::ecs::Ecs;
+use crate::error::SteelErr;
 use crate::parser::program;
+use crate::parser::ParserContext;
 use ntest::timeout;
 
 #[derive(Default, Debug)]
@@ -21,15 +21,25 @@ impl<'a> Case<'a> {
     }
 
     fn no_round_trip(self) -> Self {
-        Case { no_round_trip: true, ..self }
+        Case {
+            no_round_trip: true,
+            ..self
+        }
     }
 
     fn prints_as(self, prints_as: &'a str) -> Self {
-        Case { prints_as: Some(prints_as), ..self }
+        Case {
+            prints_as: Some(prints_as),
+            ..self
+        }
     }
 }
 
-fn run_test<'a, T: ParserContext<'a>>(name: &str, case: &Case<'a>, ref mut ctx: T) -> Result<(), SteelErr>
+fn run_test<'a, T: ParserContext<'a>>(
+    name: &str,
+    case: &Case<'a>,
+    ref mut ctx: T,
+) -> Result<(), SteelErr>
 where
     <T as ParserContext<'a>>::ID: std::fmt::Debug,
     SteelErr: From<<T as ParserContext<'a>>::E>,
