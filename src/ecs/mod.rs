@@ -14,23 +14,23 @@ mod arena_providers;
 use arena_providers::*;
 
 #[derive(Debug, Default)]
-struct Context<'source> {
+pub struct ECS<'source> {
     entities: Arena<Entity>,
     symbols: Arena<Symbol<'source>>,
     calls: Arena<Call<ID>>,
     int64_values: Arena<i64>,
 }
 
-make_arena_provider!(Context<'a>, Symbol<'a>, Symbol, symbols);
-make_arena_provider!(Context<'a>, Call<ID>, Call, calls);
-make_arena_provider!(Context<'a>, i64, I64, int64_values);
+make_arena_provider!(ECS<'a>, Symbol<'a>, Symbol, symbols);
+make_arena_provider!(ECS<'a>, Call<ID>, Call, calls);
+make_arena_provider!(ECS<'a>, i64, I64, int64_values);
 
-impl<'source> ParserContext<'source> for Context<'source> {
+impl<'source> ParserContext<'source> for ECS<'source> {
     type ID = ID;
     type E = ECSError;
 }
 
-impl<'source, T: 'source> ParserStorage<ID, T, ECSError> for Context<'source>
+impl<'source, T: 'source> ParserStorage<ID, T, ECSError> for ECS<'source>
 where
     Self: Provider<'source, T>,
 {
@@ -39,19 +39,19 @@ where
     }
 
     fn get(&self, id: ID) -> Result<&T, ECSError> {
-        <Context<'source> as Provider<'source, T>>::get_component_for_entity(self, id)
+        <ECS<'source> as Provider<'source, T>>::get_component_for_entity(self, id)
     }
     #[allow(unused)]
     fn get_mut(&mut self, id: ID) -> Result<&mut T, ECSError>
     where
         Self: Provider<'source, T>,
     {
-        <Context<'source> as Provider<'source, T>>::get_component_for_entity_mut(self, id)
+        <ECS<'source> as Provider<'source, T>>::get_component_for_entity_mut(self, id)
     }
 }
 
-impl<'source> Context<'source> {
-    fn new() -> Self {
+impl<'source> ECS<'source> {
+    pub fn new() -> Self {
         Default::default()
     }
 
@@ -84,7 +84,7 @@ mod test {
 
     #[test]
     fn can_construct_node() -> Result<(), ECSError> {
-        let mut ctx: Context<'static> = Context::new();
+        let mut ctx: ECS<'static> = ECS::new();
 
         let hello = ctx.add(Symbol::new("hello"));
 
@@ -95,7 +95,7 @@ mod test {
 
     #[test]
     fn cannot_access_incorrect_node() {
-        let mut ctx: Context<'static> = Context::new();
+        let mut ctx: ECS<'static> = ECS::new();
         let hello = ctx.add(Symbol::new("hello"));
         let call: Result<&Call, ECSError> = ctx.get(hello);
         assert_eq!(
@@ -106,7 +106,7 @@ mod test {
 
     #[test]
     fn can_construct_nodes() {
-        let mut ctx: Context<'static> = Context::new();
+        let mut ctx: ECS<'static> = ECS::new();
 
         let hello = ctx.add(Symbol::new("hello"));
         let world = ctx.add(Symbol::new("world"));
@@ -123,7 +123,7 @@ mod test {
 
     #[test]
     fn can_construct_nodes_with_self_reference() {
-        let mut ctx: Context<'static> = Context::new();
+        let mut ctx: ECS<'static> = ECS::new();
 
         let reference = ctx.add_with_id(|id| Call::new(id, vec![]));
 
@@ -135,7 +135,7 @@ mod test {
 
     #[test]
     fn can_construct_nodes_with_cross_reference() {
-        let mut ctx: Context<'static> = Context::new();
+        let mut ctx: ECS<'static> = ECS::new();
 
         let hello = ctx.add(Symbol::new("hello"));
         let world = ctx.add(Symbol::new("world"));
@@ -149,7 +149,7 @@ mod test {
 
     #[test]
     fn can_construct_values() {
-        let mut ctx: Context<'static> = Context::new();
+        let mut ctx: ECS<'static> = ECS::new();
 
         let plus = ctx.add(Symbol::new("plus"));
         let a = ctx.add(32i64);
