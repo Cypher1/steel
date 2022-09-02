@@ -19,25 +19,25 @@ use parser::program;
 fn main() -> Result<(), SteelErr> {
     let args = std::env::args();
     for arg in args {
-        println!("arg: {}", arg);
+        eprintln!("arg: {}", arg);
     }
     loop {
         let mut line = String::new();
         std::io::stdin()
             .read_line(&mut line)
             .expect("Stdio should be accessible");
-        println!("line: {}", line);
+        eprintln!("line: {}", line);
         {
             let line = line.clone();
             let mut ast = ast::Ast::new();
             let (_ast_out_input, ast_out) = program(&mut ast, &line)?;
-            println!("ast expr: {:?}", ast.pretty(ast_out));
+            eprintln!("ast expr: {:?}", ast.pretty(ast_out));
         }
         {
             let line = line.clone();
             let mut ecs = ecs::Ecs::new();
             let (_ecs_out_input, ecs_out) = program(&mut ecs, &line)?;
-            println!("ecs expr: {:?}", ecs.pretty(ecs_out));
+            eprintln!("ecs expr: {:?}", ecs.pretty(ecs_out));
         }
     }
 }
