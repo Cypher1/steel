@@ -10,6 +10,8 @@ mod primitives;
 
 #[cfg(test)]
 mod assertions;
+#[cfg(test)]
+mod tests;
 
 use crate::parser::ParserContext;
 use error::SteelErr;
