@@ -249,8 +249,13 @@ where
     if input.is_empty() {
         Err(nom::Err::Error(SteelErr::UnexpectedEndOfInput))
     } else {
+        let mut report = input;
+        let mut lines = input.split('\n');
+        if let Some(first_line) = lines.next() {
+            report = first_line;
+        }
         Err(nom::Err::Error(SteelErr::MalformedExpression(
-            input.to_string(),
+            report.to_string(),
         )))
     }
 }
