@@ -30,6 +30,9 @@ make_arena_provider!(Ecs<'a>, i64, I64, int64_values);
 impl<'source> ParserContext<'source> for Ecs<'source> {
     type ID = ID;
     type E = EcsError;
+    fn new() -> Self {
+        Self::new()
+    }
 
     fn active_mem_usage(&self) -> usize {
         std::mem::size_of::<Self>()

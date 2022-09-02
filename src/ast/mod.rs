@@ -40,6 +40,10 @@ where
     type ID = ID;
     type E = AstError;
 
+    fn new() -> Self {
+        Self::new()
+    }
+
     fn active_mem_usage(&self) -> usize {
         std::mem::size_of::<Self>() + self.members.active_mem_usage()
     }

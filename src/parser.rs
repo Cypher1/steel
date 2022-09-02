@@ -34,6 +34,7 @@ pub trait ParserContext<'source>:
     type ID: Copy + std::fmt::Debug;
     type E;
 
+    fn new() -> Self;
     fn get_symbol(&self, id: Self::ID) -> Result<&Symbol<'source>, Self::E> {
         self.get(id)
     }
