@@ -10,6 +10,7 @@ struct Case<'a> {
     txt: &'a str,
     no_round_trip: bool,
     prints_as: Option<&'a str>,
+    error_is: Option<&'a str>,
 }
 
 impl<'a> Case<'a> {
@@ -23,6 +24,13 @@ impl<'a> Case<'a> {
     fn no_round_trip(self) -> Self {
         Case {
             no_round_trip: true,
+            ..self
+        }
+    }
+
+    fn error_is(self, error_is: &'a str) -> Self {
+        Case {
+            error_is: Some(error_is),
             ..self
         }
     }
@@ -45,7 +53,18 @@ where
     SteelErr: From<<T as ParserContext<'a>>::E>,
 {
     eprintln!("TEST: {} -> {}", name, case.txt);
-    let (left_over, result) = program(ctx, case.txt)?;
+    let (left_over, result) = match program(ctx, case.txt) {
+        Ok((left_over, result)) => (left_over, result),
+        Err(e) => {
+            let e = e.into();
+            if let Some(error_is) = case.error_is {
+                assert_eq!(error_is, format!("{}", e));
+                return Ok(());
+            } else {
+                return Err(e);
+            }
+        }
+    };
     assert_eq!(left_over, "", "Expected to parse full input");
     eprint!("  program: {:?}", result);
     eprintln!(" value={:?}", ctx.get_call(result)?);
@@ -89,6 +108,7 @@ macro_rules! make_test {
 }
 
 make_test!(handle_white_space, "-123\n", prints_as "(-123)");
+make_test!(handle_malformed_with_white_space, "#lol\n", error_is "Expected an expression, found \"#lol\"");
 make_test!(simple_plus, "(12+23)");
 make_test!(simple_plus_with_trailing, "(12+23)");
 make_test!(unary_in_parens, "(*12)");
