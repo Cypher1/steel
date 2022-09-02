@@ -8,6 +8,7 @@ use crate::parser::expr;
 struct Case<'a> {
     txt: &'a str,
     no_round_trip: bool,
+    left_over: &'a str,
 }
 
 impl<'a> Case<'a> {
@@ -21,6 +22,10 @@ impl<'a> Case<'a> {
     fn no_round_trip(self) -> Self {
         Case { no_round_trip: true, ..self }
     }
+
+    fn left_over(self, left_over: &'a str) -> Self {
+        Case { left_over, ..self }
+    }
 }
 
 fn run_test<'a, T: ParserContext<'a>>(name: &str, case: &Case<'a>, ref mut ctx: T) -> Result<(), SteelErr>
@@ -30,13 +35,13 @@ where
 {
     eprintln!("TEST: {} -> {}", name, case.txt);
     let (left_over, result) = expr(ctx, case.txt)?;
-    assert_eq!(left_over, "", "Is expected to fully parse the input");
+    assert_eq!(left_over, case.left_over, "Is expected to fully parse the input");
     eprint!("  expr: {:?}", result);
     eprintln!(" value={:?}", ctx.get_call(result)?);
     let pretty = ctx.pretty(result);
     eprintln!(" as_tree={}", &pretty);
     if !case.no_round_trip {
-        assert_eq!(pretty, case.txt, "Is expected to round trip");
+        assert_eq!(pretty, case.txt[0..case.txt.len()-case.left_over.len()], "Is expected to round trip (ignoring left over)");
     }
     eprintln!(
         "    Mem usage: {:?}/{:?}",
@@ -51,15 +56,15 @@ macro_rules! make_case {
     ($case: expr) => {
         Case::new($case)
     };
-    ($case: expr, $mod: ident $(, $mods: ident)*) => {
-        make_case!($case $(, $mods )*).$mod()
+    ($case: expr, $mod: ident $($args: expr)* $(, $tail_mods: ident $($tail_args: expr)*)*) => {
+        make_case!($case $(, $tail_mods $($tail_args)*)*).$mod($($args, )*)
     };
 }
 macro_rules! make_test {
-    ($name: ident, $case: expr $(, $mods: ident)*) => {
+    ($name: ident, $case: expr $(, $mods: ident $($args: expr)*)*) => {
         #[test]
         fn $name() -> Result<(), SteelErr> {
-            let case = make_case!($case $(, $mods)*);
+            let case = make_case!($case $(, $mods $( $args )*)*);
             run_test("Ast", &case, Ast::new())?;
             run_test("Ecs", &case, Ecs::new())
         }
@@ -67,6 +72,7 @@ macro_rules! make_test {
 }
 
 make_test!(simple_plus, "(12+23)");
+make_test!(simple_plus_with_trailing, "(12+23))", left_over ")");
 make_test!(unary_in_parens, "(*12)");
 make_test!(unary_no_parens, "*12", no_round_trip);
 make_test!(func_call, "foo(12, a)");
