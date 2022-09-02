@@ -102,6 +102,14 @@ impl<T> Arena<T> {
         }
     }
 
+    pub fn active_mem_usage(&self) -> usize {
+        self.members.len() * std::mem::size_of::<T>()
+    }
+
+    pub fn mem_usage(&self) -> usize {
+        self.members.capacity() * std::mem::size_of::<T>()
+    }
+
     pub fn add_with_id<S: Into<T>, F: FnOnce(ID) -> S>(&mut self, value: F) -> ID {
         let id = self.members.len();
         self.members.push(Entry(value(id).into()));

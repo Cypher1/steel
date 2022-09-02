@@ -36,6 +36,14 @@ where
 {
     type ID = Ref<'source>;
     type E = ASTError<'source>;
+
+    fn active_mem_usage(&self) -> usize {
+        std::mem::size_of::<Self>() + self.members.active_mem_usage()
+    }
+
+    fn mem_usage(&self) -> usize {
+        std::mem::size_of::<Self>() + self.members.mem_usage()
+    }
 }
 
 impl<'source> ParserStorage<Ref<'source>, Node<'source>, Infallible> for Ast<'source> {
@@ -67,14 +75,14 @@ macro_rules! wrap_node {
                 self.add(std::convert::Into::<Node<'source>>::into(value))
             }
             fn get(&self, id: Ref<'source>) -> Result<&$ty, ASTError<'source>> {
-                if let Node::$variant(ref value) = unsafe {&*id} {
+                if let Node::$variant(ref value) = unsafe { &*id } {
                     Ok(value)
                 } else {
                     Err(NodeOfWrongKindError(id, stringify!($variant)))
                 }
             }
             fn get_mut(&mut self, id: Ref<'source>) -> Result<&mut $ty, ASTError<'source>> {
-                if let Node::$variant(ref mut value) = unsafe {&mut *id} {
+                if let Node::$variant(ref mut value) = unsafe { &mut *id } {
                     Ok(value)
                 } else {
                     Err(NodeOfWrongKindError(id, stringify!($variant)))
@@ -160,10 +168,7 @@ mod test {
 
         assert_eq!(
             format!("{:?}", ctx.get_call(reference)),
-            format!(
-                "Ok(Call {{ callee: {:?}, args: [{:?}] }})",
-                hello, world
-            )
+            format!("Ok(Call {{ callee: {:?}, args: [{:?}] }})", hello, world)
         );
         Ok(())
     }

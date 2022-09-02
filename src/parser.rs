@@ -24,15 +24,18 @@ pub trait ParserContext<'source>:
     type ID;
     type E;
 
-    fn get_symbol(&self, id: Self:: ID) -> Result<&Symbol<'source>, Self::E> {
+    fn get_symbol(&self, id: Self::ID) -> Result<&Symbol<'source>, Self::E> {
         self.get(id)
     }
-    fn get_call(&self, id: Self:: ID) -> Result<&Call<Self::ID>, Self::E> {
+    fn get_call(&self, id: Self::ID) -> Result<&Call<Self::ID>, Self::E> {
         self.get(id)
     }
-    fn get_i64(&self, id: Self:: ID) -> Result<&i64, Self::E> {
+    fn get_i64(&self, id: Self::ID) -> Result<&i64, Self::E> {
         self.get(id)
     }
+
+    fn active_mem_usage(&self) -> usize;
+    fn mem_usage(&self) -> usize;
 }
 
 fn from_hex(input: &str) -> Result<u8, std::num::ParseIntError> {
