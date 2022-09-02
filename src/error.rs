@@ -9,7 +9,9 @@ pub enum SteelErr {
     PrecedenceError {
         precendence: i32,
     },
-    Error {
+    UnexpectedEndOfInput,
+    MalformedExpression(String),
+    ParserError {
         input: String,
         code: nom::error::ErrorKind,
     }, // Parse
@@ -27,7 +29,9 @@ impl std::fmt::Display for SteelErr {
             ParseErrorParseInt(input, error) => {
                 write!(f, "Failed to parse int due to {:?} in {}", error, input)
             }
-            Error { input, code } => write!(f, "Failed in {:?} while parsing {}", code, input),
+            UnexpectedEndOfInput => write!(f, "Expected an expression, found nothing"),
+            MalformedExpression(input) => write!(f, "Expected an expression, found {:?}", input),
+            ParserError { input, code } => write!(f, "Failed in {:?} while parsing {}", code, input),
             AstError(e) => write!(f, "{:?}", e),
             EcsError(e) => write!(f, "{:?}", e),
             Multi(a, b) => write!(f, "{}\nand {}", a, b),
@@ -71,7 +75,7 @@ impl nom::error::FromExternalError<&str, std::num::ParseIntError> for SteelErr {
 
 impl ParseError<&str> for SteelErr {
     fn from_error_kind(input: &str, kind: nom::error::ErrorKind) -> Self {
-        Error {
+        ParserError {
             input: input.into(),
             code: kind,
         }
@@ -79,7 +83,7 @@ impl ParseError<&str> for SteelErr {
     fn append(input: &str, kind: nom::error::ErrorKind, other: Self) -> Self {
         // TODO: !?
         match other {
-            Error { input, code } => Error { input, code },
+            ParserError { input, code } => ParserError { input, code },
             _ => Multi(
                 Box::new(Self::from_error_kind(input, kind)),
                 Box::new(other),
