@@ -1,7 +1,7 @@
 use nom::{
     branch::alt,
     bytes::complete::{tag as raw_tag, take_while, take_while1, take_while_m_n},
-    character::complete::{alpha1, space0},
+    character::complete::{alpha1, multispace0},
     combinator::map_res,
     multi::separated_list0,
     sequence::tuple,
@@ -12,10 +12,8 @@ type SResult<'a, T> = std::result::Result<(&'a str, T), nom::Err<SteelErr>>;
 fn tag(raw: &str) -> impl Fn(&str) -> SResult<&str> + '_ {
     // TODO: Consider only ignoring some whitespace...
     move |input: &str| {
-        // let (input, _) = space0::<&str, SteelErr>(input)?;
+        let (input, _) = multispace0::<&str, SteelErr>(input)?;
         raw_tag::<&str, &str, SteelErr>(raw)(input)
-        // TODO: This might be expensive?
-        //Err(_) => Err(SteelErr::ParseErrorExpected(raw.to_string(), input.to_string())),
     }
 }
 
@@ -124,7 +122,7 @@ pub fn symbol<'source, ID, E: Into<SteelErr>, C: ParserStorage<'source, ID, Symb
     context: &mut C,
     input: &'source str,
 ) -> SResult<'source, ID> {
-    let (input, _) = space0(input)?;
+    let (input, _) = multispace0(input)?;
     let (input, symbol) = symbol_raw(input)?;
     let id = context.add(symbol);
     Ok((input, id))
@@ -212,7 +210,6 @@ fn nud<'source, C: ParserContext<'source>>(
 where
     <C as ParserContext<'source>>::E: Into<SteelErr>,
 {
-    let (input, _) = space0(input)?;
     if let Ok((input, _)) = tag("(")(input) {
         let mut ignore_prec = INIT_PRECENDENCE;
         let (input, wrapped) = expr(context, input, &mut ignore_prec)?;
@@ -279,6 +276,8 @@ where
     let mut min_prec = INIT_PRECENDENCE;
     let (mut input, mut left) = expr(context, input, &mut min_prec)?;
     loop {
+        let (new_input, _) = multispace0(input)?;
+        input = new_input;
         if input.is_empty() {
             return Ok((input, left));
         }
