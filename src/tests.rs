@@ -51,11 +51,12 @@ where
     eprintln!(" value={:?}", ctx.get_call(result)?);
     let pretty = ctx.pretty(result);
     eprintln!(" as_tree={}", &pretty);
-    if !case.no_round_trip {
-        assert_eq!(pretty, case.txt, "Is expected to round trip");
-    }
     if let Some(prints_as) = case.prints_as {
         assert_eq!(pretty, prints_as, "Is expected to print as");
+    } else {
+        if !case.no_round_trip {
+            assert_eq!(pretty, case.txt, "Is expected to round trip");
+        }
     }
     eprintln!(
         "    Mem usage: {:?}/{:?}",
@@ -94,8 +95,8 @@ make_test!(unary_no_parens, "*12", no_round_trip);
 make_test!(func_call, "foo(12, a)");
 make_test!(op_call, "+(12, 23)");
 make_test!(multi_op, "(12+23+34)", no_round_trip);
-make_test!(prec_mul_add, "12*23+34", no_round_trip, prints_as "((12*23)+34)");
-make_test!(prec_add_mul, "12+23*34", no_round_trip, prints_as "(12+(23*34))");
-make_test!(prec_mul_paren_add, "12*(23+34)", no_round_trip, prints_as "(12*(23+34))");
-make_test!(prec_paren_add_mul, "(12+23)*34", no_round_trip, prints_as "((12+23)*34)");
-make_test!(prec_hard_case2, "a+b*c+d", no_round_trip, prints_as "((a+(b*c))+d)");
+make_test!(prec_mul_add, "12*23+34", prints_as "((12*23)+34)");
+make_test!(prec_add_mul, "12+23*34", prints_as "(12+(23*34))");
+make_test!(prec_mul_paren_add, "12*(23+34)", prints_as "(12*(23+34))");
+make_test!(prec_paren_add_mul, "(12+23)*34", prints_as "((12+23)*34)");
+make_test!(prec_hard_case2, "a+b*c+d", prints_as "((a+(b*c))+d)");
