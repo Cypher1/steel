@@ -21,7 +21,6 @@ fn tag(raw: &str) -> impl Fn(&str) -> SResult<&str> + '_ {
 
 use crate::error::SteelErr;
 use crate::nodes::{Call, Symbol};
-use crate::primitives::Color;
 
 pub trait ParserStorage<'source, ID, T, E> {
     fn add(&mut self, value: T) -> ID;
@@ -82,25 +81,6 @@ pub trait ParserContext<'source>:
         }
         format!("{{node? {:?}}}", id)
     }
-}
-
-fn from_hex(input: &str) -> Result<u8, std::num::ParseIntError> {
-    u8::from_str_radix(input, 16)
-}
-
-fn is_hex_digit(c: char) -> bool {
-    c.is_ascii_hexdigit()
-}
-
-fn hex_primary(input: &str) -> SResult<u8> {
-    map_res(take_while_m_n(2, 2, is_hex_digit), from_hex)(input)
-}
-
-pub fn hex_color(input: &str) -> SResult<Color> {
-    let (input, _) = tag("#")(input)?;
-    let (input, (red, green, blue)) = tuple((hex_primary, hex_primary, hex_primary))(input)?;
-
-    Ok((input, Color { red, green, blue }))
 }
 
 pub fn number_i64_raw(input: &str) -> SResult<i64> {
@@ -322,30 +302,6 @@ where
 mod test {
     use super::*;
     use crate::assertions::{assert_err_is, assert_is_err};
-
-    #[test]
-    fn parse_color() {
-        assert_eq!(
-            hex_color("#2F14DF").expect("Should parse"),
-            (
-                "",
-                Color {
-                    red: 47,
-                    green: 20,
-                    blue: 223,
-                }
-            )
-        );
-    }
-
-    #[test]
-    fn parse_non_color() {
-        let err = assert_is_err(hex_color("#lol"));
-        assert_eq!(
-            format!("{}", err),
-            "Parsing Error: Error { input: \"lol\", code: TakeWhileMN }"
-        );
-    }
 
     #[test]
     fn parse_symbol() {

@@ -6,7 +6,6 @@ mod ecs;
 mod error;
 mod nodes;
 mod parser;
-mod primitives;
 
 #[cfg(test)]
 mod assertions;
