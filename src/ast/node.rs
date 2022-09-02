@@ -1,10 +1,10 @@
+use crate::arena::ID;
 use crate::nodes::*;
-pub type Ref<'source> = *mut Node<'source>;
 
 #[derive(Debug)]
 pub enum Node<'source> {
     Symbol(Symbol<'source>),
-    Call(Call<Ref<'source>>),
+    Call(Call<ID>),
     I64(i64),
 }
 
@@ -63,8 +63,6 @@ mod test {
 
         let hello = ctx.add(Symbol::new("hello"));
         let world = ctx.add(Symbol::new("world"));
-        let hello: Ref<'static> = ctx.get_mut(hello)?;
-        let world: Ref<'static> = ctx.get_mut(world)?;
         let reference = ctx.add(Call::new(hello, vec![world]));
 
         assert_eq!(
@@ -84,9 +82,6 @@ mod test {
         let plus = ctx.add(Symbol::new("plus"));
         let a = ctx.add(32i64);
         let b = ctx.add(12i64);
-        let plus: Ref<'static> = ctx.get_mut(plus)?;
-        let a: Ref<'static> = ctx.get_mut(a)?;
-        let b: Ref<'static> = ctx.get_mut(b)?;
         let reference = ctx.add(Call::new(plus, vec![a, b]));
 
         assert_eq!(

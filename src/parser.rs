@@ -40,13 +40,21 @@ pub trait ParserContext<'source>:
     fn get_symbol(&self, id: Self::ID) -> Result<&Symbol<'source>, Self::E> {
         self.get(id)
     }
+    fn get_symbol_mut(&mut self, id: Self::ID) -> Result<&mut Symbol<'source>, Self::E> {
+        self.get_mut(id)
+    }
     fn get_call(&self, id: Self::ID) -> Result<&Call<Self::ID>, Self::E> {
         self.get(id)
+    }
+    fn get_call_mut(&mut self, id: Self::ID) -> Result<&mut Call<Self::ID>, Self::E> {
+        self.get_mut(id)
     }
     fn get_i64(&self, id: Self::ID) -> Result<&i64, Self::E> {
         self.get(id)
     }
-
+    fn get_i64_mut(&mut self, id: Self::ID) -> Result<&mut i64, Self::E> {
+        self.get_mut(id)
+    }
     fn active_mem_usage(&self) -> usize;
     fn mem_usage(&self) -> usize;
     fn pretty(&self, id: Self::ID) -> String {
@@ -72,7 +80,7 @@ pub trait ParserContext<'source>:
             let args = args.join(", ");
             return format!("{}({})", callee, args);
         }
-        format!("unknown node: {:?}", id)
+        format!("{{node? {:?}}}", id)
     }
 }
 
@@ -192,9 +200,6 @@ pub fn nud<'source, C: ParserContext<'source>>(
         let (input, _) = tag(")")(input)?;
         return Ok((input, wrapped));
     }
-    if let Ok(res) = number_i64(context, input) {
-        return Ok(res);
-    }
     if let Ok((input, sym)) = symbol(context, input) {
         if let Ok((input, args)) = args(context, input) {
             // Function call
@@ -207,6 +212,9 @@ pub fn nud<'source, C: ParserContext<'source>>(
         // Unified calling syntax for a prefix operator
         if let Ok((input, args)) = args(context, input) {
             // Function call
+            if let Ok(op) = context.get_symbol_mut(op) { // TODO: WHAT!?
+                op.is_operator = false;
+            }
             let call = context.add(Call::new(op, args));
             return Ok((input, call));
         }
@@ -215,7 +223,8 @@ pub fn nud<'source, C: ParserContext<'source>>(
         let call = context.add(Call::new(op, vec![right]));
         return Ok((input, call));
     }
-    panic!("Unexpected input: {}", input)
+    // Otherwise expect a number
+    number_i64(context, input)
 }
 
 pub fn expr<'source, C: ParserContext<'source>>(

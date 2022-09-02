@@ -2,7 +2,7 @@
 #[derive(Debug)]
 pub enum SteelErr<'a> {
     ParseError(nom::Err<nom::error::Error<&'a str>>),
-    AstError(crate::ast::AstError<'a>),
+    AstError(crate::ast::AstError),
     EcsError(crate::ecs::EcsError),
 }
 
@@ -31,8 +31,8 @@ impl<'a> From<nom::Err<nom::error::Error<&'a str>>> for SteelErr<'a> {
     }
 }
 
-impl<'a> From<crate::ast::AstError<'a>> for SteelErr<'a> {
-    fn from(err: crate::ast::AstError<'a>) -> Self {
+impl<'a> From<crate::ast::AstError> for SteelErr<'a> {
+    fn from(err: crate::ast::AstError) -> Self {
         AstError(err)
     }
 }

@@ -1,15 +1,22 @@
-use crate::arena::Arena;
+use crate::arena::{Arena, ID, ArenaError};
 use crate::nodes::*;
 use crate::parser::{ParserContext, ParserStorage};
-use std::convert::Infallible;
 
 mod node;
 use node::*;
 
 #[derive(Debug)]
-pub enum AstError<'source> {
-    NodeOfWrongKindError(Ref<'source>, &'static str),
+pub enum AstError {
+    NodeOfWrongKindError(ID, &'static str),
+    InternalError(ArenaError),
 }
+
+impl From<ArenaError> for AstError {
+    fn from(it: ArenaError) -> Self {
+        InternalError(it)
+    }
+}
+
 use AstError::*;
 
 pub struct Ast<'source> {
@@ -26,12 +33,12 @@ impl<'source> Ast<'source> {
 
 impl<'source> ParserContext<'source> for Ast<'source>
 where
-    Self: ParserStorage<'source, Ref<'source>, i64, AstError<'source>>,
-    Self: ParserStorage<'source, Ref<'source>, Symbol<'source>, AstError<'source>>,
-    Self: ParserStorage<'source, Ref<'source>, Call<Ref<'source>>, AstError<'source>>,
+    Self: ParserStorage<'source, ID, i64, AstError>,
+    Self: ParserStorage<'source, ID, Symbol<'source>, AstError>,
+    Self: ParserStorage<'source, ID, Call<ID>, AstError>,
 {
-    type ID = Ref<'source>;
-    type E = AstError<'source>;
+    type ID = ID;
+    type E = AstError;
 
     fn active_mem_usage(&self) -> usize {
         std::mem::size_of::<Self>() + self.members.active_mem_usage()
@@ -42,20 +49,15 @@ where
     }
 }
 
-impl<'source> ParserStorage<'source, Ref<'source>, Node<'source>, Infallible> for Ast<'source> {
-    fn add(&mut self, value: Node<'source>) -> Ref<'source> {
-        let id = self.members.add(value);
-        self.members
-            .get_mut(id)
-            .expect("Getting the 'just' added member, should always be safe")
+impl<'source> ParserStorage<'source, ID, Node<'source>, ArenaError> for Ast<'source> {
+    fn add(&mut self, value: Node<'source>) -> ID {
+        self.members.add(value)
     }
-    fn get(&self, id: Ref<'source>) -> Result<&Node<'source>, Infallible> {
-        // This is safe unless a node is deleted... (and we don't expose .remove)
-        Ok(unsafe { &*id })
+    fn get(&self, id: ID) -> Result<&Node<'source>, ArenaError> {
+        self.members.get(id)
     }
-    fn get_mut(&mut self, id: Ref<'source>) -> Result<&mut Node<'source>, Infallible> {
-        // This is safe unless a node is deleted... (and we don't expose .remove)
-        Ok(unsafe { &mut *id })
+    fn get_mut(&mut self, id: ID) -> Result<&mut Node<'source>, ArenaError> {
+        self.members.get_mut(id)
     }
 }
 
@@ -66,19 +68,19 @@ macro_rules! wrap_node {
                 Node::$variant(it)
             }
         }
-        impl<'source> ParserStorage<'source, Ref<'source>, $ty, AstError<'source>> for Ast<'source> {
-            fn add(&mut self, value: $ty) -> Ref<'source> {
+        impl<'source> ParserStorage<'source, ID, $ty, AstError> for Ast<'source> {
+            fn add(&mut self, value: $ty) -> ID {
                 self.add(std::convert::Into::<Node<'source>>::into(value))
             }
-            fn get(&self, id: Ref<'source>) -> Result<&$ty, AstError<'source>> {
-                if let Node::$variant(ref value) = unsafe { &*id } {
+            fn get(&self, id: ID) -> Result<&$ty, AstError> {
+                if let Node::$variant(ref value) = <Self as ParserStorage<'source, ID, Node<'source>, ArenaError>>::get(self, id)? {
                     Ok(value)
                 } else {
                     Err(NodeOfWrongKindError(id, stringify!($variant)))
                 }
             }
-            fn get_mut(&mut self, id: Ref<'source>) -> Result<&mut $ty, AstError<'source>> {
-                if let Node::$variant(ref mut value) = unsafe { &mut *id } {
+            fn get_mut(&mut self, id: ID) -> Result<&mut $ty, AstError> {
+                if let Node::$variant(ref mut value) = <Self as ParserStorage<'source, ID, Node<'source>, ArenaError>>::get_mut(self, id)? {
                     Ok(value)
                 } else {
                     Err(NodeOfWrongKindError(id, stringify!($variant)))
@@ -89,7 +91,7 @@ macro_rules! wrap_node {
 }
 
 wrap_node!(Symbol<'source>, Symbol);
-wrap_node!(Call<Ref<'source>>, Call);
+wrap_node!(Call<ID>, Call);
 wrap_node!(i64, I64);
 
 #[cfg(test)]
@@ -153,13 +155,11 @@ mod test {
     */
 
     #[test]
-    fn can_construct_nodes_with_cross_reference() -> Result<(), Infallible> {
+    fn can_construct_nodes_with_cross_reference() -> Result<(), ArenaError> {
         let mut ctx: Ast<'static> = Ast::new();
 
         let hello = ctx.add(Symbol::new("hello"));
         let world = ctx.add(Symbol::new("world"));
-        let hello: Ref<'static> = ctx.get_mut(hello)?;
-        let world: Ref<'static> = ctx.get_mut(world)?;
         let reference = ctx.add(Call::new(hello, vec![world]));
 
         assert_eq!(
@@ -170,15 +170,12 @@ mod test {
     }
 
     #[test]
-    fn can_construct_values() -> Result<(), Infallible> {
+    fn can_construct_values() -> Result<(), ArenaError> {
         let mut ctx: Ast<'static> = Ast::new();
 
         let plus = ctx.add(Symbol::new("plus"));
         let a = ctx.add(32i64);
         let b = ctx.add(12i64);
-        let plus: Ref<'static> = ctx.get_mut(plus)?;
-        let a: Ref<'static> = ctx.get_mut(a)?;
-        let b: Ref<'static> = ctx.get_mut(b)?;
         let reference = ctx.add(Call::new(plus, vec![a, b]));
 
         assert_eq!(
