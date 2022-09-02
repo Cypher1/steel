@@ -1,11 +1,23 @@
 use nom::{
     branch::alt,
-    bytes::complete::{tag, take_while, take_while1, take_while_m_n},
-    character::complete::alpha1,
+    bytes::complete::{tag as raw_tag, take_while, take_while1, take_while_m_n},
+    character::complete::{space0, alpha1},
     combinator::map_res,
     sequence::tuple,
+    multi::separated_list0,
     IResult,
 };
+
+// Automatically ignore whitespace by default...
+// TODO: Consider only ignoring some whitespace...
+pub fn tag(
+    raw: &str
+) -> impl Fn(&str) -> IResult<&str, &str> + '_ {
+    move |input: &str| {
+        let (input, _) = space0(input)?;
+        raw_tag::<&str, &str, nom::error::Error<_>>(raw)(input)
+    }
+}
 
 use crate::nodes::{Call, Symbol};
 use crate::primitives::Color;
@@ -124,6 +136,7 @@ pub fn symbol<'source, ID, E: Into<SteelErr<'source>>, C: ParserStorage<'source,
     context: &mut C,
     input: &'source str,
 ) -> IResult<&'source str, ID> {
+    let (input, _) = space0(input)?;
     let (input, symbol) = symbol_raw(input)?;
     let id = context.add(symbol);
     Ok((input, id))
@@ -141,30 +154,84 @@ pub fn operator<'source, ID, E: Into<SteelErr<'source>>, C: ParserStorage<'sourc
     context: &mut C,
     input: &'source str,
 ) -> IResult<&'source str, ID> {
+    let (input, _) = space0(input)?;
     let (input, symbol) = operator_raw(input)?;
     let id = context.add(symbol);
     Ok((input, id))
+}
+
+pub fn args<'source, C: ParserContext<'source>>(
+    context: &mut C,
+    input: &'source str,
+) -> IResult<&'source str, Vec<C::ID>> where <C as ParserContext<'source>>::E: Into<SteelErr<'source>> {
+    let (input, _) = tag("(")(input)?;
+    let (input, args) = separated_list0(tag(","), |input|expr(context, input))(input)?;
+    let (input, _) = tag(")")(input)?;
+    return Ok((input, args));
+}
+
+pub fn complex_expr<'source, C: ParserContext<'source>>(
+    context: &mut C,
+    left: C::ID,
+    input: &'source str,
+) -> IResult<&'source str, C::ID> where <C as ParserContext<'source>>::E: Into<SteelErr<'source>> {
+    // try precedence(less) parsing...
+    // TODO: add precedence...
+    let (input, op) = operator(context, input)?;
+    let (input, right) = expr(context, input)?;
+    let call = context.add(Call::new(op, vec![left, right]));
+    return Ok((input, call));
+}
+
+pub fn simple_expr<'source, C: ParserContext<'source>>(
+    context: &mut C,
+    input: &'source str,
+) -> IResult<&'source str, C::ID> where <C as ParserContext<'source>>::E: Into<SteelErr<'source>> {
+    if let Ok((input, _)) = tag("(")(input) {
+        let (input, wrapped) = expr(context, input)?;
+        let (input, _) = tag(")")(input)?;
+        return Ok((input, wrapped));
+    }
+    if let Ok(res) = number_i64(context, input) {
+        return Ok(res);
+    }
+    if let Ok((input, sym)) = symbol(context, input) {
+        if let Ok((input, args)) = args(context, input) {
+            // Function call
+            let call = context.add(Call::new(sym, args));
+            return Ok((input, call));
+        }
+        return Ok((input, sym));
+    }
+    if let Ok((input, op)) = operator(context, input) {
+        // Unified calling syntax for a prefix operator
+        if let Ok((input, args)) = args(context, input) {
+            // Function call
+            let call = context.add(Call::new(op, args));
+            return Ok((input, call));
+        }
+        // Prefix operator
+        let (input, right) = expr(context, input)?;
+        let call = context.add(Call::new(op, vec![right]));
+        return Ok((input, call));
+    }
+    panic!("Unexpected input: {}", input)
 }
 
 pub fn expr<'source, C: ParserContext<'source>>(
     context: &mut C,
     input: &'source str,
 ) -> IResult<&'source str, C::ID> where <C as ParserContext<'source>>::E: Into<SteelErr<'source>> {
-    if let Ok((input, _)) = tag::<&str, &str, nom::error::Error<_>>("(")(input) {
-        let (input, left) = expr(context, input)?;
-        let (input, op) = operator(context, input)?;
-        let (input, right) = expr(context, input)?;
-        let call = context.add(Call::new(op, vec![left, right]));
-        let (input, _) = tag::<&str, &str, nom::error::Error<_>>(")")(input)?;
-        return Ok((input, call));
+    let mut state = simple_expr(context, input)?;
+    loop {
+        let update = complex_expr(context, state.1, state.0);
+        match update {
+            Ok(new_state) => {
+                state = new_state;
+            }
+            Err(_) => return Ok(state),
+        }
     }
-    if let Ok(res) = number_i64(context, input) {
-        return Ok(res);
-    }
-    if let Ok(res) = symbol(context, input) {
-        return Ok(res);
-    }
-    todo!("Unexpected '{}'", input);
 }
 
 #[cfg(test)]
