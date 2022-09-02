@@ -152,7 +152,6 @@ pub fn operator_raw<'source>(
     if precendence < *min_prec {
         return Err(nom::Err::Error(SteelErr::PrecedenceError { precendence }));
     }
-    eprintln!("RAISE PREC FROM {:?} TO {:?} ", min_prec, precendence);
     *min_prec = precendence; // otherwise raise the precendence.
     Ok((input, Symbol::operator(name)))
 }
@@ -281,7 +280,6 @@ where
         if input.is_empty() {
             return Ok((input, left));
         }
-        // dbg!(&state);
         match led(context, left, input, &mut min_prec) {
             Ok((new_input, new_left)) => {
                 input = new_input;
@@ -289,7 +287,6 @@ where
             }
             Err(nom::Err::Error(SteelErr::PrecedenceError { precendence })) => {
                 // go back down and try again
-                eprintln!("TRY AGAIN {:?}", precendence);
                 min_prec = precendence;
             }
             Err(e) => return Err(e),
