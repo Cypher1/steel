@@ -324,11 +324,11 @@ mod test {
     fn parse_non_symbol() {
         assert_err_is!(
             symbol_raw("#lol"),
-            "Parsing Error: ParserError { input: \"#lol\", code: Tag }",
+            "Parsing Error: Failed in Tag while parsing #lol"
         );
         assert_err_is!(
             symbol_raw("123"),
-            "Parsing Error: ParserError { input: \"123\", code: Tag }",
+            "Parsing Error: Failed in Tag while parsing 123"
         );
     }
 
@@ -366,8 +366,8 @@ mod test {
         let mut prec = MUL_PRECENDENCE;
         assert_err_is!(
             operator_raw("+", &mut prec),
-            &format!(
-                "Parsing Error: PrecedenceError {{ precendence: {} }}",
+            format!(
+                "Parsing Error: Unexpected operator due to max precendence setting ({})",
                 PLUS_PRECENDENCE
             ),
         );
@@ -378,12 +378,12 @@ mod test {
         let mut prec = INIT_PRECENDENCE;
         assert_err_is!(
             operator_raw("#lol", &mut prec),
-            "Parsing Error: ParserError { input: \"#lol\", code: TakeWhileMN }",
+            "Parsing Error: Failed in TakeWhileMN while parsing #lol"
         );
         let mut prec = INIT_PRECENDENCE;
         assert_err_is!(
             operator_raw("123", &mut prec),
-            "Parsing Error: ParserError { input: \"123\", code: TakeWhileMN }",
+            "Parsing Error: Failed in TakeWhileMN while parsing 123"
         );
     }
 
@@ -398,15 +398,15 @@ mod test {
     fn parse_non_number_i64() {
         assert_err_is!(
             number_i64_raw("#lol"),
-            "Parsing Error: ParserError { input: \"#lol\", code: TakeWhile1 }",
+            "Parsing Error: Failed in TakeWhile1 while parsing #lol"
         );
         assert_err_is!(
             number_i64_raw("||"),
-            "Parsing Error: ParserError { input: \"||\", code: TakeWhile1 }",
+            "Parsing Error: Failed in TakeWhile1 while parsing ||"
         );
         assert_err_is!(
             number_i64_raw("e2"),
-            "Parsing Error: ParserError { input: \"e2\", code: TakeWhile1 }",
+            "Parsing Error: Failed in TakeWhile1 while parsing e2"
         );
     }
 }

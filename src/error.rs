@@ -1,7 +1,6 @@
 use nom::error::ParseError;
 
 #[must_use]
-#[derive(Debug)]
 pub enum SteelErr {
     ParseErrorParseInt(String, std::num::ParseIntError),
     IOError(std::io::Error),
@@ -17,6 +16,12 @@ pub enum SteelErr {
         code: nom::error::ErrorKind,
     }, // Parse
     Multi(Box<SteelErr>, Box<SteelErr>),
+}
+
+impl std::fmt::Debug for SteelErr {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}", self)
+    }
 }
 
 impl std::fmt::Display for SteelErr {

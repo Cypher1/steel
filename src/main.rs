@@ -17,20 +17,14 @@ use crate::parser::ParserContext;
 use error::SteelErr;
 use parser::program;
 
-fn handle<'a, S: ParserContext<'a>>(line: &'a str)
-where
+fn handle<'a, S: ParserContext<'a>>(line: &'a str) -> Result<(), SteelErr>
+    where
     S::E: Into<SteelErr>,
 {
     let mut store = S::new();
-    match program(&mut store, line) {
-        Ok((_input, program)) => {
-            eprintln!("ast expr: {:?}", store.pretty(program));
-        }
-        Err(e) => {
-            eprintln!("{}", e);
-            std::process::exit(1);
-        }
-    }
+    let (_input, program) = program(&mut store, line)?;
+    eprintln!("expr: {:?}", store.pretty(program));
+    Ok(())
 }
 
 fn main() -> Result<(), SteelErr> {
@@ -40,11 +34,12 @@ fn main() -> Result<(), SteelErr> {
     }
     loop {
         let mut line = String::new();
-        if std::io::stdin().read_line(&mut line)? == 0 {
-            return Ok(());
+        if std::io::stdin()
+            .read_line(&mut line)? == 0 {
+                return Ok(());
         }
         eprintln!("line: {}", line);
-        handle::<ast::Ast>(&line);
-        handle::<ecs::Ecs>(&line);
+        handle::<ast::Ast>(&line)?;
+        handle::<ecs::Ecs>(&line)?;
     }
 }
