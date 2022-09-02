@@ -1,7 +1,5 @@
-use super::component::{ComponentID, EcsError, Entity};
-use crate::arena::{Arena, ArenaError, ID};
-use crate::nodes::*;
-use std::marker::PhantomData;
+use super::component::EcsError;
+use crate::arena::ID;
 
 pub trait Provider<'a, T: 'a> {
     type ID;

@@ -1,7 +1,4 @@
-use crate::arena::{Arena, ArenaError, ID};
 use crate::nodes::*;
-use crate::parser::ParserContext;
-use std::convert::Infallible;
 pub type Ref<'source> = *mut Node<'source>;
 
 #[derive(Debug)]
@@ -14,6 +11,7 @@ pub enum Node<'source> {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::arena::{Arena, ArenaError};
 
     #[test]
     fn can_construct_node() {

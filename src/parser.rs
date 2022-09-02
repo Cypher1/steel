@@ -92,7 +92,7 @@ pub fn symbol_raw(og_input: &str) -> IResult<&str, Symbol> {
 
     let name = &og_input[0..head.len() + tail.len()];
 
-    Ok((input, Symbol { name }))
+    Ok((input, Symbol::new(name)))
 }
 pub fn symbol<'source, ID, E, C: ParserStorage<ID, Symbol<'source>, E>>(
     context: &mut C,
@@ -109,7 +109,7 @@ fn is_operator_char(c: char) -> bool {
 
 pub fn operator_raw(input: &str) -> IResult<&str, Symbol> {
     let (input, name) = take_while_m_n(1, 3, is_operator_char)(input)?;
-    Ok((input, Symbol { name }))
+    Ok((input, Symbol::new(name)))
 }
 pub fn operator<'source, ID, E, C: ParserStorage<ID, Symbol<'source>, E>>(
     context: &mut C,
@@ -172,13 +172,13 @@ mod test {
 
     #[test]
     fn parse_symbol() {
-        assert_eq!(symbol_raw("hello"), Ok(("", Symbol { name: "hello" })));
+        assert_eq!(symbol_raw("hello"), Ok(("", Symbol::new("hello"))));
     }
 
     #[test]
     fn parse_symbol_with_underscores() {
-        assert_eq!(symbol_raw("he_llo"), Ok(("", Symbol { name: "he_llo" })));
-        assert_eq!(symbol_raw("_e_llo"), Ok(("", Symbol { name: "_e_llo" })));
+        assert_eq!(symbol_raw("he_llo"), Ok(("", Symbol::new("he_llo"))));
+        assert_eq!(symbol_raw("_e_llo"), Ok(("", Symbol::new("_e_llo"))));
     }
 
     #[test]
@@ -195,9 +195,9 @@ mod test {
 
     #[test]
     fn parse_operator() {
-        assert_eq!(operator_raw("||"), Ok(("", Symbol { name: "||" })));
-        assert_eq!(operator_raw("+"), Ok(("", Symbol { name: "+" })));
-        assert_eq!(operator_raw("*"), Ok(("", Symbol { name: "*" })));
+        assert_eq!(operator_raw("||"), Ok(("", Symbol::new("||"))));
+        assert_eq!(operator_raw("+"), Ok(("", Symbol::new("+"))));
+        assert_eq!(operator_raw("*"), Ok(("", Symbol::new("*"))));
     }
 
     #[test]

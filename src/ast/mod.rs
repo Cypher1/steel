@@ -1,4 +1,4 @@
-use crate::arena::{Arena, ArenaError};
+use crate::arena::Arena;
 use crate::nodes::*;
 use crate::parser::{ParserContext, ParserStorage};
 use std::convert::Infallible;
@@ -9,21 +9,17 @@ use node::*;
 #[derive(Debug)]
 pub enum ASTError<'source> {
     NodeOfWrongKindError(Ref<'source>, &'static str),
-    InternalError(ArenaError),
-    ComponentNotFound(Ref<'source>),
 }
 use ASTError::*;
 
 pub struct Ast<'source> {
     members: Arena<Node<'source>>,
-    root: Option<Ref<'source>>,
 }
 
 impl<'source> Ast<'source> {
     pub fn new() -> Self {
         Self {
             members: Arena::new(),
-            root: None,
         }
     }
 }

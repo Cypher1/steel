@@ -1,6 +1,6 @@
 use super::component::{ComponentID, EcsError, Entity};
 use super::providers::Provider;
-use crate::arena::{Arena, ArenaError, ID};
+use crate::arena::{Arena, ID};
 
 // In future there may be other kinds of Providers.
 pub trait ArenaProvider<'a, T> {

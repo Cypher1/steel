@@ -1,4 +1,4 @@
-use crate::arena::{Arena, ArenaError, ID};
+use crate::arena::{Arena, ID};
 use crate::nodes::*;
 use crate::parser::{ParserContext, ParserStorage};
 use std::marker::PhantomData;
@@ -71,6 +71,7 @@ impl<'source> Ecs<'source> {
         Default::default()
     }
 
+    #[cfg(test)]
     fn add<T>(&mut self, value: T) -> ID
     where
         Self: ParserStorage<ID, T, EcsError>,
@@ -78,18 +79,12 @@ impl<'source> Ecs<'source> {
         <Self as ParserStorage<ID, T, EcsError>>::add(self, value)
     }
 
+    #[cfg(test)]
     fn get<T>(&self, id: ID) -> Result<&T, EcsError>
     where
         Self: ParserStorage<ID, T, EcsError>,
     {
         <Self as ParserStorage<ID, T, EcsError>>::get(self, id)
-    }
-
-    fn get_mut<T>(&mut self, id: ID) -> Result<&mut T, EcsError>
-    where
-        Self: ParserStorage<ID, T, EcsError>,
-    {
-        <Self as ParserStorage<ID, T, EcsError>>::get_mut(self, id)
     }
 }
 

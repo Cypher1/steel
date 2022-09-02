@@ -1,5 +1,4 @@
 // TODO: Remove when we can run in ECS and AST mode.
-#![allow(unused)]
 
 mod arena;
 mod ast;
@@ -14,9 +13,8 @@ mod assertions;
 
 use crate::parser::ParserContext;
 use error::SteelErr;
-use parser::{expr, hex_color, symbol_raw};
+use parser::expr;
 
-#[must_use]
 fn test<'a, T: ParserContext<'a>>(name: &str, ref mut ctx: T) -> Result<(), SteelErr<'a>>
 where
     <T as ParserContext<'a>>::ID: std::fmt::Debug,

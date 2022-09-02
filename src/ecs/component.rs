@@ -1,4 +1,4 @@
-use crate::arena::{Arena, ArenaError, ID};
+use crate::arena::{ArenaError, ID};
 use crate::nodes::*;
 use std::marker::PhantomData;
 
