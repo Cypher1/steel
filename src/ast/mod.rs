@@ -1,6 +1,6 @@
 use crate::arena::{Arena, ArenaError, ID};
 use crate::nodes::*;
-use crate::parser::{ParserContext, ParserStorage};
+use crate::compiler_context::{CompilerContext, NodeStore};
 
 mod node;
 use node::*;
@@ -31,11 +31,11 @@ impl<'source> Ast<'source> {
     }
 }
 
-impl<'source> ParserContext<'source> for Ast<'source>
+impl<'source> CompilerContext<'source> for Ast<'source>
 where
-    Self: ParserStorage<'source, ID, i64, AstError>,
-    Self: ParserStorage<'source, ID, Symbol<'source>, AstError>,
-    Self: ParserStorage<'source, ID, Call<ID>, AstError>,
+    Self: NodeStore<'source, ID, i64, AstError>,
+    Self: NodeStore<'source, ID, Symbol<'source>, AstError>,
+    Self: NodeStore<'source, ID, Call<ID>, AstError>,
 {
     type ID = ID;
     type E = AstError;
@@ -53,7 +53,7 @@ where
     }
 }
 
-impl<'source> ParserStorage<'source, ID, Node<'source>, ArenaError> for Ast<'source> {
+impl<'source> NodeStore<'source, ID, Node<'source>, ArenaError> for Ast<'source> {
     fn add(&mut self, value: Node<'source>) -> ID {
         self.members.add(value)
     }
@@ -72,13 +72,13 @@ macro_rules! wrap_node {
                 Node::$variant(it)
             }
         }
-        impl<'source> ParserStorage<'source, ID, $ty, AstError> for Ast<'source> {
+        impl<'source> NodeStore<'source, ID, $ty, AstError> for Ast<'source> {
             fn add(&mut self, value: $ty) -> ID {
                 self.add(std::convert::Into::<Node<'source>>::into(value))
             }
             fn get(&self, id: ID) -> Result<&$ty, AstError> {
                 if let Node::$variant(ref value) =
-                    <Self as ParserStorage<'source, ID, Node<'source>, ArenaError>>::get(self, id)?
+                    <Self as NodeStore<'source, ID, Node<'source>, ArenaError>>::get(self, id)?
                 {
                     Ok(value)
                 } else {
@@ -87,7 +87,7 @@ macro_rules! wrap_node {
             }
             fn get_mut(&mut self, id: ID) -> Result<&mut $ty, AstError> {
                 if let Node::$variant(ref mut value) =
-                    <Self as ParserStorage<'source, ID, Node<'source>, ArenaError>>::get_mut(
+                    <Self as NodeStore<'source, ID, Node<'source>, ArenaError>>::get_mut(
                         self, id,
                     )?
                 {

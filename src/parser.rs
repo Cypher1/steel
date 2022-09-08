@@ -6,6 +6,9 @@ use nom::{
     multi::separated_list0,
     sequence::tuple,
 };
+use crate::error::SteelErr;
+use crate::compiler_context::{NodeStore, CompilerContext};
+use crate::nodes::{Call, Symbol};
 
 type SResult<'a, T> = std::result::Result<(&'a str, T), nom::Err<SteelErr>>;
 
@@ -14,71 +17,6 @@ fn tag(raw: &str) -> impl Fn(&str) -> SResult<&str> + '_ {
     move |input: &str| {
         let (input, _) = multispace0::<&str, SteelErr>(input)?;
         raw_tag::<&str, &str, SteelErr>(raw)(input)
-    }
-}
-
-use crate::error::SteelErr;
-use crate::nodes::{Call, Symbol};
-
-pub trait ParserStorage<'source, ID, T, E> {
-    fn add(&mut self, value: T) -> ID;
-    fn get(&self, id: ID) -> Result<&T, E>;
-    fn get_mut(&mut self, id: ID) -> Result<&mut T, E>;
-}
-
-pub trait ParserContext<'source>:
-    ParserStorage<'source, Self::ID, Call<Self::ID>, Self::E>
-    + ParserStorage<'source, Self::ID, Symbol<'source>, Self::E>
-    + ParserStorage<'source, Self::ID, i64, Self::E>
-{
-    type ID: Copy + std::fmt::Debug;
-    type E;
-
-    fn new() -> Self;
-    fn get_symbol(&self, id: Self::ID) -> Result<&Symbol<'source>, Self::E> {
-        self.get(id)
-    }
-    fn get_symbol_mut(&mut self, id: Self::ID) -> Result<&mut Symbol<'source>, Self::E> {
-        self.get_mut(id)
-    }
-    fn get_call(&self, id: Self::ID) -> Result<&Call<Self::ID>, Self::E> {
-        self.get(id)
-    }
-    fn get_call_mut(&mut self, id: Self::ID) -> Result<&mut Call<Self::ID>, Self::E> {
-        self.get_mut(id)
-    }
-    fn get_i64(&self, id: Self::ID) -> Result<&i64, Self::E> {
-        self.get(id)
-    }
-    fn get_i64_mut(&mut self, id: Self::ID) -> Result<&mut i64, Self::E> {
-        self.get_mut(id)
-    }
-    fn active_mem_usage(&self) -> usize;
-    fn mem_usage(&self) -> usize;
-    fn pretty(&self, id: Self::ID) -> String {
-        if let Ok(v) = self.get_i64(id) {
-            return format!("{}", v);
-        }
-        if let Ok(s) = self.get_symbol(id) {
-            return s.name.to_string();
-        }
-        if let Ok(c) = self.get_call(id) {
-            let callee = self.pretty(c.callee);
-            let is_operator_call = if let Ok(sym) = self.get_symbol(c.callee) {
-                sym.is_operator
-            } else {
-                false
-            };
-            if is_operator_call {
-                let args: Vec<String> = c.args.iter().map(|arg| self.pretty(*arg)).collect();
-                let args = args.join(&callee);
-                return format!("({}{})", if c.args.len() < 2 { &callee } else { "" }, args);
-            }
-            let args: Vec<String> = c.args.iter().map(|arg| self.pretty(*arg)).collect();
-            let args = args.join(", ");
-            return format!("{}({})", callee, args);
-        }
-        format!("{{node? {:?}}}", id)
     }
 }
 
@@ -91,7 +29,7 @@ pub fn number_i64_raw(input: &str) -> SResult<i64> {
     Ok((input, if sign == "-" { -value } else { value }))
 }
 
-pub fn number_i64<'source, ID, E: Into<SteelErr>, C: ParserStorage<'source, ID, i64, E>>(
+pub fn number_i64<'source, ID, E: Into<SteelErr>, C: NodeStore<'source, ID, i64, E>>(
     context: &mut C,
     input: &'source str,
 ) -> SResult<'source, ID> {
@@ -119,7 +57,7 @@ pub fn symbol_raw(og_input: &str) -> SResult<Symbol> {
 
     Ok((input, Symbol::new(name)))
 }
-pub fn symbol<'source, ID, E: Into<SteelErr>, C: ParserStorage<'source, ID, Symbol<'source>, E>>(
+pub fn symbol<'source, ID, E: Into<SteelErr>, C: NodeStore<'source, ID, Symbol<'source>, E>>(
     context: &mut C,
     input: &'source str,
 ) -> SResult<'source, ID> {
@@ -161,7 +99,7 @@ pub fn operator<
     'source,
     ID,
     E: Into<SteelErr>,
-    C: ParserStorage<'source, ID, Symbol<'source>, E>,
+    C: NodeStore<'source, ID, Symbol<'source>, E>,
 >(
     context: &mut C,
     input: &'source str,
@@ -172,12 +110,12 @@ pub fn operator<
     Ok((input, id))
 }
 
-fn args<'source, C: ParserContext<'source>>(
+fn args<'source, C: CompilerContext<'source>>(
     context: &mut C,
     input: &'source str,
 ) -> SResult<'source, Vec<C::ID>>
 where
-    <C as ParserContext<'source>>::E: Into<SteelErr>,
+    <C as CompilerContext<'source>>::E: Into<SteelErr>,
 {
     let (input, _) = tag("(")(input)?;
     let (input, args) = separated_list0(tag(","), |input| {
@@ -188,14 +126,14 @@ where
     Ok((input, args))
 }
 
-fn led<'source, C: ParserContext<'source>>(
+fn led<'source, C: CompilerContext<'source>>(
     context: &mut C,
     left: C::ID,
     input: &'source str,
     min_prec: &mut Precedence,
 ) -> SResult<'source, C::ID>
 where
-    <C as ParserContext<'source>>::E: Into<SteelErr>,
+    <C as CompilerContext<'source>>::E: Into<SteelErr>,
 {
     let (input, op) = operator(context, input, min_prec)?;
     let (input, right) = expr(context, input, min_prec)?;
@@ -203,12 +141,12 @@ where
     Ok((input, call))
 }
 
-fn nud<'source, C: ParserContext<'source>>(
+fn nud<'source, C: CompilerContext<'source>>(
     context: &mut C,
     input: &'source str,
 ) -> SResult<'source, C::ID>
 where
-    <C as ParserContext<'source>>::E: Into<SteelErr>,
+    <C as CompilerContext<'source>>::E: Into<SteelErr>,
 {
     if let Ok((input, _)) = tag("(")(input) {
         let mut ignore_prec = INIT_PRECENDENCE;
@@ -260,13 +198,13 @@ where
     }
 }
 
-pub fn expr<'context, 'source: 'context, C: ParserContext<'source>>(
+pub fn expr<'context, 'source: 'context, C: CompilerContext<'source>>(
     context: &'context mut C,
     input: &'source str,
     min_prec: &mut Precedence,
 ) -> SResult<'source, C::ID>
 where
-    <C as ParserContext<'source>>::E: Into<SteelErr>,
+    <C as CompilerContext<'source>>::E: Into<SteelErr>,
 {
     let mut state = nud(context, input)?;
     loop {
@@ -280,12 +218,12 @@ where
     }
 }
 
-pub fn program<'context, 'source: 'context, C: ParserContext<'source>>(
+pub fn program<'context, 'source: 'context, C: CompilerContext<'source>>(
     context: &'context mut C,
     input: &'source str,
 ) -> SResult<'source, C::ID>
 where
-    <C as ParserContext<'source>>::E: Into<SteelErr>,
+    <C as CompilerContext<'source>>::E: Into<SteelErr>,
 {
     let mut min_prec = INIT_PRECENDENCE;
     let (mut input, mut left) = expr(context, input, &mut min_prec)?;

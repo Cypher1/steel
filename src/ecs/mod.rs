@@ -1,6 +1,6 @@
 use crate::arena::{Arena, ID};
 use crate::nodes::*;
-use crate::parser::{ParserContext, ParserStorage};
+use crate::compiler_context::{CompilerContext, NodeStore};
 use std::marker::PhantomData;
 
 mod component;
@@ -27,7 +27,7 @@ make_arena_provider!(Ecs<'a>, Symbol<'a>, Symbol, symbols);
 make_arena_provider!(Ecs<'a>, Call<ID>, Call, calls);
 make_arena_provider!(Ecs<'a>, i64, I64, int64_values);
 
-impl<'source> ParserContext<'source> for Ecs<'source> {
+impl<'source> CompilerContext<'source> for Ecs<'source> {
     type ID = ID;
     type E = EcsError;
     fn new() -> Self {
@@ -51,7 +51,7 @@ impl<'source> ParserContext<'source> for Ecs<'source> {
     }
 }
 
-impl<'source, T: 'source> ParserStorage<'source, ID, T, EcsError> for Ecs<'source>
+impl<'source, T: 'source> NodeStore<'source, ID, T, EcsError> for Ecs<'source>
 where
     Self: Provider<'source, T>,
 {
@@ -79,17 +79,17 @@ impl<'source> Ecs<'source> {
     #[cfg(test)]
     fn add<T>(&mut self, value: T) -> ID
     where
-        Self: ParserStorage<'source, ID, T, EcsError>,
+        Self: NodeStore<'source, ID, T, EcsError>,
     {
-        <Self as ParserStorage<'source, ID, T, EcsError>>::add(self, value)
+        <Self as NodeStore<'source, ID, T, EcsError>>::add(self, value)
     }
 
     #[cfg(test)]
     fn get<T>(&self, id: ID) -> Result<&T, EcsError>
     where
-        Self: ParserStorage<'source, ID, T, EcsError>,
+        Self: NodeStore<'source, ID, T, EcsError>,
     {
-        <Self as ParserStorage<'source, ID, T, EcsError>>::get(self, id)
+        <Self as NodeStore<'source, ID, T, EcsError>>::get(self, id)
     }
 }
 

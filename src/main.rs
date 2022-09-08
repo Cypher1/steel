@@ -2,6 +2,7 @@
 
 mod arena;
 mod ast;
+mod compiler_context;
 mod ecs;
 mod error;
 mod nodes;
@@ -13,11 +14,11 @@ mod assertions;
 #[cfg(test)]
 mod tests;
 
-use crate::parser::ParserContext;
+use compiler_context::CompilerContext;
 use error::SteelErr;
 use parser::program;
 
-fn handle<'a, S: ParserContext<'a>>(line: &'a str) -> Result<(), SteelErr>
+fn handle<'a, S: CompilerContext<'a>>(line: &'a str) -> Result<(), SteelErr>
 where
     S::E: Into<SteelErr>,
 {

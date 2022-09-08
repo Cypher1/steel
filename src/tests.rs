@@ -2,7 +2,7 @@ use crate::ast::Ast;
 use crate::ecs::Ecs;
 use crate::error::SteelErr;
 use crate::parser::program;
-use crate::parser::ParserContext;
+use crate::compiler_context::CompilerContext;
 use glasses::{glasses_harness, glasses_test};
 use ntest::timeout;
 
@@ -33,14 +33,14 @@ impl<'a> Case<'a> {
     }
 }
 
-fn run_test<'a, T: ParserContext<'a>>(
+fn run_test<'a, T: CompilerContext<'a>>(
     name: &str,
     case: &Case<'a>,
     ref mut ctx: T,
 ) -> Result<(), SteelErr>
 where
-    <T as ParserContext<'a>>::ID: std::fmt::Debug,
-    SteelErr: From<<T as ParserContext<'a>>::E>,
+    <T as CompilerContext<'a>>::ID: std::fmt::Debug,
+    SteelErr: From<<T as CompilerContext<'a>>::E>,
 {
     let txt = case.txt.expect("Should have an input expression");
     eprintln!("TEST: {} -> {}", name, txt);
