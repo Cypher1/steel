@@ -1,6 +1,6 @@
 // TODO: Remove when we can run in ECS and AST mode.
 
-mod arena;
+mod arena; // Boiler plate: should be a dependency.
 mod ast;
 mod compiler_context;
 mod ecs;
@@ -31,7 +31,8 @@ where
 fn main() -> Result<(), SteelErr> {
     let args = std::env::args();
     for arg in args {
-        eprintln!("arg: {}", arg);
+        eprintln!("unknown argument: {}", arg);
+        std::process::exit(1);
     }
     loop {
         let mut line = String::new();
