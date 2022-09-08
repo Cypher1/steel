@@ -3,6 +3,12 @@
 version = 3
 
 [[package]]
+name = "glasses"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4954b775755e413f4de9540ee5c094fb459569b6786d89aee5fb40e189315ece"
+
+[[package]]
 name = "memchr"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -110,6 +116,7 @@ checksum = "0f747710de3dcd43b88c9168773254e809d8ddbdf9653b84e2554ab219f17860"
 name = "steel"
 version = "0.1.0"
 dependencies = [
+ "glasses",
  "nom",
  "ntest",
 ]

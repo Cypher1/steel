@@ -3,43 +3,33 @@ use crate::ecs::Ecs;
 use crate::error::SteelErr;
 use crate::parser::program;
 use crate::parser::ParserContext;
+use glasses::{glasses_harness, glasses_test};
 use ntest::timeout;
 
 #[derive(Default, Debug)]
-struct Case<'a> {
-    txt: &'a str,
+pub struct Case<'a> {
+    txt: Option<&'a str>,
     no_round_trip: bool,
     prints_as: Option<&'a str>,
     error_is: Option<&'a str>,
 }
 
 impl<'a> Case<'a> {
-    fn new(txt: &'a str) -> Self {
-        Case {
-            txt,
-            ..Default::default()
-        }
+    fn expr(mut self, txt: &'a str) -> Self {
+        self.txt = Some(txt);
+        self
     }
-
-    fn no_round_trip(self) -> Self {
-        Case {
-            no_round_trip: true,
-            ..self
-        }
+    fn no_round_trip(mut self) -> Self {
+        self.no_round_trip = true;
+        self
     }
-
-    fn error_is(self, error_is: &'a str) -> Self {
-        Case {
-            error_is: Some(error_is),
-            ..self
-        }
+    fn error_is(mut self, error_is: &'a str) -> Self {
+        self.error_is = Some(error_is);
+        self
     }
-
-    fn prints_as(self, prints_as: &'a str) -> Self {
-        Case {
-            prints_as: Some(prints_as),
-            ..self
-        }
+    fn prints_as(mut self, prints_as: &'a str) -> Self {
+        self.prints_as = Some(prints_as);
+        self
     }
 }
 
@@ -52,8 +42,9 @@ where
     <T as ParserContext<'a>>::ID: std::fmt::Debug,
     SteelErr: From<<T as ParserContext<'a>>::E>,
 {
-    eprintln!("TEST: {} -> {}", name, case.txt);
-    let (left_over, result) = match program(ctx, case.txt) {
+    let txt = case.txt.expect("Should have an input expression");
+    eprintln!("TEST: {} -> {}", name, txt);
+    let (left_over, result) = match program(ctx, txt) {
         Ok((left_over, result)) => (left_over, result),
         Err(e) => {
             let e = e.into();
@@ -74,7 +65,7 @@ where
         assert_eq!(pretty, prints_as, "Is expected to print as");
     } else {
         if !case.no_round_trip {
-            assert_eq!(pretty, case.txt, "Is expected to round trip");
+            assert_eq!(pretty, txt, "Is expected to round trip");
         }
     }
     eprintln!(
@@ -86,38 +77,40 @@ where
     Ok(())
 }
 
-macro_rules! make_case {
-    ($case: expr) => {
-        Case::new($case)
-    };
-    ($case: expr, $mod: ident $($args: expr)* $(, $tail_mods: ident $($tail_args: expr)*)*) => {
-        make_case!($case $(, $tail_mods $($tail_args)*)*).$mod($($args, )*)
-    };
-}
-macro_rules! make_test {
-    ($name: ident, $case: expr $(, $mods: ident $($args: expr)*)*) => {
-        #[test]
-        #[timeout(1)]
-        fn $name() -> Result<(), SteelErr> {
-            let case = make_case!($case $(, $mods $( $args )*)*);
-            run_test("Ast", &case, Ast::new()).expect("Ast failed");
-            run_test("Ecs", &case, Ecs::new()).expect("Ast failed");
-            Ok(())
-        }
-    };
-}
+glasses_harness!(ParserTest, Case<'static>, |case: Case<'static>| {
+    run_test("Ast", &case, Ast::new()).expect("Ast failed");
+    run_test("Ecs", &case, Ecs::new()).expect("Ast failed");
+});
 
-make_test!(handle_white_space, "-123\n", prints_as "(-123)");
-make_test!(handle_malformed_with_white_space, "#lol\n", error_is "Expected an expression, found \"#lol\"");
-make_test!(simple_plus, "(12+23)");
-make_test!(simple_plus_with_trailing, "(12+23)");
-make_test!(unary_in_parens, "(*12)");
-make_test!(unary_no_parens, "*12", no_round_trip);
-make_test!(func_call, "foo(12, a)");
-make_test!(op_call, "+(12, 23)");
-make_test!(multi_op, "(12+23+34)", no_round_trip);
-make_test!(prec_mul_add, "12*23+34", prints_as "((12*23)+34)");
-make_test!(prec_add_mul, "12+23*34", prints_as "(12+(23*34))");
-make_test!(prec_mul_paren_add, "12*(23+34)", prints_as "(12*(23+34))");
-make_test!(prec_paren_add_mul, "(12+23)*34", prints_as "((12+23)*34)");
-make_test!(prec_hard_case2, "a+b*c+d", prints_as "((a+(b*c))+d)");
+glasses_test!(ParserTest, handle_white_space, [timeout(1)], expr "-123\n", prints_as "(-123)");
+glasses_test!(
+    ParserTest,
+    handle_malformed_with_white_space,
+    [timeout(1)],
+    expr "#lol\n",
+    error_is "Expected an expression, found \"#lol\""
+);
+glasses_test!(ParserTest, simple_plus, [timeout(1)], expr "(12+23)");
+glasses_test!(ParserTest, simple_plus_with_trailing, [timeout(1)], expr "(12+23)");
+glasses_test!(ParserTest, unary_in_parens, [timeout(1)], expr "(*12)");
+glasses_test!(ParserTest, unary_no_parens, [timeout(1)], expr "*12", no_round_trip);
+glasses_test!(ParserTest, func_call, [timeout(1)], expr "foo(12, a)");
+glasses_test!(ParserTest, op_call, [timeout(1)], expr "+(12, 23)");
+glasses_test!(ParserTest, multi_op, [timeout(1)], expr "(12+23+34)", no_round_trip);
+glasses_test!(ParserTest, prec_mul_add, [timeout(1)], expr "12*23+34", prints_as "((12*23)+34)");
+glasses_test!(ParserTest, prec_add_mul, [timeout(1)], expr "12+23*34", prints_as "(12+(23*34))");
+glasses_test!(
+    ParserTest,
+    prec_mul_paren_add,
+    [timeout(1)],
+    expr "12*(23+34)",
+    prints_as "(12*(23+34))"
+);
+glasses_test!(
+    ParserTest,
+    prec_paren_add_mul,
+    [timeout(1)],
+    expr "(12+23)*34",
+    prints_as "((12+23)*34)"
+);
+glasses_test!(ParserTest, prec_hard_case2, [timeout(1)], expr "a+b*c+d", prints_as "((a+(b*c))+d)");

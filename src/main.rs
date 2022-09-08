@@ -18,7 +18,7 @@ use error::SteelErr;
 use parser::program;
 
 fn handle<'a, S: ParserContext<'a>>(line: &'a str) -> Result<(), SteelErr>
-    where
+where
     S::E: Into<SteelErr>,
 {
     let mut store = S::new();
@@ -34,9 +34,8 @@ fn main() -> Result<(), SteelErr> {
     }
     loop {
         let mut line = String::new();
-        if std::io::stdin()
-            .read_line(&mut line)? == 0 {
-                return Ok(());
+        if std::io::stdin().read_line(&mut line)? == 0 {
+            return Ok(());
         }
         eprintln!("line: {}", line);
         handle::<ast::Ast>(&line)?;
