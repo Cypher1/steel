@@ -18,18 +18,25 @@ use compiler_context::CompilerContext;
 use error::SteelErr;
 use parser::program;
 
+use crate::compiler_context::EvalState;
+
 fn handle<'a, S: CompilerContext<'a>>(line: &'a str) -> Result<(), SteelErr>
 where
-    S::E: Into<SteelErr>,
+    SteelErr: From<<S as CompilerContext<'a>>::E>,
 {
     let mut store = S::new();
     let (_input, program) = program(&mut store, line)?;
     eprintln!("expr: {:?}", store.pretty(program));
+    let mut stack = EvalState::default();
+    stack.function_stack.push(program);
+    store.eval(&mut stack)?;
+    eprintln!("eval: {:?}", stack);
     Ok(())
 }
 
 fn main() -> Result<(), SteelErr> {
-    let args = std::env::args();
+    let mut args = std::env::args();
+    let _program_path = args.next();
     for arg in args {
         eprintln!("unknown argument: {}", arg);
         std::process::exit(1);

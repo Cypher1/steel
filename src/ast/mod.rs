@@ -34,7 +34,7 @@ impl<'source> Ast<'source> {
 impl<'source> CompilerContext<'source> for Ast<'source>
 where
     Self: NodeStore<'source, ID, i64, AstError>,
-    Self: NodeStore<'source, ID, Symbol<'source>, AstError>,
+    Self: NodeStore<'source, ID, Symbol<'source, ID>, AstError>,
     Self: NodeStore<'source, ID, Call<ID>, AstError>,
 {
     type ID = ID;
@@ -100,7 +100,7 @@ macro_rules! wrap_node {
     };
 }
 
-wrap_node!(Symbol<'source>, Symbol);
+wrap_node!(Symbol<'source, ID>, Symbol);
 wrap_node!(Call<ID>, Call);
 wrap_node!(i64, I64);
 
@@ -116,7 +116,7 @@ mod test {
 
         assert_eq!(
             format!("{:?}", ctx.get_symbol(hello)),
-            "Ok(Symbol { name: \"hello\", is_operator: false })"
+            "Ok(Symbol { name: \"hello\", is_operator: false, bound_to: None })"
         );
     }
 
@@ -129,11 +129,11 @@ mod test {
 
         assert_eq!(
             format!("{:?}", ctx.get_symbol(hello)),
-            "Ok(Symbol { name: \"hello\", is_operator: false })"
+            "Ok(Symbol { name: \"hello\", is_operator: false, bound_to: None })"
         );
         assert_eq!(
             format!("{:?}", ctx.get_symbol(world)),
-            "Ok(Symbol { name: \"world\", is_operator: false })"
+            "Ok(Symbol { name: \"world\", is_operator: false, bound_to: None })"
         );
     }
 

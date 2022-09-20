@@ -3,7 +3,7 @@ use crate::nodes::*;
 
 #[derive(Debug)]
 pub enum Node<'source> {
-    Symbol(Symbol<'source>),
+    Symbol(Symbol<'source, ID>),
     Call(Call<ID>),
     I64(i64),
 }
@@ -21,7 +21,7 @@ mod test {
 
         assert_eq!(
             format!("{:?}", ctx.get(hello)),
-            "Ok(Symbol(Symbol { name: \"hello\", is_operator: false }))"
+            "Ok(Symbol(Symbol { name: \"hello\", is_operator: false, bound_to: None }))"
         );
     }
 
@@ -34,11 +34,11 @@ mod test {
 
         assert_eq!(
             format!("{:?}", ctx.get(hello)),
-            "Ok(Symbol(Symbol { name: \"hello\", is_operator: false }))"
+            "Ok(Symbol(Symbol { name: \"hello\", is_operator: false, bound_to: None }))"
         );
         assert_eq!(
             format!("{:?}", ctx.get(world)),
-            "Ok(Symbol(Symbol { name: \"world\", is_operator: false }))"
+            "Ok(Symbol(Symbol { name: \"world\", is_operator: false, bound_to: None }))"
         );
     }
 
