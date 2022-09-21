@@ -1,15 +1,10 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
-fn fibonacci(n: u64) -> u64 {
-    match n {
-        0 => 1,
-        1 => 1,
-        n => fibonacci(n-1) + fibonacci(n-2),
-    }
-}
+use steel::{ast, ecs, handle};
 
 fn criterion_benchmark(c: &mut Criterion) {
-    c.bench_function("fib 20", |b| b.iter(|| fibonacci(black_box(20))));
+    c.bench_function("ast 123", |b| b.iter(|| handle::<ast::Ast>(black_box("123")).unwrap()));
+    c.bench_function("ecs 123", |b| b.iter(|| handle::<ecs::Ecs>(black_box("123")).unwrap()));
 }
 
 criterion_group!(benches, criterion_benchmark);

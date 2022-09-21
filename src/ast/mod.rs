@@ -1,6 +1,6 @@
 use crate::arena::{Arena, ArenaError, ID};
-use crate::nodes::*;
 use crate::compiler_context::{CompilerContext, NodeStore};
+use crate::nodes::*;
 
 mod node;
 use node::*;
@@ -87,9 +87,7 @@ macro_rules! wrap_node {
             }
             fn get_mut(&mut self, id: ID) -> Result<&mut $ty, AstError> {
                 if let Node::$variant(ref mut value) =
-                    <Self as NodeStore<'source, ID, Node<'source>, ArenaError>>::get_mut(
-                        self, id,
-                    )?
+                    <Self as NodeStore<'source, ID, Node<'source>, ArenaError>>::get_mut(self, id)?
                 {
                     Ok(value)
                 } else {

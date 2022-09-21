@@ -1,3 +1,6 @@
+use crate::compiler_context::{CompilerContext, NodeStore};
+use crate::error::SteelErr;
+use crate::nodes::{Call, Symbol};
 use nom::{
     branch::alt,
     bytes::complete::{tag as raw_tag, take_while, take_while1, take_while_m_n},
@@ -6,9 +9,6 @@ use nom::{
     multi::separated_list0,
     sequence::tuple,
 };
-use crate::error::SteelErr;
-use crate::compiler_context::{NodeStore, CompilerContext};
-use crate::nodes::{Call, Symbol};
 
 type SResult<'a, T> = std::result::Result<(&'a str, T), nom::Err<SteelErr>>;
 
@@ -254,13 +254,22 @@ mod test {
 
     #[test]
     fn parse_symbol() {
-        assert_eq!(symbol_raw::<()>("hello").unwrap(), ("", Symbol::new("hello")));
+        assert_eq!(
+            symbol_raw::<()>("hello").unwrap(),
+            ("", Symbol::new("hello"))
+        );
     }
 
     #[test]
     fn parse_symbol_with_underscores() {
-        assert_eq!(symbol_raw::<()>("he_llo").unwrap(), ("", Symbol::new("he_llo")));
-        assert_eq!(symbol_raw::<()>("_e_llo").unwrap(), ("", Symbol::new("_e_llo")));
+        assert_eq!(
+            symbol_raw::<()>("he_llo").unwrap(),
+            ("", Symbol::new("he_llo"))
+        );
+        assert_eq!(
+            symbol_raw::<()>("_e_llo").unwrap(),
+            ("", Symbol::new("_e_llo"))
+        );
     }
 
     #[test]

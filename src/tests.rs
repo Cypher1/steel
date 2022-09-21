@@ -1,8 +1,8 @@
 use crate::ast::Ast;
+use crate::compiler_context::CompilerContext;
 use crate::ecs::Ecs;
 use crate::error::SteelErr;
 use crate::parser::program;
-use crate::compiler_context::CompilerContext;
 use glasses::{glasses_harness, glasses_test};
 use ntest::timeout;
 

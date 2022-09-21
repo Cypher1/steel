@@ -68,7 +68,11 @@ pub trait CompilerContext<'source>:
         Ok(())
     }
 
-    fn step(&self, _state: &mut EvalState<i64, Self::ID>, id: Self::ID) -> Result<EvalResult<i64, Self::ID>, Self::E> {
+    fn step(
+        &self,
+        _state: &mut EvalState<i64, Self::ID>,
+        id: Self::ID,
+    ) -> Result<EvalResult<i64, Self::ID>, Self::E> {
         if let Ok(v) = self.get_i64(id) {
             return Ok(Value(*v));
         }
@@ -125,4 +129,3 @@ pub trait CompilerContext<'source>:
         format!("{{node? {:?}}}", id)
     }
 }
-

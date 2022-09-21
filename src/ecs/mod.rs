@@ -1,6 +1,6 @@
 use crate::arena::{Arena, ID};
-use crate::nodes::*;
 use crate::compiler_context::{CompilerContext, NodeStore};
+use crate::nodes::*;
 use std::marker::PhantomData;
 
 mod component;
