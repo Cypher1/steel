@@ -14,7 +14,7 @@ mod assertions;
 #[cfg(test)]
 mod tests;
 
-use crate::compiler_context::CompilerContext;
+pub use crate::compiler_context::CompilerContext;
 use crate::compiler_context::EvalState;
 pub use crate::error::SteelErr;
 use crate::parser::program;
