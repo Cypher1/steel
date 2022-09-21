@@ -11,8 +11,14 @@ nom = "7.1.1"
 ntest = "0.8.1"
 
 [dev-dependencies]
-criterion = "0.3"
+criterion = { version = "0.3", features = ["html_reports"] }
+lazy_static = "1.4.0"
+rand = "0.8.5"
 
 [[bench]]
 name = "random_programs"
+harness = false
+
+[[bench]]
+name = "known_programs"
 harness = false

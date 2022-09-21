@@ -5,7 +5,7 @@ pub mod ast;
 mod compiler_context;
 pub mod ecs;
 mod error;
-mod nodes;
+pub mod nodes;
 mod parser;
 
 #[cfg(test)]
@@ -26,9 +26,11 @@ where
     let mut store = S::new();
     let (_input, program) = program(&mut store, line)?;
     // eprintln!("expr: {:?}", store.pretty(program));
+    /*
     let mut stack = EvalState::default();
     stack.function_stack.push(program);
     store.eval(&mut stack)?;
+    */
     // eprintln!("eval: {:?}", stack);
     Ok(())
 }
