@@ -19,15 +19,14 @@ impl From<ArenaError> for AstError {
 
 use AstError::*;
 
+#[derive(Debug, Default)]
 pub struct Ast<'source> {
     members: Arena<Node<'source>>,
 }
 
 impl<'source> Ast<'source> {
     pub fn new() -> Self {
-        Self {
-            members: Arena::new(),
-        }
+        Self::default()
     }
 }
 
