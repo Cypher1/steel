@@ -82,7 +82,7 @@ glasses_harness!(ParserTest, Case<'static>, |case: Case<'static>| {
     run_test("Ecs", &case, Ecs::new()).expect("Ast failed");
 });
 
-glasses_test!(ParserTest, handle_white_space, [timeout(1)], expr "-123\n", prints_as "(-123)");
+glasses_test!(ParserTest, handle_white_space, [timeout(10)], expr "-123\n", prints_as "(-123)");
 glasses_test!(
     ParserTest,
     handle_malformed_with_white_space,
@@ -90,27 +90,27 @@ glasses_test!(
     expr "#lol\n",
     error_is "Expected an expression, found \"#lol\""
 );
-glasses_test!(ParserTest, simple_plus, [timeout(1)], expr "(12+23)");
-glasses_test!(ParserTest, simple_plus_with_trailing, [timeout(1)], expr "(12+23)");
-glasses_test!(ParserTest, unary_in_parens, [timeout(1)], expr "(*12)");
-glasses_test!(ParserTest, unary_no_parens, [timeout(1)], expr "*12", no_round_trip);
-glasses_test!(ParserTest, func_call, [timeout(1)], expr "foo(12, a)");
-glasses_test!(ParserTest, op_call, [timeout(1)], expr "+(12, 23)");
-glasses_test!(ParserTest, multi_op, [timeout(1)], expr "(12+23+34)", no_round_trip);
-glasses_test!(ParserTest, prec_mul_add, [timeout(1)], expr "12*23+34", prints_as "((12*23)+34)");
-glasses_test!(ParserTest, prec_add_mul, [timeout(1)], expr "12+23*34", prints_as "(12+(23*34))");
+glasses_test!(ParserTest, simple_plus, [timeout(10)], expr "(12+23)");
+glasses_test!(ParserTest, simple_plus_with_trailing, [timeout(10)], expr "(12+23)");
+glasses_test!(ParserTest, unary_in_parens, [timeout(10)], expr "(*12)");
+glasses_test!(ParserTest, unary_no_parens, [timeout(10)], expr "*12", no_round_trip);
+glasses_test!(ParserTest, func_call, [timeout(10)], expr "foo(12, a)");
+glasses_test!(ParserTest, op_call, [timeout(10)], expr "+(12, 23)");
+glasses_test!(ParserTest, multi_op, [timeout(10)], expr "(12+23+34)", no_round_trip);
+glasses_test!(ParserTest, prec_mul_add, [timeout(10)], expr "12*23+34", prints_as "((12*23)+34)");
+glasses_test!(ParserTest, prec_add_mul, [timeout(10)], expr "12+23*34", prints_as "(12+(23*34))");
 glasses_test!(
     ParserTest,
     prec_mul_paren_add,
-    [timeout(1)],
+    [timeout(10)],
     expr "12*(23+34)",
     prints_as "(12*(23+34))"
 );
 glasses_test!(
     ParserTest,
     prec_paren_add_mul,
-    [timeout(1)],
+    [timeout(10)],
     expr "(12+23)*34",
     prints_as "((12+23)*34)"
 );
-glasses_test!(ParserTest, prec_hard_case2, [timeout(1)], expr "a+b*c+d", prints_as "((a+(b*c))+d)");
+glasses_test!(ParserTest, prec_hard_case2, [timeout(10)], expr "a+b*c+d", prints_as "((a+(b*c))+d)");
