@@ -20,7 +20,7 @@ use crate::compiler_context::EvalState;
 pub use crate::error::SteelErr;
 use crate::parser::program;
 
-pub fn handle<'a, S: CompilerContext>(line: &'a str) -> Result<(), SteelErr>
+pub fn handle<S: CompilerContext>(line: &str) -> Result<(), SteelErr>
 where
     SteelErr: From<<S as CompilerContext>::E>,
 {
