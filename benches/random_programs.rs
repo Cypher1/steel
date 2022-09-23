@@ -1,12 +1,12 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use steel::{
-    ast, ecs, gen_code::{generate_random_program, Spec}, handle, CompilerContext, SteelErr,
+    ast, ecs,
+    gen_code::{generate_random_program, Spec},
+    handle, CompilerContext, SteelErr,
 };
 
-fn criterion_benchmark_with<T: CompilerContext>(
-    name: &'static str,
-    c: &mut Criterion,
-) where
+fn criterion_benchmark_with<T: CompilerContext>(name: &'static str, c: &mut Criterion)
+where
     SteelErr: From<<T as CompilerContext>::E>,
 {
     let mut rng = rand::thread_rng();

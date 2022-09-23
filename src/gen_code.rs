@@ -1,4 +1,7 @@
-use crate::{nodes::{Call, Symbol}, CompilerContext};
+use crate::{
+    nodes::{Call, Symbol},
+    CompilerContext,
+};
 use rand::{rngs::ThreadRng, Rng};
 
 pub struct Spec<ID> {
@@ -45,10 +48,11 @@ pub fn generate_random_program<Ctx: CompilerContext>(
                 let arg_spec = Spec::default().sized(arg_size);
                 args_size -= arg_size - 1;
                 let arg_id = generate_random_program(_name, store, arg_spec, rng);
-                let arg_name = rng.sample_iter(&rand::distributions::Alphanumeric)
-                                  .take(4)
-                                  .map(char::from)
-                                  .collect();
+                let arg_name = rng
+                    .sample_iter(&rand::distributions::Alphanumeric)
+                    .take(4)
+                    .map(char::from)
+                    .collect();
                 inner_spec = inner_spec.add_symbol(arg_name, arg_id, 0);
                 args.push(arg_id);
             }

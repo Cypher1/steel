@@ -95,12 +95,7 @@ pub fn operator_raw<'source, ID>(
     Ok((input, Symbol::operator(name)))
 }
 
-pub fn operator<
-    'source,
-    ID,
-    E: Into<SteelErr>,
-    C: NodeStore<ID, Symbol<ID>, E>,
->(
+pub fn operator<'source, ID, E: Into<SteelErr>, C: NodeStore<ID, Symbol<ID>, E>>(
     context: &mut C,
     input: &'source str,
     min_prec: &mut Precedence,
@@ -141,10 +136,7 @@ where
     Ok((input, call))
 }
 
-fn nud<'source, C: CompilerContext>(
-    context: &mut C,
-    input: &'source str,
-) -> SResult<'source, C::ID>
+fn nud<'source, C: CompilerContext>(context: &mut C, input: &'source str) -> SResult<'source, C::ID>
 where
     <C as CompilerContext>::E: Into<SteelErr>,
 {
