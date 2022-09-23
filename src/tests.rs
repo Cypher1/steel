@@ -7,49 +7,49 @@ use glasses::{glasses_harness, glasses_test};
 use ntest::timeout;
 
 #[derive(Default, Debug)]
-pub struct Case<'a> {
-    txt: Option<&'a str>,
+pub struct Case {
+    txt: Option<String>,
     no_round_trip: bool,
-    prints_as: Option<&'a str>,
-    error_is: Option<&'a str>,
+    prints_as: Option<String>,
+    error_is: Option<String>,
 }
 
-impl<'a> Case<'a> {
-    fn expr(mut self, txt: &'a str) -> Self {
-        self.txt = Some(txt);
+impl Case {
+    fn expr(mut self, txt: &str) -> Self {
+        self.txt = Some(txt.to_string());
         self
     }
     fn no_round_trip(mut self) -> Self {
         self.no_round_trip = true;
         self
     }
-    fn error_is(mut self, error_is: &'a str) -> Self {
-        self.error_is = Some(error_is);
+    fn error_is(mut self, error_is: &str) -> Self {
+        self.error_is = Some(error_is.to_string());
         self
     }
-    fn prints_as(mut self, prints_as: &'a str) -> Self {
-        self.prints_as = Some(prints_as);
+    fn prints_as(mut self, prints_as: &str) -> Self {
+        self.prints_as = Some(prints_as.to_string());
         self
     }
 }
 
-fn run_test<'a, T: CompilerContext<'a>>(
+fn run_test<T: CompilerContext>(
     name: &str,
-    case: &Case<'a>,
+    case: &Case,
     ref mut ctx: T,
 ) -> Result<(), SteelErr>
 where
-    <T as CompilerContext<'a>>::ID: std::fmt::Debug,
-    SteelErr: From<<T as CompilerContext<'a>>::E>,
+    <T as CompilerContext>::ID: std::fmt::Debug,
+    SteelErr: From<<T as CompilerContext>::E>,
 {
-    let txt = case.txt.expect("Should have an input expression");
+    let txt = case.txt.as_ref().expect("Should have an input expression");
     eprintln!("TEST: {} -> {}", name, txt);
     let (left_over, result) = match program(ctx, txt) {
         Ok((left_over, result)) => (left_over, result),
         Err(e) => {
             let e = e.into();
-            if let Some(error_is) = case.error_is {
-                assert_eq!(error_is, format!("{}", e));
+            if let Some(error_is) = &case.error_is {
+                assert_eq!(error_is, &format!("{}", e));
                 return Ok(());
             } else {
                 return Err(e);
@@ -61,11 +61,11 @@ where
     eprintln!(" value={:?}", ctx.get_call(result)?);
     let pretty = ctx.pretty(result);
     eprintln!(" as_tree={}", &pretty);
-    if let Some(prints_as) = case.prints_as {
-        assert_eq!(pretty, prints_as, "Is expected to print as");
+    if let Some(prints_as) = &case.prints_as {
+        assert_eq!(&pretty, prints_as, "Is expected to print as");
     } else {
         if !case.no_round_trip {
-            assert_eq!(pretty, txt, "Is expected to round trip");
+            assert_eq!(&pretty, txt, "Is expected to round trip");
         }
     }
     eprintln!(
@@ -77,7 +77,7 @@ where
     Ok(())
 }
 
-glasses_harness!(ParserTest, Case<'static>, |case: Case<'static>| {
+glasses_harness!(ParserTest, Case, |case: Case| {
     run_test("Ast", &case, Ast::new()).expect("Ast failed");
     run_test("Ecs", &case, Ecs::new()).expect("Ast failed");
 });

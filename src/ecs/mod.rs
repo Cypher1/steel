@@ -79,17 +79,17 @@ impl Ecs {
     #[cfg(test)]
     fn add<T>(&mut self, value: T) -> ID
     where
-        Self: NodeStore<'source, ID, T, EcsError>,
+        Self: NodeStore<ID, T, EcsError>,
     {
-        <Self as NodeStore<'source, ID, T, EcsError>>::add(self, value)
+        <Self as NodeStore<ID, T, EcsError>>::add(self, value)
     }
 
     #[cfg(test)]
     fn get<T>(&self, id: ID) -> Result<&T, EcsError>
     where
-        Self: NodeStore<'source, ID, T, EcsError>,
+        Self: NodeStore<ID, T, EcsError>,
     {
-        <Self as NodeStore<'source, ID, T, EcsError>>::get(self, id)
+        <Self as NodeStore<ID, T, EcsError>>::get(self, id)
     }
 }
 
@@ -100,11 +100,11 @@ mod test {
 
     #[test]
     fn can_construct_node() -> Result<(), EcsError> {
-        let mut ctx: Ecs<'static> = Ecs::new();
+        let mut ctx: Ecs = Ecs::new();
 
         let hello = ctx.add(Symbol::new("hello"));
 
-        let sym: &Symbol<'static, ID> = ctx.get(hello)?;
+        let sym: &Symbol<ID> = ctx.get(hello)?;
         assert_eq!(
             format!("{:?}", sym),
             "Symbol { name: \"hello\", is_operator: false, bound_to: None }"
@@ -114,7 +114,7 @@ mod test {
 
     #[test]
     fn cannot_access_incorrect_node() {
-        let mut ctx: Ecs<'static> = Ecs::new();
+        let mut ctx: Ecs = Ecs::new();
         let hello = ctx.add(Symbol::new("hello"));
         let call: Result<&Call, EcsError> = ctx.get(hello);
         assert_eq!(
@@ -125,7 +125,7 @@ mod test {
 
     #[test]
     fn can_construct_nodes() {
-        let mut ctx: Ecs<'static> = Ecs::new();
+        let mut ctx: Ecs = Ecs::new();
 
         let hello = ctx.add(Symbol::new("hello"));
         let world = ctx.add(Symbol::new("world"));
@@ -142,7 +142,7 @@ mod test {
 
     #[test]
     fn can_construct_nodes_with_self_reference() {
-        let mut ctx: Ecs<'static> = Ecs::new();
+        let mut ctx: Ecs = Ecs::new();
 
         let reference = ctx.add_with_id(|id| Call::new(id, vec![]));
 
@@ -154,7 +154,7 @@ mod test {
 
     #[test]
     fn can_construct_nodes_with_cross_reference() {
-        let mut ctx: Ecs<'static> = Ecs::new();
+        let mut ctx: Ecs = Ecs::new();
 
         let hello = ctx.add(Symbol::new("hello"));
         let world = ctx.add(Symbol::new("world"));
@@ -168,7 +168,7 @@ mod test {
 
     #[test]
     fn can_construct_values() {
-        let mut ctx: Ecs<'static> = Ecs::new();
+        let mut ctx: Ecs = Ecs::new();
 
         let plus = ctx.add(Symbol::new("plus"));
         let a = ctx.add(32i64);
