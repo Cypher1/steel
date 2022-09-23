@@ -154,7 +154,10 @@ where
 {
     let (input, op) = operator(context, input, min_prec)?;
     let (input, right) = expr(context, input, min_prec)?;
-    let call = context.add(Call::new(op, vec![("arg_0".to_string(), left), ("arg_1".to_string(), right)]));
+    let call = context.add(Call::new(
+        op,
+        vec![("arg_0".to_string(), left), ("arg_1".to_string(), right)],
+    ));
     Ok((input, call))
 }
 

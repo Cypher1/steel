@@ -171,7 +171,10 @@ mod test {
 
         assert_eq!(
             format!("{:?}", ctx.get_call(reference)),
-            format!("Ok(Call {{ callee: {:?}, args: [(\"arg_0\", {:?})] }})", hello, world)
+            format!(
+                "Ok(Call {{ callee: {:?}, args: [(\"arg_0\", {:?})] }})",
+                hello, world
+            )
         );
         Ok(())
     }
@@ -183,7 +186,10 @@ mod test {
         let plus = ctx.add(Symbol::new("plus"));
         let a = ctx.add(32i64);
         let b = ctx.add(12i64);
-        let reference = ctx.add(Call::new(plus, vec![("arg_0".to_string(), a), ("arg_1".to_string(), b)]));
+        let reference = ctx.add(Call::new(
+            plus,
+            vec![("arg_0".to_string(), a), ("arg_1".to_string(), b)],
+        ));
 
         assert_eq!(
             format!("{:?}", ctx.get_call(reference)),
