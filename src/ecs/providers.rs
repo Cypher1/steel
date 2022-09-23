@@ -1,7 +1,7 @@
 use super::component::EcsError;
 use crate::arena::ID;
 
-pub trait Provider<'a, T: 'a> {
+pub trait Provider<T> {
     type ID;
     fn add_with_id<F: FnOnce(ID) -> T>(&mut self, value: F) -> ID; // Entity ID.
     fn add_component(&mut self, value: T) -> ID {

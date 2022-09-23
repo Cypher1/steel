@@ -5,6 +5,7 @@ pub mod ast;
 mod compiler_context;
 pub mod ecs;
 mod error;
+pub mod gen_code;
 pub mod nodes;
 mod parser;
 
@@ -19,9 +20,9 @@ use crate::compiler_context::EvalState;
 pub use crate::error::SteelErr;
 use crate::parser::program;
 
-pub fn handle<'a, S: CompilerContext<'a>>(line: &'a str) -> Result<(), SteelErr>
+pub fn handle<'a, S: CompilerContext>(line: &'a str) -> Result<(), SteelErr>
 where
-    SteelErr: From<<S as CompilerContext<'a>>::E>,
+    SteelErr: From<<S as CompilerContext>::E>,
 {
     let mut store = S::new();
     let (_input, program) = program(&mut store, line)?;

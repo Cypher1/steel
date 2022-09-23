@@ -1,13 +1,15 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use rand::{Rng, rngs::ThreadRng};
-use steel::{ast, ecs, handle, nodes::Call, CompilerContext, SteelErr};
-use std::sync::Mutex;
 use lazy_static::lazy_static;
+use std::sync::Mutex;
+use steel::{
+    ast, ecs, gen_code::{generate_random_program, Spec}, handle, CompilerContext, SteelErr,
+};
 
+// Work around for static lifetime data
 lazy_static! {
     static ref PROGRAMS: Mutex<Vec<String>> = {
         let mut v = vec![];
-        v.reserve(1000);
+        v.reserve(1000); // Ensure that we don't invalidate pointers into the vector.
         Mutex::new(v)
     };
 }
@@ -27,49 +29,28 @@ fn get_program(id: usize) -> &'static String {
     }
 }
 
-fn generate_random_program<'b, T: CompilerContext<'b>>(
-    _name: &'static str,
-    store: &mut T,
-    size: usize,
-    rng: &mut ThreadRng,
-) -> T::ID {
-    if size > 1 {
-        let mut args = vec![];
-        let mut args_size: usize = rng.gen_range(1..size);
-        let num_inner: usize = size - args_size - 1;
-        if args_size > 0 {
-            let num_args: usize = rng.gen_range(1..=args_size);
-            args_size -= num_args; // at lesst one node per arg.
-            for i in 0..num_args {
-                let arg_size: usize = rng.gen_range(1..=1+args_size);
-                args_size -= arg_size-1;
-                args.push(generate_random_program(_name, store, arg_size, rng));
-            }
-        }
-        let callee = generate_random_program(_name, store, num_inner, rng);
-        return store.add(Call {callee, args});
-    }
-    let value: i64 = rng.gen();
-    store.add(value)
-}
+// End workaround for static lifetime data
 
-fn criterion_benchmark_with<'source, T: CompilerContext<'source>>(name: &'static str, c: &mut Criterion)
-where
+fn criterion_benchmark_with<'source, T: CompilerContext<'source>>(
+    name: &'static str,
+    c: &mut Criterion,
+) where
     SteelErr: From<<T as CompilerContext<'source>>::E>,
 {
     let mut rng = rand::thread_rng();
     let mut store = T::new();
-
     for i in 0..4 {
         let size: usize = 10usize.pow(i);
-        let program = generate_random_program::<T>(name, &mut store, size, &mut rng);
+        let spec = Spec::default().sized(size);
+        let program = generate_random_program(name, &mut store, spec, &mut rng);
+        // This ensures that the program is stored for a static lifetime, because criterion
+        // benchmark functions live longer than the lifetime of this function, which means we need
+        // a home for the test data.
         let program = get_program(save_program(store.pretty(program)));
 
         eprintln!("testing {} with {}\n{}", name, size, program);
         c.bench_function(&format!("{} parse random program {}", name, size), |b| {
-            b.iter(|| {
-                    handle::<T>(black_box(program))
-            })
+            b.iter(|| handle::<T>(black_box(program)))
         });
     }
 }

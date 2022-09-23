@@ -16,18 +16,18 @@ mod arena_providers;
 use arena_providers::*;
 
 #[derive(Debug, Default)]
-pub struct Ecs<'source> {
+pub struct Ecs {
     entities: Arena<Entity>,
-    symbols: Arena<Symbol<'source, ID>>,
+    symbols: Arena<Symbol<ID>>,
     calls: Arena<Call<ID>>,
     int64_values: Arena<i64>,
 }
 
-make_arena_provider!(Ecs<'a>, Symbol<'a, ID>, Symbol, symbols);
-make_arena_provider!(Ecs<'a>, Call<ID>, Call, calls);
-make_arena_provider!(Ecs<'a>, i64, I64, int64_values);
+make_arena_provider!(Ecs, Symbol<ID>, Symbol, symbols);
+make_arena_provider!(Ecs, Call<ID>, Call, calls);
+make_arena_provider!(Ecs, i64, I64, int64_values);
 
-impl<'source> CompilerContext<'source> for Ecs<'source> {
+impl CompilerContext for Ecs {
     type ID = ID;
     type E = EcsError;
     fn new() -> Self {
@@ -51,27 +51,27 @@ impl<'source> CompilerContext<'source> for Ecs<'source> {
     }
 }
 
-impl<'source, T: 'source> NodeStore<'source, ID, T, EcsError> for Ecs<'source>
+impl<T> NodeStore<ID, T, EcsError> for Ecs
 where
-    Self: Provider<'source, T>,
+    Self: Provider<T>,
 {
     fn add(&mut self, value: T) -> ID {
         self.add_component(value)
     }
 
     fn get(&self, id: ID) -> Result<&T, EcsError> {
-        <Ecs<'source> as Provider<'source, T>>::get_component_for_entity(self, id)
+        <Ecs as Provider<T>>::get_component_for_entity(self, id)
     }
     #[allow(unused)]
     fn get_mut(&mut self, id: ID) -> Result<&mut T, EcsError>
     where
-        Self: Provider<'source, T>,
+        Self: Provider<T>,
     {
-        <Ecs<'source> as Provider<'source, T>>::get_component_for_entity_mut(self, id)
+        <Ecs as Provider<T>>::get_component_for_entity_mut(self, id)
     }
 }
 
-impl<'source> Ecs<'source> {
+impl Ecs {
     pub fn new() -> Self {
         Default::default()
     }

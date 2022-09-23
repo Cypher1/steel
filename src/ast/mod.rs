@@ -20,21 +20,21 @@ impl From<ArenaError> for AstError {
 use AstError::*;
 
 #[derive(Debug, Default)]
-pub struct Ast<'source> {
-    members: Arena<Node<'source>>,
+pub struct Ast {
+    members: Arena<Node>,
 }
 
-impl<'source> Ast<'source> {
+impl Ast {
     pub fn new() -> Self {
         Self::default()
     }
 }
 
-impl<'source> CompilerContext<'source> for Ast<'source>
+impl CompilerContext for Ast
 where
-    Self: NodeStore<'source, ID, i64, AstError>,
-    Self: NodeStore<'source, ID, Symbol<'source, ID>, AstError>,
-    Self: NodeStore<'source, ID, Call<ID>, AstError>,
+    Self: NodeStore<ID, i64, AstError>,
+    Self: NodeStore<ID, Symbol<ID>, AstError>,
+    Self: NodeStore<ID, Call<ID>, AstError>,
 {
     type ID = ID;
     type E = AstError;
@@ -52,32 +52,32 @@ where
     }
 }
 
-impl<'source> NodeStore<'source, ID, Node<'source>, ArenaError> for Ast<'source> {
-    fn add(&mut self, value: Node<'source>) -> ID {
+impl NodeStore<ID, Node, ArenaError> for Ast {
+    fn add(&mut self, value: Node) -> ID {
         self.members.add(value)
     }
-    fn get(&self, id: ID) -> Result<&Node<'source>, ArenaError> {
+    fn get(&self, id: ID) -> Result<&Node, ArenaError> {
         self.members.get(id)
     }
-    fn get_mut(&mut self, id: ID) -> Result<&mut Node<'source>, ArenaError> {
+    fn get_mut(&mut self, id: ID) -> Result<&mut Node, ArenaError> {
         self.members.get_mut(id)
     }
 }
 
 macro_rules! wrap_node {
     ($ty: ty, $variant: tt) => {
-        impl<'source> From<$ty> for Node<'source> {
+        impl From<$ty> for Node {
             fn from(it: $ty) -> Self {
                 Node::$variant(it)
             }
         }
-        impl<'source> NodeStore<'source, ID, $ty, AstError> for Ast<'source> {
+        impl NodeStore<ID, $ty, AstError> for Ast {
             fn add(&mut self, value: $ty) -> ID {
-                self.add(std::convert::Into::<Node<'source>>::into(value))
+                self.add(std::convert::Into::<Node>::into(value))
             }
             fn get(&self, id: ID) -> Result<&$ty, AstError> {
                 if let Node::$variant(ref value) =
-                    <Self as NodeStore<'source, ID, Node<'source>, ArenaError>>::get(self, id)?
+                    <Self as NodeStore<ID, Node, ArenaError>>::get(self, id)?
                 {
                     Ok(value)
                 } else {
@@ -86,7 +86,7 @@ macro_rules! wrap_node {
             }
             fn get_mut(&mut self, id: ID) -> Result<&mut $ty, AstError> {
                 if let Node::$variant(ref mut value) =
-                    <Self as NodeStore<'source, ID, Node<'source>, ArenaError>>::get_mut(self, id)?
+                    <Self as NodeStore<ID, Node, ArenaError>>::get_mut(self, id)?
                 {
                     Ok(value)
                 } else {
@@ -97,7 +97,7 @@ macro_rules! wrap_node {
     };
 }
 
-wrap_node!(Symbol<'source, ID>, Symbol);
+wrap_node!(Symbol<ID>, Symbol);
 wrap_node!(Call<ID>, Call);
 wrap_node!(i64, I64);
 
@@ -107,7 +107,7 @@ mod test {
 
     #[test]
     fn can_construct_node() {
-        let mut ctx: Ast<'static> = Ast::new();
+        let mut ctx: Ast = Ast::new();
 
         let hello = ctx.add(Symbol::new("hello"));
 
@@ -119,7 +119,7 @@ mod test {
 
     #[test]
     fn can_construct_nodes() {
-        let mut ctx: Ast<'static> = Ast::new();
+        let mut ctx: Ast = Ast::new();
 
         let hello = ctx.add(Symbol::new("hello"));
         let world = ctx.add(Symbol::new("world"));
@@ -136,7 +136,7 @@ mod test {
 
     #[test]
     fn canot_accidentally_cast_to_different_node_type() {
-        let mut ctx: Ast<'static> = Ast::new();
+        let mut ctx: Ast = Ast::new();
 
         let hello = ctx.add(Symbol::new("hello"));
 
@@ -150,7 +150,7 @@ mod test {
     #[test]
     fn can_construct_nodes_with_self_reference() {
         // TODO: Work out how to do self references...
-        let mut ctx: Ast<'static> = Ast::new();
+        let mut ctx: Ast = Ast::new();
 
         let reference = ctx.add_with_id(|id| Call::new(id, vec![]));
 
@@ -163,7 +163,7 @@ mod test {
 
     #[test]
     fn can_construct_nodes_with_cross_reference() -> Result<(), ArenaError> {
-        let mut ctx: Ast<'static> = Ast::new();
+        let mut ctx: Ast = Ast::new();
 
         let hello = ctx.add(Symbol::new("hello"));
         let world = ctx.add(Symbol::new("world"));
@@ -178,7 +178,7 @@ mod test {
 
     #[test]
     fn can_construct_values() -> Result<(), ArenaError> {
-        let mut ctx: Ast<'static> = Ast::new();
+        let mut ctx: Ast = Ast::new();
 
         let plus = ctx.add(Symbol::new("plus"));
         let a = ctx.add(32i64);

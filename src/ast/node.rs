@@ -2,8 +2,8 @@ use crate::arena::ID;
 use crate::nodes::*;
 
 #[derive(Debug)]
-pub enum Node<'source> {
-    Symbol(Symbol<'source, ID>),
+pub enum Node {
+    Symbol(Symbol<ID>),
     Call(Call<ID>),
     I64(i64),
 }
@@ -15,7 +15,7 @@ mod test {
 
     #[test]
     fn can_construct_node() {
-        let mut ctx: Arena<Node<'static>> = Arena::new();
+        let mut ctx: Arena<Node> = Arena::new();
 
         let hello = ctx.add(Symbol::new("hello"));
 
@@ -27,7 +27,7 @@ mod test {
 
     #[test]
     fn can_construct_nodes() {
-        let mut ctx: Arena<Node<'static>> = Arena::new();
+        let mut ctx: Arena<Node> = Arena::new();
 
         let hello = ctx.add(Symbol::new("hello"));
         let world = ctx.add(Symbol::new("world"));
@@ -46,7 +46,7 @@ mod test {
     #[test]
     fn can_construct_nodes_with_self_reference() {
         // TODO: Work out how to do self references...
-        let mut ctx: Arena<Node<'static>> = Arena::new();
+        let mut ctx: Arena<Node> = Arena::new();
 
         let reference = ctx.add_with_id(|id| Call::new(id, vec![]));
 
@@ -59,7 +59,7 @@ mod test {
 
     #[test]
     fn can_construct_nodes_with_cross_reference() -> Result<(), ArenaError> {
-        let mut ctx: Arena<Node<'static>> = Arena::new();
+        let mut ctx: Arena<Node> = Arena::new();
 
         let hello = ctx.add(Symbol::new("hello"));
         let world = ctx.add(Symbol::new("world"));
@@ -77,7 +77,7 @@ mod test {
 
     #[test]
     fn can_construct_values() -> Result<(), ArenaError> {
-        let mut ctx: Arena<Node<'static>> = Arena::new();
+        let mut ctx: Arena<Node> = Arena::new();
 
         let plus = ctx.add(Symbol::new("plus"));
         let a = ctx.add(32i64);

@@ -22,25 +22,25 @@ impl<T, ID> Default for EvalState<T, ID> {
     }
 }
 
-pub trait NodeStore<'source, ID, T, E> {
+pub trait NodeStore<ID, T, E> {
     fn add(&mut self, value: T) -> ID;
     fn get(&self, id: ID) -> Result<&T, E>;
     fn get_mut(&mut self, id: ID) -> Result<&mut T, E>;
 }
 
-pub trait CompilerContext<'source>:
-    NodeStore<'source, Self::ID, Call<Self::ID>, Self::E>
-    + NodeStore<'source, Self::ID, Symbol<'source, Self::ID>, Self::E>
-    + NodeStore<'source, Self::ID, i64, Self::E>
+pub trait CompilerContext:
+    NodeStore<Self::ID, Call<Self::ID>, Self::E>
+    + NodeStore<Self::ID, Symbol<Self::ID>, Self::E>
+    + NodeStore<Self::ID, i64, Self::E>
 {
     type ID: Copy + std::fmt::Debug;
     type E;
 
     fn new() -> Self;
-    fn get_symbol(&self, id: Self::ID) -> Result<&Symbol<'source, Self::ID>, Self::E> {
+    fn get_symbol(&self, id: Self::ID) -> Result<&Symbol<Self::ID>, Self::E> {
         self.get(id)
     }
-    fn get_symbol_mut(&mut self, id: Self::ID) -> Result<&mut Symbol<'source, Self::ID>, Self::E> {
+    fn get_symbol_mut(&mut self, id: Self::ID) -> Result<&mut Symbol<Self::ID>, Self::E> {
         self.get_mut(id)
     }
     fn get_call(&self, id: Self::ID) -> Result<&Call<Self::ID>, Self::E> {

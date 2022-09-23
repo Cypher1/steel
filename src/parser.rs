@@ -29,7 +29,7 @@ pub fn number_i64_raw(input: &str) -> SResult<i64> {
     Ok((input, if sign == "-" { -value } else { value }))
 }
 
-pub fn number_i64<'source, ID, E: Into<SteelErr>, C: NodeStore<'source, ID, i64, E>>(
+pub fn number_i64<'source, ID, E: Into<SteelErr>, C: NodeStore<ID, i64, E>>(
     context: &mut C,
     input: &'source str,
 ) -> SResult<'source, ID> {
@@ -50,14 +50,14 @@ fn identifier_tail(input: &str) -> SResult<&str> {
     take_while(is_identifier_char)(input)
 }
 
-pub fn symbol_raw<'a, P>(og_input: &'a str) -> SResult<Symbol<'a, P>> {
+pub fn symbol_raw<P>(og_input: &str) -> SResult<Symbol<P>> {
     let (input, (head, tail)) = tuple((identifier_head, identifier_tail))(og_input)?;
 
     let name = &og_input[0..head.len() + tail.len()];
 
     Ok((input, Symbol::new(name)))
 }
-pub fn symbol<'source, ID, E: Into<SteelErr>, C: NodeStore<'source, ID, Symbol<'source, ID>, E>>(
+pub fn symbol<'source, ID, E: Into<SteelErr>, C: NodeStore<ID, Symbol<ID>, E>>(
     context: &mut C,
     input: &'source str,
 ) -> SResult<'source, ID> {
@@ -81,7 +81,7 @@ const PLUS_PRECENDENCE: Precedence = 1;
 pub fn operator_raw<'source, ID>(
     input: &'source str,
     min_prec: &mut Precedence, // TODO: reject operators of the wrong prec...
-) -> SResult<'source, Symbol<'source, ID>> {
+) -> SResult<'source, Symbol<ID>> {
     let (input, name) = take_while_m_n(1, 3, is_operator_char)(input)?;
     let precendence = match name {
         "+" => PLUS_PRECENDENCE,
@@ -99,7 +99,7 @@ pub fn operator<
     'source,
     ID,
     E: Into<SteelErr>,
-    C: NodeStore<'source, ID, Symbol<'source, ID>, E>,
+    C: NodeStore<ID, Symbol<ID>, E>,
 >(
     context: &mut C,
     input: &'source str,
@@ -110,12 +110,12 @@ pub fn operator<
     Ok((input, id))
 }
 
-fn args<'source, C: CompilerContext<'source>>(
+fn args<'source, C: CompilerContext>(
     context: &mut C,
     input: &'source str,
 ) -> SResult<'source, Vec<C::ID>>
 where
-    <C as CompilerContext<'source>>::E: Into<SteelErr>,
+    <C as CompilerContext>::E: Into<SteelErr>,
 {
     let (input, _) = tag("(")(input)?;
     let (input, args) = separated_list0(tag(","), |input| {
@@ -126,14 +126,14 @@ where
     Ok((input, args))
 }
 
-fn led<'source, C: CompilerContext<'source>>(
+fn led<'source, C: CompilerContext>(
     context: &mut C,
     left: C::ID,
     input: &'source str,
     min_prec: &mut Precedence,
 ) -> SResult<'source, C::ID>
 where
-    <C as CompilerContext<'source>>::E: Into<SteelErr>,
+    <C as CompilerContext>::E: Into<SteelErr>,
 {
     let (input, op) = operator(context, input, min_prec)?;
     let (input, right) = expr(context, input, min_prec)?;
@@ -141,12 +141,12 @@ where
     Ok((input, call))
 }
 
-fn nud<'source, C: CompilerContext<'source>>(
+fn nud<'source, C: CompilerContext>(
     context: &mut C,
     input: &'source str,
 ) -> SResult<'source, C::ID>
 where
-    <C as CompilerContext<'source>>::E: Into<SteelErr>,
+    <C as CompilerContext>::E: Into<SteelErr>,
 {
     if let Ok((input, _)) = tag("(")(input) {
         let mut ignore_prec = INIT_PRECENDENCE;
@@ -198,13 +198,13 @@ where
     }
 }
 
-pub fn expr<'context, 'source: 'context, C: CompilerContext<'source>>(
+pub fn expr<'context, 'source: 'context, C: CompilerContext>(
     context: &'context mut C,
     input: &'source str,
     min_prec: &mut Precedence,
 ) -> SResult<'source, C::ID>
 where
-    <C as CompilerContext<'source>>::E: Into<SteelErr>,
+    <C as CompilerContext>::E: Into<SteelErr>,
 {
     let mut state = nud(context, input)?;
     loop {
@@ -218,12 +218,12 @@ where
     }
 }
 
-pub fn program<'context, 'source: 'context, C: CompilerContext<'source>>(
+pub fn program<'context, 'source: 'context, C: CompilerContext>(
     context: &'context mut C,
     input: &'source str,
 ) -> SResult<'source, C::ID>
 where
-    <C as CompilerContext<'source>>::E: Into<SteelErr>,
+    <C as CompilerContext>::E: Into<SteelErr>,
 {
     let mut min_prec = INIT_PRECENDENCE;
     let (mut input, mut left) = expr(context, input, &mut min_prec)?;

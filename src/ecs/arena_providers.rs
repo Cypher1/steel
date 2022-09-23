@@ -3,7 +3,7 @@ use super::providers::Provider;
 use crate::arena::{Arena, ID};
 
 // In future there may be other kinds of Providers.
-pub trait ArenaProvider<'a, T> {
+pub trait ArenaProvider<T> {
     fn entities(&self) -> &Arena<Entity>;
     fn entities_mut(&mut self) -> &mut Arena<Entity>;
     fn make_entity(id: ID) -> Entity;
@@ -13,7 +13,7 @@ pub trait ArenaProvider<'a, T> {
     fn get_mut_impl(&mut self, id: ID) -> Result<&mut T, EcsError>;
 }
 
-impl<'a, T: 'a, S: ArenaProvider<'a, T>> Provider<'a, T> for S {
+impl<T, S: ArenaProvider<T>> Provider<T> for S {
     type ID = ComponentID<T>;
     fn add_with_id<F: FnOnce(ID) -> T>(&mut self, value: F) -> ID {
         let (entities, arena) = self.arena_mut();
@@ -39,7 +39,7 @@ impl<'a, T: 'a, S: ArenaProvider<'a, T>> Provider<'a, T> for S {
 #[macro_export]
 macro_rules! make_arena_provider {
     ($ctx: ty, $type: ty, $kind: tt, $accessor: tt) => {
-        impl<'a> ArenaProvider<'a, $type> for $ctx {
+        impl ArenaProvider<$type> for $ctx {
             fn entities(&self) -> &Arena<Entity> {
                 &self.entities
             }

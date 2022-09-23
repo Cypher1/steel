@@ -9,11 +9,11 @@ edition = "2021"
 glasses = "0.1.1"
 nom = "7.1.1"
 ntest = "0.8.1"
+rand = "0.8.5"
 
 [dev-dependencies]
 criterion = { version = "0.3", features = ["html_reports"] }
 lazy_static = "1.4.0"
-rand = "0.8.5"
 
 [[bench]]
 name = "random_programs"

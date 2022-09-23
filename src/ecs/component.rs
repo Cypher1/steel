@@ -33,7 +33,7 @@ impl<T> Clone for ComponentID<T> {
 
 #[derive(Debug, Copy, Clone)]
 pub enum Entity {
-    Symbol(ComponentID<Symbol<'static, ID>>),
+    Symbol(ComponentID<Symbol<ID>>),
     Call(ComponentID<Call<ID>>),
     I64(ComponentID<i64>),
 }

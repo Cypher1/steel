@@ -1,23 +1,23 @@
 #[derive(Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
-pub struct Symbol<'a, P> {
+pub struct Symbol<P> {
     // TODO: Intern strings
     // TODO: Locations
-    pub name: &'a str,
+    pub name: String,
     pub is_operator: bool,
     pub bound_to: Option<P>,
 }
 
-impl<'a, P> Symbol<'a, P> {
-    pub fn new(name: &'a str) -> Self {
+impl<P> Symbol<P> {
+    pub fn new(name: &str) -> Self {
         Self {
-            name,
+            name: name.to_string(),
             is_operator: false,
             bound_to: None,
         }
     }
-    pub fn operator(name: &'a str) -> Self {
+    pub fn operator(name: &str) -> Self {
         Self {
-            name,
+            name: name.to_string(),
             is_operator: true,
             bound_to: None,
         }
