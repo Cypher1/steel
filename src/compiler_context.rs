@@ -83,23 +83,13 @@ pub trait CompilerContext:
             todo!("Unknown variable: {}", s.name);
         }
         if let Ok(c) = self.get_call(id) {
-            todo!("call: {:?}", c);
-            /*
-            let callee = self.pretty(c.callee);
-            let is_operator_call = if let Ok(sym) = self.get_symbol(c.callee) {
-                sym.is_operator
-            } else {
-                false
-            };
-            if is_operator_call {
-                let args: Vec<String> = c.args.iter().map(|arg| self.pretty(*arg)).collect();
-                let args = args.join(&callee);
-                return format!("({}{})", if c.args.len() < 2 { &callee } else { "" }, args);
-            }
-            let args: Vec<String> = c.args.iter().map(|arg| self.pretty(*arg)).collect();
-            let args = args.join(", ");
-            return format!("{}({})", callee, args);
-            */
+            // load in all the args
+            //for (name, arg) in c.args {
+                
+            //}
+            eprintln!("functions: {:#?}", _state.function_stack);
+            eprintln!("mem_stack: {:#?}", _state.function_stack);
+            todo!("call: {:#?}\n{}", c, self.pretty(id));
         }
         // format!("{{node? {:?}}}", id)
         todo!("Unknown node {:?}", id);

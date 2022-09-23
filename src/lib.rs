@@ -16,7 +16,7 @@ mod assertions;
 mod tests;
 
 pub use crate::compiler_context::CompilerContext;
-// use crate::compiler_context::EvalState;
+use crate::compiler_context::EvalState;
 pub use crate::error::SteelErr;
 use crate::parser::program;
 
@@ -25,12 +25,12 @@ where
     SteelErr: From<<S as CompilerContext>::E>,
 {
     let mut store = S::new();
-    let (_input, _program) = program(&mut store, line)?;
-    // eprintln!("expr: {:?}", store.pretty(program));
-    // let mut stack = EvalState::default();
-    // stack.function_stack.push(program);
-    // store.eval(&mut stack)?;
-    // eprintln!("eval: {:?}", stack);
+    let (_input, expr) = program(&mut store, line)?;
+    eprintln!("expr: {:?}", store.pretty(expr));
+    let mut stack = EvalState::default();
+    stack.function_stack.push(expr);
+    store.eval(&mut stack)?;
+    eprintln!("eval: {:?}", stack);
     Ok(())
 }
 
