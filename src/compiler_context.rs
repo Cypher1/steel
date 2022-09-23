@@ -127,7 +127,7 @@ pub trait CompilerContext:
                             arg_num += 1;
                             self.pretty(*arg)
                         } else {
-                            format!("{}={}", name, self.pretty(*arg))
+                            format!("({}={})", name, self.pretty(*arg))
                         }
                     })
                     .collect();
