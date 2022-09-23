@@ -78,7 +78,7 @@ glasses_harness!(ParserTest, Case, |case: Case| {
     run_test("Ecs", &case, Ecs::new()).expect("Ast failed");
 });
 
-glasses_test!(ParserTest, handle_white_space, [timeout(10)], expr "-123\n", prints_as "(-123)");
+glasses_test!(ParserTest, handle_white_space, [timeout(10)], expr "-123\n", prints_as "-(123)");
 glasses_test!(
     ParserTest,
     handle_malformed_with_white_space,
@@ -88,7 +88,7 @@ glasses_test!(
 );
 glasses_test!(ParserTest, simple_plus, [timeout(10)], expr "(12+23)");
 glasses_test!(ParserTest, simple_plus_with_trailing, [timeout(10)], expr "(12+23)");
-glasses_test!(ParserTest, unary_in_parens, [timeout(10)], expr "(*12)");
+glasses_test!(ParserTest, unary_in_parens, [timeout(10)], expr "*(12)");
 glasses_test!(ParserTest, unary_no_parens, [timeout(10)], expr "*12", no_round_trip);
 glasses_test!(ParserTest, func_call, [timeout(10)], expr "foo(12, a)");
 glasses_test!(ParserTest, op_call, [timeout(10)], expr "+(12, 23)");

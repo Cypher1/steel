@@ -8,7 +8,7 @@ use steel::{
 fn criterion_benchmark_with<T: CompilerContext>(
     name: &'static str,
     program: &str,
-    spec: &Spec<T::ID>,
+    spec: &Spec,
     c: &mut Criterion,
 ) where
     SteelErr: From<<T as CompilerContext>::E>,

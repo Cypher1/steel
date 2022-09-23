@@ -127,7 +127,12 @@ pub trait CompilerContext:
                         arg_num += 1;
                         self.pretty(*arg)
                     } else {
-                        format!("{}=({})", name, self.pretty(*arg))
+                        let arg = format!("{}=({})", name, self.pretty(*arg));
+                        if is_operator_call {
+                            format!("({})", arg)
+                        } else {
+                            arg
+                        }
                     }
                 })
                 .collect();

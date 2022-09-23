@@ -42,7 +42,7 @@ pub fn generate_random_program<Ctx: CompilerContext>(
     rng: &mut ThreadRng,
 ) -> Ctx::ID {
     let r = generate_random_program_impl::<Ctx>(_name, store, spec, rng);
-    // eprintln!(">> {}", store.pretty(r));
+    eprintln!(">> {}", store.pretty(r));
     r
 }
 
@@ -59,7 +59,7 @@ pub fn generate_random_program_impl<Ctx: CompilerContext>(
         let mut inner_spec = Spec::default().sized(inner_size);
         if args_size > 0 {
             let num_args: usize = rng.gen_range(1..=args_size);
-            args_size -= num_args; // at lesst one node per arg.
+            args_size -= num_args; // at least one node per arg.
             for _ in 0..num_args {
                 let arg_size: usize = rng.gen_range(1..=1 + args_size);
                 let arg_spec = Spec::default().sized(arg_size);

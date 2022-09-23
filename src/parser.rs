@@ -8,7 +8,6 @@ use nom::{
     combinator::map_res,
     multi::separated_list0,
     sequence::tuple,
-    Err::{Error},
 };
 
 type SResult<'a, T> = std::result::Result<(&'a str, T), nom::Err<SteelErr>>;
@@ -154,6 +153,11 @@ fn led<'source, C: CompilerContext>(
 where
     <C as CompilerContext>::E: Into<SteelErr>,
 {
+    // Unified calling syntax e.g. <expr>(...args...).
+    if let Ok((input, args)) = args(context, input) {
+        let call = context.add(Call::new(left, args));
+        return Ok((input, call));
+    }
     let (input, op) = operator(context, input, min_prec)?;
     let (input, right) = expr(context, input, min_prec)?;
     let call = context.add(Call::new(
@@ -183,16 +187,8 @@ where
     }
     let mut ignore_prec = INIT_PRECENDENCE;
     if let Ok((input, op)) = operator(context, input, &mut ignore_prec) {
-        // Unified calling syntax for a prefix operator
-        // e.g. +(1, 2).
-        if let Ok((input, args)) = args(context, input) {
-            // Function call
-            if let Ok(op) = context.get_symbol_mut(op) {
-                // TODO: WHAT!?
-                op.is_operator = false;
-            }
-            let call = context.add(Call::new(op, args));
-            return Ok((input, call));
+        if let Ok(op) = context.get_symbol_mut(op) {
+            op.is_operator = false;
         }
         // Prefix operator e.g. -3.
         let mut ignore_prec = INIT_PRECENDENCE;
