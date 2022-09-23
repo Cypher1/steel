@@ -158,7 +158,7 @@ mod test {
 
         let hello = ctx.add(Symbol::new("hello"));
         let world = ctx.add(Symbol::new("world"));
-        let reference = ctx.add(Call::new(hello, vec![world]));
+        let reference = ctx.add(Call::new(hello, vec![(None, world)]));
 
         assert_eq!(
             format!("{:?}", ctx.get::<Call>(reference)),
@@ -173,7 +173,7 @@ mod test {
         let plus = ctx.add(Symbol::new("plus"));
         let a = ctx.add(32i64);
         let b = ctx.add(12i64);
-        let reference = ctx.add(Call::new(plus, vec![a, b]));
+        let reference = ctx.add(Call::new(plus, vec![(None, a), (None, b)]));
 
         assert_eq!(
             format!("{:?}", ctx.get::<Call>(reference)),

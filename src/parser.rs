@@ -57,6 +57,17 @@ pub fn symbol_raw<P>(og_input: &str) -> SResult<Symbol<P>> {
 
     Ok((input, Symbol::new(name)))
 }
+pub fn binding<'source, ID, E: Into<SteelErr>, C: NodeStore<ID, Symbol<ID>, E>>(
+    context: &mut C,
+    input: &'source str,
+) -> SResult<'source, String> {
+    let (og_input, _) = multispace0(input)?;
+    let (input, (head, tail)) = tuple((identifier_head, identifier_tail))(og_input)?;
+    let name = &og_input[0..head.len() + tail.len()];
+    let (input, _) = tag("=")(input)?;
+    Ok((input, name.to_string()))
+}
+
 pub fn symbol<'source, ID, E: Into<SteelErr>, C: NodeStore<ID, Symbol<ID>, E>>(
     context: &mut C,
     input: &'source str,
@@ -105,17 +116,27 @@ pub fn operator<'source, ID, E: Into<SteelErr>, C: NodeStore<ID, Symbol<ID>, E>>
     Ok((input, id))
 }
 
+type ArgBindings<ID> = Vec<(String, ID)>;
+
 fn args<'source, C: CompilerContext>(
     context: &mut C,
     input: &'source str,
-) -> SResult<'source, Vec<C::ID>>
+) -> SResult<'source, ArgBindings<C::ID>>
 where
     <C as CompilerContext>::E: Into<SteelErr>,
 {
     let (input, _) = tag("(")(input)?;
+    let mut arg_num = 0;
     let (input, args) = separated_list0(tag(","), |input| {
+        let (input, name) = if let Ok((input, sym)) = binding(context, input) {
+            (input, sym)
+        } else {
+            arg_num += 1;
+            (input, format!("arg_{}", arg_num))
+        };
         let mut ignore_prec = INIT_PRECENDENCE;
-        expr(context, input, &mut ignore_prec)
+        let (input, value) = expr(context, input, &mut ignore_prec)?;
+        Ok((input, (name, value)))
     })(input)?;
     let (input, _) = tag(")")(input)?;
     Ok((input, args))
@@ -132,7 +153,7 @@ where
 {
     let (input, op) = operator(context, input, min_prec)?;
     let (input, right) = expr(context, input, min_prec)?;
-    let call = context.add(Call::new(op, vec![left, right]));
+    let call = context.add(Call::new(op, vec![("arg_0".to_string(), left), ("arg_1".to_string(), right)]));
     Ok((input, call))
 }
 
@@ -169,7 +190,7 @@ where
         // Prefix operator
         let mut ignore_prec = INIT_PRECENDENCE;
         let (input, right) = expr(context, input, &mut ignore_prec)?;
-        let call = context.add(Call::new(op, vec![right]));
+        let call = context.add(Call::new(op, vec![("arg_1".to_string(), right)]));
         return Ok((input, call));
     }
     // Otherwise expect a number

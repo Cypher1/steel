@@ -118,11 +118,23 @@ pub trait CompilerContext:
                 false
             };
             if is_operator_call {
-                let args: Vec<String> = c.args.iter().map(|arg| self.pretty(*arg)).collect();
+                let args: Vec<String> = c
+                    .args
+                    .iter()
+                    .map(|(name, arg)| {
+                        format!("{}={}", name, self.pretty(*arg))
+                    })
+                    .collect();
                 let args = args.join(&callee);
                 return format!("({}{})", if c.args.len() < 2 { &callee } else { "" }, args);
             }
-            let args: Vec<String> = c.args.iter().map(|arg| self.pretty(*arg)).collect();
+            let args: Vec<String> = c
+                .args
+                .iter()
+                .map(|(name, arg)| {
+                    format!("{}={}", name, self.pretty(*arg))
+                })
+                .collect();
             let args = args.join(", ");
             return format!("{}({})", callee, args);
         }

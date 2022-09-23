@@ -33,11 +33,7 @@ impl Case {
     }
 }
 
-fn run_test<T: CompilerContext>(
-    name: &str,
-    case: &Case,
-    ref mut ctx: T,
-) -> Result<(), SteelErr>
+fn run_test<T: CompilerContext>(name: &str, case: &Case, ref mut ctx: T) -> Result<(), SteelErr>
 where
     <T as CompilerContext>::ID: std::fmt::Debug,
     SteelErr: From<<T as CompilerContext>::E>,

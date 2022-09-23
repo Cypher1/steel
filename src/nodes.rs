@@ -27,11 +27,11 @@ impl<P> Symbol<P> {
 #[derive(Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
 pub struct Call<P> {
     pub callee: P,
-    pub args: Vec<P>,
+    pub args: Vec<(String, P)>,
 }
 
 impl<P> Call<P> {
-    pub fn new(callee: P, args: Vec<P>) -> Self {
+    pub fn new(callee: P, args: Vec<(String, P)>) -> Self {
         Self { callee, args }
     }
 }
