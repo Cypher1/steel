@@ -84,7 +84,7 @@ glasses_test!(
     handle_malformed_with_white_space,
     [timeout(1)],
     expr "#lol\n",
-    error_is "Expected an expression, found \"#lol\""
+    error_is "Expected the end of the input, found \"#lol\""
 );
 glasses_test!(ParserTest, simple_plus, [timeout(10)], expr "(12+23)");
 glasses_test!(ParserTest, simple_plus_with_trailing, [timeout(10)], expr "(12+23)");

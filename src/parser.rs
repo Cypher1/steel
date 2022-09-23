@@ -8,6 +8,7 @@ use nom::{
     combinator::map_res,
     multi::separated_list0,
     sequence::tuple,
+    Err::{Error},
 };
 
 type SResult<'a, T> = std::result::Result<(&'a str, T), nom::Err<SteelErr>>;
@@ -183,6 +184,7 @@ where
     let mut ignore_prec = INIT_PRECENDENCE;
     if let Ok((input, op)) = operator(context, input, &mut ignore_prec) {
         // Unified calling syntax for a prefix operator
+        // e.g. +(1, 2).
         if let Ok((input, args)) = args(context, input) {
             // Function call
             if let Ok(op) = context.get_symbol_mut(op) {
@@ -192,14 +194,14 @@ where
             let call = context.add(Call::new(op, args));
             return Ok((input, call));
         }
-        // Prefix operator
+        // Prefix operator e.g. -3.
         let mut ignore_prec = INIT_PRECENDENCE;
         if let Ok((input, right)) = expr(context, input, &mut ignore_prec) {
             let call = context.add(Call::new(op, vec![("arg_0".to_string(), right)]));
             return Ok((input, call));
-        } else {
-            return Ok((input, op));
         }
+        // Operator expression e.g. f=+.
+        return Ok((input, op));
     }
     // Otherwise expect a number
     if let Ok(res) = number_i64(context, input) {
@@ -215,6 +217,7 @@ where
         }
         Err(nom::Err::Error(SteelErr::MalformedExpression(
             report.to_string(),
+            "the end of the input".to_string()
         )))
     }
 }

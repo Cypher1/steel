@@ -41,6 +41,17 @@ pub fn generate_random_program<Ctx: CompilerContext>(
     spec: &Spec,
     rng: &mut ThreadRng,
 ) -> Ctx::ID {
+    let r = generate_random_program_impl::<Ctx>(_name, store, spec, rng);
+    // eprintln!(">> {}", store.pretty(r));
+    r
+}
+
+pub fn generate_random_program_impl<Ctx: CompilerContext>(
+    _name: &'static str,
+    store: &mut Ctx,
+    spec: &Spec,
+    rng: &mut ThreadRng,
+) -> Ctx::ID {
     if spec.size > 1 {
         let mut args = vec![];
         let mut args_size: usize = rng.gen_range(1..spec.size);

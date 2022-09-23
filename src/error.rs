@@ -10,7 +10,7 @@ pub enum SteelErr {
         precendence: i32,
     },
     UnexpectedEndOfInput,
-    MalformedExpression(String),
+    MalformedExpression(String, String),
     ParserError {
         input: String,
         code: nom::error::ErrorKind,
@@ -37,7 +37,7 @@ impl std::fmt::Display for SteelErr {
             }
             IOError(e) => write!(f, "Error while performing input/output: {}", e),
             UnexpectedEndOfInput => write!(f, "Expected an expression, found nothing"),
-            MalformedExpression(input) => write!(f, "Expected an expression, found {:?}", input),
+            MalformedExpression(input, expected) => write!(f, "Expected {}, found {:?}", expected, input),
             ParserError { input, code } => {
                 write!(f, "Failed in {:?} while parsing {}", code, input)
             }
