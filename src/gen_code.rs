@@ -2,31 +2,48 @@ use crate::{
     nodes::{Call, Symbol},
     CompilerContext,
 };
-
+use std::collections::HashMap;
 use rand::{distributions::Alphanumeric, rngs::ThreadRng, Rng};
 
 pub struct Spec {
     pub size: usize,
-    symbols: Vec<(String, bool, usize)>,
+    pub arity: usize,
+    symbols: HashMap<usize, Vec<(String, bool)>>,
+}
+
+static CHANCE_OF_OFFSET: f64 = 0.95;
+static CHANCE_OF_SYMBOL: f64 = 0.25;
+
+fn weighted_bool(rng: &mut ThreadRng, chance: f64) -> bool {
+    rng.gen_range(0f64..=1f64) < chance
 }
 
 impl Default for Spec {
     fn default() -> Self {
+        let bin_ops = vec![
+            ("+".to_string(), true),
+            ("*".to_string(), true),
+            ("/".to_string(), true),
+            ("-".to_string(), true),
+        ];
+        let mut symbols = HashMap::new();
+        symbols.insert(2, bin_ops);
         Self {
             size: 1,
-            symbols: vec![
-                ("+".to_string(), true, 2),
-                ("*".to_string(), true, 2),
-                ("/".to_string(), true, 2),
-                ("-".to_string(), true, 2),
-            ],
+            arity: 0,
+            symbols,
         }
     }
 }
 
 impl Spec {
     pub fn add_symbol(mut self, name: String, is_operator: bool, arity: usize) -> Self {
-        self.symbols.push((name, is_operator, arity));
+        let symbols = self.symbols.entry(arity).or_insert_with(Vec::new);
+        symbols.push((name, is_operator));
+        self
+    }
+    pub fn arity(mut self, arity: usize) -> Self {
+        self.arity = arity;
         self
     }
     pub fn sized(mut self, size: usize) -> Self {
@@ -75,20 +92,26 @@ pub fn generate_random_program_impl<Ctx: CompilerContext>(
                 args.push((arg_name, arg_id));
             }
         }
+        inner_spec = inner_spec.arity(args.len());
         let callee = generate_random_program(_name, store, &inner_spec, rng);
         return store.add(Call { callee, args });
     }
-    let chance_of_value: f64 = 0.25;
-    if !spec.symbols.is_empty() && rng.gen_range(0f64..=1f64) >= chance_of_value {
-        let symbol_index: usize = rng.gen_range(0..spec.symbols.len());
-        let (name, is_operator, _arity) = &spec.symbols[symbol_index];
-        let bound_to = None; // TODO:
-        return store.add(Symbol {
-            name: name.to_string(),
-            is_operator: *is_operator,
-            bound_to,
-        });
+    if !spec.symbols.is_empty() && weighted_bool(rng, CHANCE_OF_SYMBOL) {
+        if let Some(symbols) = &spec.symbols.get(&spec.arity) {
+            let symbol_index: usize = rng.gen_range(0..symbols.len());
+            let (name, is_operator) = &symbols[symbol_index];
+            let bound_to = None; // TODO:
+            return store.add(Symbol {
+                name: name.to_string(),
+                is_operator: *is_operator,
+                bound_to,
+            });
+        }
     }
-    let value: i64 = rng.gen();
+    let value: i64 = if weighted_bool(rng, CHANCE_OF_OFFSET) {
+        rng.gen_range(-5i64..=5i64) // some small value.
+    } else {
+        rng.gen() // some large constant.
+    };
     store.add(value)
 }
