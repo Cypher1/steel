@@ -125,7 +125,7 @@ pub trait CompilerContext:
                     .map(|(name, arg)| {
                         if name.starts_with("arg_") && name == &format!("arg_{}", arg_num) {
                             arg_num += 1;
-                            format!("{}", self.pretty(*arg))
+                            self.pretty(*arg)
                         } else {
                             format!("{}={}", name, self.pretty(*arg))
                         }
@@ -140,7 +140,7 @@ pub trait CompilerContext:
                 .map(|(name, arg)| {
                     if name.starts_with("arg_") && name == &format!("arg_{}", arg_num) {
                         arg_num += 1;
-                        format!("{}", self.pretty(*arg))
+                        self.pretty(*arg)
                     } else {
                         format!("{}={}", name, self.pretty(*arg))
                     }
