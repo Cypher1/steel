@@ -11,7 +11,7 @@ pub struct Spec {
     symbols: HashMap<usize, Vec<(String, bool)>>,
 }
 
-static CHANCE_OF_OFFSET: f64 = 0.95;
+static CHANCE_OF_POTENTIALLY_LARGE_CONSTANT: f64 = 0.05;
 static CHANCE_OF_SYMBOL: f64 = 0.25;
 
 fn weighted_bool(rng: &mut ThreadRng, chance: f64) -> bool {
@@ -59,7 +59,7 @@ pub fn generate_random_program<Ctx: CompilerContext>(
     rng: &mut ThreadRng,
 ) -> Ctx::ID {
     let r = generate_random_program_impl::<Ctx>(_name, store, spec, rng);
-    eprintln!(">> {}", store.pretty(r));
+    // eprintln!(">> {}", store.pretty(r));
     r
 }
 
@@ -108,10 +108,10 @@ pub fn generate_random_program_impl<Ctx: CompilerContext>(
             });
         }
     }
-    let value: i64 = if weighted_bool(rng, CHANCE_OF_OFFSET) {
-        rng.gen_range(-5i64..=5i64) // some small value.
+    let value: i64 = if weighted_bool(rng, CHANCE_OF_POTENTIALLY_LARGE_CONSTANT) {
+        rng.gen() // some potentially large constant.
     } else {
-        rng.gen() // some large constant.
+        rng.gen_range(-5i64..=5i64) // some small value.
     };
     store.add(value)
 }
