@@ -117,12 +117,18 @@ pub trait CompilerContext:
             } else {
                 false
             };
+            let mut arg_num = 0;
             if is_operator_call {
                 let args: Vec<String> = c
                     .args
                     .iter()
                     .map(|(name, arg)| {
-                        format!("{}={}", name, self.pretty(*arg))
+                        if name.starts_with("arg_") && name == &format!("arg_{}", arg_num) {
+                            arg_num += 1;
+                            format!("{}", self.pretty(*arg))
+                        } else {
+                            format!("{}={}", name, self.pretty(*arg))
+                        }
                     })
                     .collect();
                 let args = args.join(&callee);
@@ -132,7 +138,12 @@ pub trait CompilerContext:
                 .args
                 .iter()
                 .map(|(name, arg)| {
-                    format!("{}={}", name, self.pretty(*arg))
+                    if name.starts_with("arg_") && name == &format!("arg_{}", arg_num) {
+                        arg_num += 1;
+                        format!("{}", self.pretty(*arg))
+                    } else {
+                        format!("{}={}", name, self.pretty(*arg))
+                    }
                 })
                 .collect();
             let args = args.join(", ");

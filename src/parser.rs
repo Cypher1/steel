@@ -58,7 +58,7 @@ pub fn symbol_raw<P>(og_input: &str) -> SResult<Symbol<P>> {
     Ok((input, Symbol::new(name)))
 }
 pub fn binding<'source, ID, E: Into<SteelErr>, C: NodeStore<ID, Symbol<ID>, E>>(
-    context: &mut C,
+    _context: &mut C,
     input: &'source str,
 ) -> SResult<'source, String> {
     let (og_input, _) = multispace0(input)?;
@@ -131,8 +131,9 @@ where
         let (input, name) = if let Ok((input, sym)) = binding(context, input) {
             (input, sym)
         } else {
+            let res = (input, format!("arg_{}", arg_num));
             arg_num += 1;
-            (input, format!("arg_{}", arg_num))
+            res
         };
         let mut ignore_prec = INIT_PRECENDENCE;
         let (input, value) = expr(context, input, &mut ignore_prec)?;
@@ -190,7 +191,7 @@ where
         // Prefix operator
         let mut ignore_prec = INIT_PRECENDENCE;
         let (input, right) = expr(context, input, &mut ignore_prec)?;
-        let call = context.add(Call::new(op, vec![("arg_1".to_string(), right)]));
+        let call = context.add(Call::new(op, vec![("arg_0".to_string(), right)]));
         return Ok((input, call));
     }
     // Otherwise expect a number
