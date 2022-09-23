@@ -82,8 +82,9 @@ pub trait CompilerContext:
             }
             todo!("Unknown variable: {}", s.name);
         }
-        /*
         if let Ok(c) = self.get_call(id) {
+            todo!("call: {:?}", c);
+            /*
             let callee = self.pretty(c.callee);
             let is_operator_call = if let Ok(sym) = self.get_symbol(c.callee) {
                 sym.is_operator
@@ -98,9 +99,9 @@ pub trait CompilerContext:
             let args: Vec<String> = c.args.iter().map(|arg| self.pretty(*arg)).collect();
             let args = args.join(", ");
             return format!("{}({})", callee, args);
+            */
         }
-        format!("{{node? {:?}}}", id)
-        */
+        // format!("{{node? {:?}}}", id)
         todo!("Unknown node {:?}", id);
     }
     fn pretty(&self, id: Self::ID) -> String {
@@ -127,7 +128,7 @@ pub trait CompilerContext:
                             arg_num += 1;
                             self.pretty(*arg)
                         } else {
-                            format!("({}={})", name, self.pretty(*arg))
+                            format!("({}=({}))", name, self.pretty(*arg))
                         }
                     })
                     .collect();
@@ -142,7 +143,7 @@ pub trait CompilerContext:
                         arg_num += 1;
                         self.pretty(*arg)
                     } else {
-                        format!("{}={}", name, self.pretty(*arg))
+                        format!("{}=({})", name, self.pretty(*arg))
                     }
                 })
                 .collect();

@@ -64,6 +64,7 @@ pub fn binding<'source, ID, E: Into<SteelErr>, C: NodeStore<ID, Symbol<ID>, E>>(
     let (og_input, _) = multispace0(input)?;
     let (input, (head, tail)) = tuple((identifier_head, identifier_tail))(og_input)?;
     let name = &og_input[0..head.len() + tail.len()];
+    let (input, _) = multispace0(input)?;
     let (input, _) = tag("=")(input)?;
     Ok((input, name.to_string()))
 }
@@ -193,9 +194,12 @@ where
         }
         // Prefix operator
         let mut ignore_prec = INIT_PRECENDENCE;
-        let (input, right) = expr(context, input, &mut ignore_prec)?;
-        let call = context.add(Call::new(op, vec![("arg_0".to_string(), right)]));
-        return Ok((input, call));
+        if let Ok((input, right)) = expr(context, input, &mut ignore_prec) {
+            let call = context.add(Call::new(op, vec![("arg_0".to_string(), right)]));
+            return Ok((input, call));
+        } else {
+            return Ok((input, op));
+        }
     }
     // Otherwise expect a number
     if let Ok(res) = number_i64(context, input) {

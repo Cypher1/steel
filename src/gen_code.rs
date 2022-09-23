@@ -5,23 +5,28 @@ use crate::{
 
 use rand::{distributions::Alphanumeric, rngs::ThreadRng, Rng};
 
-pub struct Spec<ID> {
+pub struct Spec {
     pub size: usize,
-    symbols: Vec<(String, ID, usize)>,
+    symbols: Vec<(String, bool, usize)>,
 }
 
-impl<ID> Default for Spec<ID> {
+impl Default for Spec {
     fn default() -> Self {
         Self {
             size: 1,
-            symbols: vec![],
+            symbols: vec![
+                ("+".to_string(), true, 2),
+                ("*".to_string(), true, 2),
+                ("/".to_string(), true, 2),
+                ("-".to_string(), true, 2),
+            ],
         }
     }
 }
 
-impl<ID> Spec<ID> {
-    pub fn add_symbol(mut self, name: String, bound_to: ID, arity: usize) -> Self {
-        self.symbols.push((name, bound_to, arity));
+impl Spec {
+    pub fn add_symbol(mut self, name: String, is_operator: bool, arity: usize) -> Self {
+        self.symbols.push((name, is_operator, arity));
         self
     }
     pub fn sized(mut self, size: usize) -> Self {
@@ -33,7 +38,7 @@ impl<ID> Spec<ID> {
 pub fn generate_random_program<Ctx: CompilerContext>(
     _name: &'static str,
     store: &mut Ctx,
-    spec: &Spec<Ctx::ID>,
+    spec: &Spec,
     rng: &mut ThreadRng,
 ) -> Ctx::ID {
     if spec.size > 1 {
@@ -55,7 +60,7 @@ pub fn generate_random_program<Ctx: CompilerContext>(
                     .map(char::from)
                     .collect();
                 let arg_name = rng.gen_range('a'..='z').to_string() + &tail;
-                inner_spec = inner_spec.add_symbol(arg_name.clone(), arg_id, 0);
+                inner_spec = inner_spec.add_symbol(arg_name.clone(), false, 0);
                 args.push((arg_name, arg_id));
             }
         }
@@ -65,11 +70,12 @@ pub fn generate_random_program<Ctx: CompilerContext>(
     let chance_of_value: f64 = 0.25;
     if !spec.symbols.is_empty() && rng.gen_range(0f64..=1f64) >= chance_of_value {
         let symbol_index: usize = rng.gen_range(0..spec.symbols.len());
-        let (name, bound_to, _arity) = &spec.symbols[symbol_index];
+        let (name, is_operator, _arity) = &spec.symbols[symbol_index];
+        let bound_to = None; // TODO:
         return store.add(Symbol {
             name: name.to_string(),
-            is_operator: rng.gen(),
-            bound_to: Some(*bound_to),
+            is_operator: *is_operator,
+            bound_to,
         });
     }
     let value: i64 = rng.gen();
