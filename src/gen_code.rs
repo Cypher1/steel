@@ -77,6 +77,7 @@ pub fn generate_random_program_impl<Ctx: CompilerContext>(
         if args_size > 0 {
             let num_args: usize = rng.gen_range(1..=args_size);
             args_size -= num_args; // at least one node per arg.
+            let mut arg_index = 0;
             for _ in 0..num_args {
                 let arg_size: usize = rng.gen_range(1..=1 + args_size);
                 let arg_spec = Spec::default().sized(arg_size);
@@ -87,7 +88,13 @@ pub fn generate_random_program_impl<Ctx: CompilerContext>(
                     .take(3)
                     .map(char::from)
                     .collect();
-                let arg_name = rng.gen_range('a'..='z').to_string() + &tail;
+                let arg_name = if rng.gen() {
+                    rng.gen_range('a'..='z').to_string() + &tail
+                } else {
+                    let s = format!("arg_{}", arg_index);
+                    arg_index+=1;
+                    s
+                };
                 inner_spec = inner_spec.add_symbol(arg_name.clone(), false, 0);
                 args.push((arg_name, arg_id));
             }
