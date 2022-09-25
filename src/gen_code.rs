@@ -12,7 +12,8 @@ pub struct Spec {
 }
 
 static CHANCE_OF_POTENTIALLY_LARGE_CONSTANT: f64 = 0.05;
-static CHANCE_OF_SYMBOL: f64 = 0.25;
+static CHANCE_OF_SYMBOL: f64 = 0.5;
+static CHANCE_OF_NAMED_ARG: f64 = 0.25;
 
 fn weighted_bool(rng: &mut ThreadRng, chance: f64) -> bool {
     rng.gen_range(0f64..=1f64) < chance
@@ -75,7 +76,8 @@ pub fn generate_random_program_impl<Ctx: CompilerContext>(
         let inner_size: usize = spec.size - args_size - 1;
         let mut inner_spec = Spec::default().sized(inner_size);
         if args_size > 0 {
-            let num_args: usize = rng.gen_range(1..=args_size);
+            let arg_range = (args_size as f64).sqrt() as usize;
+            let num_args: usize = rng.gen_range(1..=arg_range);
             args_size -= num_args; // at least one node per arg.
             let mut arg_index = 0;
             for _ in 0..num_args {
@@ -88,7 +90,7 @@ pub fn generate_random_program_impl<Ctx: CompilerContext>(
                     .take(3)
                     .map(char::from)
                     .collect();
-                let arg_name = if rng.gen() {
+                let arg_name = if weighted_bool(rng, CHANCE_OF_NAMED_ARG) {
                     rng.gen_range('a'..='z').to_string() + &tail
                 } else {
                     let s = format!("arg_{}", arg_index);
