@@ -9,7 +9,7 @@ pub fn pretty<C: CompilerContext + ?Sized>(context: &C, id: C::ID) -> String {
     }
     if let Ok(c) = context.get_call(id) {
         let callee = context.pretty(c.callee);
-        let is_operator_call = if let Ok(sym) = context.get_symbol(c.callee) {
+        let mut is_operator_call = if let Ok(sym) = context.get_symbol(c.callee) {
             sym.is_operator
         } else {
             false
@@ -23,16 +23,13 @@ pub fn pretty<C: CompilerContext + ?Sized>(context: &C, id: C::ID) -> String {
                     arg_num += 1;
                     context.pretty(*arg)
                 } else {
-                    let arg = format!("{}={}", name, context.pretty(*arg));
-                    if is_operator_call {
-                        format!("({})", arg)
-                    } else {
-                        arg
-                    }
+                    is_operator_call = false;
+                    format!("{}={}", name, context.pretty(*arg))
                 }
             })
             .collect();
         if is_operator_call {
+            let args: Vec<String> = args.iter().map(|arg| format!("({})", arg)).collect();
             let args = args.join(&callee);
             return format!("({}{})", if c.args.len() < 2 { &callee } else { "" }, args);
         }
