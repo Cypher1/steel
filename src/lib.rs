@@ -42,14 +42,14 @@ use super::*;
 use gen_code::{generate_random_program, Spec};
 
 fn test_with_program<Ctx: CompilerContext>(){
-    let size: usize = 10;
+    let size: usize = 100;
     let spec = Spec::default().sized(size);
     let mut rng = rand::thread_rng();
     let mut store = ast::Ast::new();
     let program = generate_random_program("ast generator", &mut store, &spec, &mut rng);
     let program = store.pretty(program);
 
-    handle::<ecs::Ecs>(&program).expect("Should be able to eval program");
+    handle::<ecs::Ecs>(&program).expect(&format!("Should be able to eval program:\n{}", program))
 }
 
 #[test]
