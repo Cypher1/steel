@@ -15,7 +15,7 @@ mod pretty_printer;
 #[macro_use]
 mod assertions;
 #[cfg(test)]
-mod tests;
+mod integration_tests;
 
 pub use crate::compiler_context::CompilerContext;
 use crate::interpreter::{EvalState, eval};
