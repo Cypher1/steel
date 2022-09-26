@@ -8,6 +8,8 @@ mod error;
 pub mod gen_code;
 pub mod nodes;
 mod parser;
+mod interpreter;
+mod pretty_printer;
 
 #[cfg(test)]
 #[macro_use]
@@ -16,7 +18,7 @@ mod assertions;
 mod tests;
 
 pub use crate::compiler_context::CompilerContext;
-use crate::compiler_context::EvalState;
+use crate::interpreter::{EvalState, eval};
 pub use crate::error::SteelErr;
 use crate::parser::program;
 
@@ -27,10 +29,10 @@ where
     let mut store = S::new();
     let (_input, expr) = program(&mut store, line)?;
     eprintln!("expr: {:?}", store.pretty(expr));
-    let mut stack = EvalState::default();
-    stack.function_stack.push(expr);
-    store.eval(&mut stack)?;
-    eprintln!("eval: {:?}", stack);
+    let mut state = EvalState::default();
+    let result_index = state.setup_call(expr);
+    eval(&store, &mut state)?;
+    eprintln!("eval: {:?} {:?}", state, result_index);
     Ok(())
 }
 

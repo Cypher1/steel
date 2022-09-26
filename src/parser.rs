@@ -98,6 +98,7 @@ pub fn operator_raw<'source, ID>(
     let precendence = match name {
         "+" => PLUS_PRECENDENCE,
         "*" => MUL_PRECENDENCE,
+        "=" => panic!("We don't support = ops right now...\n{}", input),
         _ => MAX_PRECENDENCE,
     };
     if precendence < *min_prec {
@@ -193,7 +194,8 @@ where
         // Prefix operator e.g. -3.
         let mut ignore_prec = INIT_PRECENDENCE;
         if let Ok((input, right)) = expr(context, input, &mut ignore_prec) {
-            let call = context.add(Call::new(op, vec![("arg_0".to_string(), right)]));
+            let z = context.add(0);
+            let call = context.add(Call::new(op, vec![("arg_0".to_string(), z), ("arg_1".to_string(), right)]));
             return Ok((input, call));
         }
         // Operator expression e.g. f=+.
