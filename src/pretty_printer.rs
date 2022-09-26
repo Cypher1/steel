@@ -29,7 +29,6 @@ pub fn pretty<C: CompilerContext + ?Sized>(context: &C, id: C::ID) -> String {
             })
             .collect();
         if is_operator_call {
-            let args: Vec<String> = args.iter().map(|arg| format!("({})", arg)).collect();
             let args = args.join(&callee);
             return format!("({}{})", if c.args.len() < 2 { &callee } else { "" }, args);
         }
