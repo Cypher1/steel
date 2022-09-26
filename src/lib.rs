@@ -42,7 +42,7 @@ use super::*;
 use gen_code::{generate_random_program, Spec};
 
 fn test_with_program<Ctx: CompilerContext>(){
-    let size: usize = 1000;
+    let size: usize = 10;
     let spec = Spec::default().sized(size);
     let mut rng = rand::thread_rng();
     let mut store = ast::Ast::new();

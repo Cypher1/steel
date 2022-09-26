@@ -15,7 +15,9 @@ pub fn pretty<C: CompilerContext + ?Sized>(context: &C, id: C::ID) -> String {
             false
         };
         let mut arg_num = 0;
-        let args: Vec<String> = c
+        let args: Vec<String> = {
+            let ref mut is_operator_call = is_operator_call;
+            c
             .args
             .iter()
             .map(|(name, arg)| {
@@ -23,11 +25,12 @@ pub fn pretty<C: CompilerContext + ?Sized>(context: &C, id: C::ID) -> String {
                     arg_num += 1;
                     context.pretty(*arg)
                 } else {
-                    is_operator_call = false;
+                    *is_operator_call = false;
                     format!("{}={}", name, context.pretty(*arg))
                 }
             })
-            .collect();
+            .collect()
+        };
         if is_operator_call {
             let args = args.join(&callee);
             return format!("({}{})", if c.args.len() < 2 { &callee } else { "" }, args);
