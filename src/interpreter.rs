@@ -138,7 +138,7 @@ pub fn perform<C: CompilerContext>(
         // load in all the args
         let result = state.setup_call_to(c.callee, res_index, args+c.args.len());
         trace!("  inner {:?} -> {}", &result, context.pretty(c.callee));
-        for (name, arg) in &c.args {
+        for (name, arg) in c.args.iter().rev() {
             trace!("    arg {:?} -> {}", &name, context.pretty(*arg));
             let index = state.setup_call(*arg, 0);
             let entries = state.bindings.entry(name.clone()).or_insert_with(Vec::new);
