@@ -60,10 +60,8 @@ where
     eprintln!(" as_tree={}", &pretty);
     if let Some(prints_as) = &case.prints_as {
         assert_eq!(&pretty, prints_as, "Is expected to print as");
-    } else {
-        if !case.no_round_trip {
-            assert_eq!(&pretty, txt, "Is expected to round trip");
-        }
+    } else if !case.no_round_trip {
+        assert_eq!(&pretty, txt, "Is expected to round trip");
     }
     eprintln!(
         "    Mem usage: {:?}/{:?}",

@@ -16,7 +16,7 @@ fn criterion_benchmark_with<T: CompilerContext>(
     eprintln!("testing {} with {}\n{}", name, spec.size, program);
     c.bench_function(
         &format!("{} parse random program {}", name, spec.size),
-        |b| b.iter(|| handle::<T>(black_box(&program))),
+        |b| b.iter(|| handle::<T>(black_box(program))),
     );
 }
 

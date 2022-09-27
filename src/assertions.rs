@@ -11,7 +11,7 @@ macro_rules! assert_is_err {
 #[macro_export]
 macro_rules! assert_err_is {
     ($value: expr, $msg: expr $(,)?) => {
-        let err = crate::assert_is_err!($value);
+        let err = $crate::assert_is_err!($value);
         assert_eq!(format!("{}", err), $msg);
     };
 }

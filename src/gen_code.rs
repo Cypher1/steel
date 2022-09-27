@@ -59,9 +59,9 @@ pub fn generate_random_program<Ctx: CompilerContext>(
     spec: &Spec,
     rng: &mut ThreadRng,
 ) -> Ctx::ID {
-    let r = generate_random_program_impl::<Ctx>(_name, store, spec, rng);
+    
     // eprintln!(">> {}", store.pretty(r));
-    r
+    generate_random_program_impl::<Ctx>(_name, store, spec, rng)
 }
 
 pub fn generate_random_program_impl<Ctx: CompilerContext>(

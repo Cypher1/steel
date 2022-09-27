@@ -19,7 +19,7 @@ pub fn pretty<C: CompilerContext + ?Sized>(context: &C, id: C::ID) -> String {
         };
         let mut arg_num = 0;
         let args: Vec<String> = {
-            let ref mut is_operator_call = is_operator_call;
+            let is_operator_call = &mut is_operator_call;
             c
             .args
             .iter()
