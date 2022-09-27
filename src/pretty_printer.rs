@@ -2,6 +2,9 @@ use crate::compiler_context::CompilerContext;
 
 pub fn pretty<C: CompilerContext + ?Sized>(context: &C, id: C::ID) -> String {
     if let Ok(v) = context.get_i64(id) {
+        if *v < 0 {
+            return format!("({})", v);
+        }
         return format!("{}", v);
     }
     if let Ok(s) = context.get_symbol(id) {
