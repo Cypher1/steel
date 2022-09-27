@@ -22,7 +22,7 @@ fn criterion_benchmark_with<T: CompilerContext>(
 
 fn criterion_benchmark(c: &mut Criterion) {
     let mut rng = rand::thread_rng();
-    for i in 0..3 {
+    for i in 0..4 {
         let size: usize = 10usize.pow(i);
         let spec = Spec::default().sized(size);
         let mut store = ast::Ast::new();
