@@ -30,7 +30,7 @@ where
     let (_input, expr) = program(&mut store, line)?;
     eprintln!("expr: {:?}", store.pretty(expr));
     let mut state = EvalState::default();
-    let result_index = state.setup_call(expr);
+    let result_index = state.setup_call(expr, 0);
     eval(&store, &mut state)?;
     eprintln!("eval: {:?} {:?}", state, result_index);
     Ok(())
