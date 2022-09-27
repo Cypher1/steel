@@ -21,6 +21,7 @@ pub use crate::compiler_context::CompilerContext;
 use crate::interpreter::{EvalState, eval};
 pub use crate::error::SteelErr;
 use crate::parser::program;
+use log::debug;
 
 pub fn handle<S: CompilerContext>(line: &str) -> Result<i64, SteelErr>
 where
@@ -28,11 +29,11 @@ where
 {
     let mut store = S::new();
     let (_input, expr) = program(&mut store, line)?;
-    eprintln!("expr: {:?}", store.pretty(expr));
+    debug!("expr: {:?}", store.pretty(expr));
     let mut state = EvalState::default();
     let result_index = state.setup_call(expr, 0);
     eval(&store, &mut state)?;
-    eprintln!("eval: {:?} {:?}", state, state.mem_stack.get(result_index));
+    debug!("eval: {:?} {:?}", state, state.mem_stack.get(result_index));
     Ok(state.mem_stack[result_index])
 }
 
@@ -40,6 +41,7 @@ where
 mod test {
 use super::*;
 use gen_code::{generate_random_program, Spec};
+use log::error;
 
 fn test_with_program<Ctx: CompilerContext>(){
     let size: usize = 100;
@@ -50,8 +52,8 @@ fn test_with_program<Ctx: CompilerContext>(){
     let program = store.pretty(program);
 
     match handle::<ecs::Ecs>(&program) {
-        Ok(r) => eprintln!("result {:?}", r),
-        Err(e) => panic!("Should be able to eval program:\n{}\nerror: {:?}", program, e),
+        Ok(r) => debug!("result {:?}", r),
+        Err(e) => error!("Should be able to eval program:\n{}\nerror: {:?}", program, e),
     }
 }
 

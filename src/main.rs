@@ -1,10 +1,12 @@
 use steel::{ast, ecs, handle, SteelErr};
+use log::{debug, error};
 
 fn main() -> Result<(), SteelErr> {
+    env_logger::init();
     let mut args = std::env::args();
     let _program_path = args.next();
     for arg in args {
-        eprintln!("unknown argument: {}", arg);
+        error!("unknown argument: {}", arg);
         std::process::exit(1);
     }
     loop {
@@ -12,8 +14,8 @@ fn main() -> Result<(), SteelErr> {
         if std::io::stdin().read_line(&mut line)? == 0 {
             return Ok(());
         }
-        eprintln!("line: {}", line);
-        eprintln!("ast: {:?}", handle::<ast::Ast>(&line)?);
-        eprintln!("ecs: {:?}", handle::<ecs::Ecs>(&line)?);
+        debug!("line: {}", line);
+        debug!("ast: {:?}", handle::<ast::Ast>(&line)?);
+        debug!("ecs: {:?}", handle::<ecs::Ecs>(&line)?);
     }
 }

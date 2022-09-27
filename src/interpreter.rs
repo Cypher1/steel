@@ -1,6 +1,7 @@
 use crate::compiler_context::CompilerContext;
 use crate::error::SteelErr;
 use std::collections::HashMap;
+use log::{trace, error};
 
 #[derive(Debug)]
 pub struct EvalState<T, ID> {
@@ -56,7 +57,7 @@ pub fn eval<'context, C: CompilerContext>(context: &'context C, state: &mut Eval
     where
     <C as CompilerContext>::E: Into<SteelErr>, {
     while let Some((f, res_addr, args)) = state.function_stack.pop() {
-        eprintln!("Step {:?}:\n  {}", f, context.pretty(f));
+        trace!("Step {:?}:\n  {}", f, context.pretty(f));
         step(context, state, f, res_addr, args)?;
     }
     Ok(())
@@ -74,7 +75,7 @@ pub fn step<'context, C: CompilerContext>(
     if let Some(s) = perform(context, state, id, res_index, args)? {
         state.mem_stack[res_index] = s;
         if args > 0 {
-            eprintln!("Forgetting {:?} args", args);
+            trace!("Forgetting {:?} args", args);
             let final_length = state.mem_stack.len().saturating_sub(args);
             state.mem_stack.truncate(final_length);
         }
@@ -129,9 +130,9 @@ pub fn perform<'context, C: CompilerContext>(
     if let Ok(c) = context.get_call(id) {
         // load in all the args
         let result = state.setup_call_to(c.callee, res_index, args+c.args.len());
-        eprintln!("  inner {:?} -> {}", &result, context.pretty(c.callee));
+        trace!("  inner {:?} -> {}", &result, context.pretty(c.callee));
         for (name, arg) in &c.args {
-            eprintln!("    arg {:?} -> {}", &name, context.pretty(*arg));
+            trace!("    arg {:?} -> {}", &name, context.pretty(*arg));
             let index = state.setup_call(*arg, 0);
             let entries = state.bindings.entry(name.clone()).or_insert_with(Vec::new);
             entries.push(index); // Vec allows shadowing
@@ -139,6 +140,6 @@ pub fn perform<'context, C: CompilerContext>(
         return Ok(None);
     }
     // format!("{{node? {:?}}}", id)
-    eprintln!("Unknown node {}, {:?}", context.pretty(id), id);
+    error!("Unknown node {}, {:?}", context.pretty(id), id);
     todo!("Unknown node {:?}", id);
 }

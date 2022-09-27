@@ -38,6 +38,7 @@ where
     <T as CompilerContext>::ID: std::fmt::Debug,
     SteelErr: From<<T as CompilerContext>::E>,
 {
+    let _ = env_logger::builder().is_test(true).try_init();
     let txt = case.txt.as_ref().expect("Should have an input expression");
     eprintln!("TEST: {} -> {}", name, txt);
     let (left_over, result) = match program(ctx, txt) {
