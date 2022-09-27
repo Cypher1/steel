@@ -49,7 +49,10 @@ fn test_with_program<Ctx: CompilerContext>(){
     let program = generate_random_program("ast generator", &mut store, &spec, &mut rng);
     let program = store.pretty(program);
 
-    handle::<ecs::Ecs>(&program).expect(&format!("Should be able to eval program:\n{}", program))
+    match handle::<ecs::Ecs>(&program) {
+        Ok(r) => eprintln!("result {:?}", r),
+        Err(e) => panic!("Should be able to eval program:\n{}\nerror: {:?}", program, e),
+    }
 }
 
 #[test]
