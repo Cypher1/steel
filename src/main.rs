@@ -13,7 +13,7 @@ fn main() -> Result<(), SteelErr> {
             return Ok(());
         }
         eprintln!("line: {}", line);
-        handle::<ast::Ast>(&line)?;
-        handle::<ecs::Ecs>(&line)?;
+        eprintln!("ast: {:?}", handle::<ast::Ast>(&line)?);
+        eprintln!("ecs: {:?}", handle::<ecs::Ecs>(&line)?);
     }
 }

@@ -22,7 +22,7 @@ use crate::interpreter::{EvalState, eval};
 pub use crate::error::SteelErr;
 use crate::parser::program;
 
-pub fn handle<S: CompilerContext>(line: &str) -> Result<(), SteelErr>
+pub fn handle<S: CompilerContext>(line: &str) -> Result<i64, SteelErr>
 where
     SteelErr: From<<S as CompilerContext>::E>,
 {
@@ -32,8 +32,8 @@ where
     let mut state = EvalState::default();
     let result_index = state.setup_call(expr, 0);
     eval(&store, &mut state)?;
-    eprintln!("eval: {:?} {:?}", state, result_index);
-    Ok(())
+    eprintln!("eval: {:?} {:?}", state, state.mem_stack.get(result_index));
+    Ok(state.mem_stack[result_index])
 }
 
 #[cfg(test)]
