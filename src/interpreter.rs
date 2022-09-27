@@ -76,6 +76,19 @@ pub fn step<C: CompilerContext>(
     Ok(())
 }
 
+fn un_op<C: CompilerContext, F: FnOnce(i64)->i64>(
+    _context: &C,
+    state: &mut EvalState<i64, C::ID>,
+    name: &str,
+    op: F) -> i64 {
+    let l = state.get_value_for("arg_0");
+    if let Some(l) = l {
+        op(l)
+    } else {
+        todo!("{} expects one argument got {:?}", name, &l);
+    }
+}
+
 fn bin_op<C: CompilerContext, F: FnOnce(i64, i64)->i64>(
     _context: &C,
     state: &mut EvalState<i64, C::ID>,
@@ -111,6 +124,7 @@ pub fn perform<C: CompilerContext>(
             value
         } else {
             match &*s.name {
+                "putchar" => un_op(context, state, "Putchar", |i|{print!("{}", char::from_u32(i as u32).expect("putchar expects u32"));0}),
                 "+" => bin_op(context, state, "Addition", |l, r|l+r),
                 "-" => bin_op(context, state, "Subtraction", |l, r|l-r),
                 "*" => bin_op(context, state, "Multiplication", |l, r|l*r),

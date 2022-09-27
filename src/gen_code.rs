@@ -21,6 +21,10 @@ fn weighted_bool(rng: &mut ThreadRng, chance: f64) -> bool {
 
 impl Default for Spec {
     fn default() -> Self {
+        let un_ops = vec![
+            ("putchar".to_string(), false),
+            ("-".to_string(), true),
+        ];
         let bin_ops = vec![
             ("+".to_string(), true),
             ("*".to_string(), true),
@@ -29,6 +33,7 @@ impl Default for Spec {
         ];
         let mut symbols = HashMap::new();
         symbols.insert(2, bin_ops);
+        symbols.insert(1, un_ops);
         Self {
             size: 1,
             arity: 0,
