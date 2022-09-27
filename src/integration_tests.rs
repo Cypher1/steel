@@ -33,7 +33,7 @@ impl Case {
     }
 }
 
-fn run_test<T: CompilerContext>(name: &str, case: &Case, ref mut ctx: T) -> Result<(), SteelErr>
+fn run_test<T: CompilerContext>(name: &str, case: &Case, mut ctx: T) -> Result<(), SteelErr>
 where
     <T as CompilerContext>::ID: std::fmt::Debug,
     SteelErr: From<<T as CompilerContext>::E>,
@@ -41,7 +41,7 @@ where
     let _ = env_logger::builder().is_test(true).try_init();
     let txt = case.txt.as_ref().expect("Should have an input expression");
     eprintln!("TEST: {} -> {}", name, txt);
-    let (left_over, result) = match program(ctx, txt) {
+    let (left_over, result) = match program(&mut ctx, txt) {
         Ok((left_over, result)) => (left_over, result),
         Err(e) => {
             let e = e.into();

@@ -45,7 +45,7 @@ impl<T: Default + Clone, ID> EvalState<T, ID> {
 }
 
 
-pub fn eval<'context, C: CompilerContext>(context: &'context C, state: &mut EvalState<i64, C::ID>) -> Result<(), C::E>
+pub fn eval<C: CompilerContext>(context: &C, state: &mut EvalState<i64, C::ID>) -> Result<(), C::E>
     where
     <C as CompilerContext>::E: Into<SteelErr>, {
     while let Some((f, res_addr, args)) = state.function_stack.pop() {
@@ -56,8 +56,8 @@ pub fn eval<'context, C: CompilerContext>(context: &'context C, state: &mut Eval
     Ok(())
 }
 
-pub fn step<'context, C: CompilerContext>(
-    context: &'context C,
+pub fn step<C: CompilerContext>(
+    context: &C,
     state: &mut EvalState<i64, C::ID>,
     id: C::ID,
     res_index: usize,
@@ -76,8 +76,8 @@ pub fn step<'context, C: CompilerContext>(
     Ok(())
 }
 
-fn bin_op<'context, C: CompilerContext, F: FnOnce(i64, i64)->i64>(
-    _context: &'context C,
+fn bin_op<C: CompilerContext, F: FnOnce(i64, i64)->i64>(
+    _context: &C,
     state: &mut EvalState<i64, C::ID>,
     name: &str,
     op: F) -> i64 {
@@ -90,8 +90,8 @@ fn bin_op<'context, C: CompilerContext, F: FnOnce(i64, i64)->i64>(
     }
 }
 
-pub fn perform<'context, C: CompilerContext>(
-    context: &'context C,
+pub fn perform<C: CompilerContext>(
+    context: &C,
     state: &mut EvalState<i64, C::ID>,
     id: C::ID,
     res_index: usize,
