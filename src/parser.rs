@@ -96,9 +96,8 @@ pub fn operator_raw<'source, ID>(
 ) -> SResult<'source, Symbol<ID>> {
     let (input, name) = take_while_m_n(1, 3, is_operator_char)(input)?;
     let precendence = match name {
-        "+" => PLUS_PRECENDENCE,
-        "*" => MUL_PRECENDENCE,
-        "=" => panic!("We don't support = ops right now...\n{}", input),
+        "-" | "+" => PLUS_PRECENDENCE,
+        "/" | "*" => MUL_PRECENDENCE,
         _ => MAX_PRECENDENCE,
     };
     if precendence < *min_prec {
