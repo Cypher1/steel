@@ -34,21 +34,13 @@ impl<T: Default + Clone, ID> EvalState<T, ID> {
 
     pub fn get_value_for(&mut self, name: &str) -> Option<T> {
         let mut bindings = self.bindings.get(name).cloned().unwrap_or_default();
-        loop {
-            if let Some(binding) = bindings.last() {
-                if *binding < self.mem_stack.len() {
-                    break;
-                }
-            } else {
-                break;
+        while let Some(binding) = bindings.last() {
+            if *binding < self.mem_stack.len() {
+                return Some(self.mem_stack[*binding].clone());
             }
             bindings.pop();
         }
-        if let Some(binding) = bindings.last() {
-            Some(self.mem_stack[*binding].clone())
-        } else {
-            None
-        }
+        None
     }
 }
 
