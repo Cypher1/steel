@@ -57,7 +57,8 @@ pub fn eval<'context, C: CompilerContext>(context: &'context C, state: &mut Eval
     where
     <C as CompilerContext>::E: Into<SteelErr>, {
     while let Some((f, res_addr, args)) = state.function_stack.pop() {
-        trace!("Step {:?}:\n  {}", f, context.pretty(f));
+        trace!("Step {:?}:", f);
+        trace!("{}", context.pretty(f));
         step(context, state, f, res_addr, args)?;
     }
     Ok(())

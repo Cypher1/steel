@@ -53,7 +53,11 @@ fn test_with_program<Ctx: CompilerContext>(){
 
     match handle::<ecs::Ecs>(&program) {
         Ok(r) => debug!("result {:?}", r),
-        Err(e) => error!("Should be able to eval program:\n{}\nerror: {:?}", program, e),
+        Err(e) => {
+            error!("Should be able to eval program:");
+            error!("{}", program);
+            error!("error: {:?}", e);
+        }
     }
 }
 
