@@ -82,6 +82,20 @@ pub fn step<'context, C: CompilerContext>(
     Ok(())
 }
 
+fn bin_op<'context, C: CompilerContext, F: FnOnce(i64, i64)->i64>(
+    _context: &'context C,
+    state: &mut EvalState<i64, C::ID>,
+    name: &str,
+    op: F) -> i64 {
+    let l = state.get_value_for("arg_0");
+    let r = state.get_value_for("arg_1");
+    if let (Some(l), Some(r)) = (l, r) {
+        op(l,r)
+    } else {
+        todo!("{} expects two arguments got {:?} {:?}", name, &l, &r);
+    }
+}
+
 pub fn perform<'context, C: CompilerContext>(
     context: &'context C,
     state: &mut EvalState<i64, C::ID>,
@@ -103,42 +117,10 @@ pub fn perform<'context, C: CompilerContext>(
             value
         } else {
             match &*s.name {
-                "*" => {
-                    let l = state.get_value_for("arg_0");
-                    let r = state.get_value_for("arg_1");
-                    if let (Some(l), Some(r)) = (l, r) {
-                        l*r
-                    } else {
-                        todo!("Multiplication expects two arguments got {:?} {:?}", &l, &r);
-                    }
-                }
-                "+" => {
-                    let l = state.get_value_for("arg_0");
-                    let r = state.get_value_for("arg_1");
-                    if let (Some(l), Some(r)) = (l, r) {
-                        l+r
-                    } else {
-                        todo!("Addition expects two arguments got {:?} {:?}", &l, &r);
-                    }
-                }
-                "/" => {
-                    let l = state.get_value_for("arg_0");
-                    let r = state.get_value_for("arg_1");
-                    if let (Some(l), Some(r)) = (l, r) {
-                        l/r
-                    } else {
-                        todo!("Division expects two arguments got {:?} {:?}", &l, &r);
-                    }
-                }
-                "-" => {
-                    let l = state.get_value_for("arg_0");
-                    let r = state.get_value_for("arg_1");
-                    if let (Some(l), Some(r)) = (l, r) {
-                        l-r
-                    } else {
-                        todo!("Subtraction expects two arguments got {:?} {:?}", &l, &r);
-                    }
-                }
+                "+" => bin_op(context, state, "Addition", |l, r|l+r),
+                "-" => bin_op(context, state, "Subtraction", |l, r|l-r),
+                "*" => bin_op(context, state, "Multiplication", |l, r|l*r),
+                "/" => bin_op(context, state, "Division", |l, r|l/r),
                 _ => todo!("Unknown variable: {}", s.name),
             }
         };
