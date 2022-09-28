@@ -124,7 +124,14 @@ pub fn perform<C: CompilerContext>(
             value
         } else {
             match &*s.name {
-                "putchar" => un_op(context, state, "Putchar", |i|{print!("{}", char::from_u32(i as u32).expect("putchar expects u32"));0}),
+                "putchar" => un_op(context, state, "Putchar", |i|{
+                    if let Some(c) = char::from_u32(i as u32) {
+                        print!("{}", c);
+                        1
+                    } else {
+                        0
+                    }
+                }),
                 "+" => bin_op(context, state, "Addition", |l, r|l+r),
                 "-" => bin_op(context, state, "Subtraction", |l, r|l-r),
                 "*" => bin_op(context, state, "Multiplication", |l, r|l*r),
