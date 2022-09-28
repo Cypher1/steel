@@ -59,16 +59,16 @@ macro_rules! make_arena_provider {
                 (&mut self.entities, &mut self.$accessor)
             }
             fn get_impl(&self, id: ID) -> Result<&$type, EcsError> {
-                let ent = self.entities.get(id)?;
+                let ent = *self.entities.get(id)?;
                 match ent {
-                    Entity::$kind(component_id) => Ok(self.get_component(*component_id)?),
+                    Entity::$kind(component_id) => Ok(self.get_component(component_id)?),
                     _ => Err(EcsError::ComponentNotFound(id)),
                 }
             }
             fn get_mut_impl(&mut self, id: ID) -> Result<&mut $type, EcsError> {
-                let ent = self.entities.get(id)?;
+                let ent = *self.entities.get(id)?;
                 match ent {
-                    Entity::$kind(component_id) => Ok(self.get_component_mut(*component_id)?),
+                    Entity::$kind(component_id) => Ok(self.get_component_mut(component_id)?),
                     _ => Err(EcsError::ComponentNotFound(id)),
                 }
             }
