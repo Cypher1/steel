@@ -15,7 +15,9 @@ fn main() -> Result<(), SteelErr> {
             return Ok(());
         }
         debug!("line: {}", line);
-        debug!("ast: {:?}", handle::<ast::Ast>(&line)?);
-        debug!("ecs: {:?}", handle::<ecs::Ecs>(&line)?);
+        let ast = handle::<ast::Ast>(&line)?;
+        debug!("ast: {:?}", ast);
+        let ecs = handle::<ecs::Ecs>(&line)?;
+        debug!("ecs: {:?}", ecs);
     }
 }
