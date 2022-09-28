@@ -21,18 +21,39 @@ pub use crate::compiler_context::CompilerContext;
 use crate::interpreter::{EvalState, eval};
 pub use crate::error::SteelErr;
 use crate::parser::program;
-use log::debug;
+use log::{debug, error};
 
-pub fn handle<S: CompilerContext>(line: &str) -> Result<i64, SteelErr>
-where
-    SteelErr: From<<S as CompilerContext>::E>,
-{
+pub fn run<T: CompilerContext
+>(name: &str) {
+    run_inner::<T>(name).expect("unexpected error");
+}
+
+fn run_inner<T: CompilerContext>(name: &str) -> Result<(), SteelErr> {
+    env_logger::init();
+    let mut args = std::env::args();
+    let _program_path = args.next();
+    for arg in args {
+        error!("unknown argument: {}", arg);
+        std::process::exit(1);
+    }
+    loop {
+        let mut line = String::new();
+        if std::io::stdin().read_line(&mut line)? == 0 {
+            return Ok(());
+        }
+        debug!("line: {}", line);
+        let store = handle::<T>(&line)?;
+        debug!("{}: {:?}", name, store);
+    }
+}
+
+pub fn handle<S: CompilerContext>(line: &str) -> Result<i64, SteelErr> {
     let mut store = S::new();
     let (_input, expr) = program(&mut store, line)?;
     debug!("expr: {:?}", store.pretty(expr));
     let mut state = EvalState::default();
     let result_index = state.setup_call(expr, 0);
-    eval(&store, &mut state)?;
+    eval(&store, &mut state).map_err(Into::into)?;
     debug!("eval: {:?} {:?}", state, state.mem_stack.get(result_index));
     Ok(state.mem_stack[result_index])
 }

@@ -12,7 +12,7 @@ pub trait CompilerContext:
     + NodeStore<Self::ID, i64, Self::E>
 {
     type ID: Copy + std::fmt::Debug;
-    type E;
+    type E: Into<crate::error::SteelErr>;
 
     fn new() -> Self;
     fn get_symbol(&self, id: Self::ID) -> Result<&Symbol<Self::ID>, Self::E> {
