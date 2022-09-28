@@ -23,7 +23,6 @@ impl Default for Spec {
     fn default() -> Self {
         let un_ops = vec![
             ("putchar".to_string(), false),
-            ("-".to_string(), true),
         ];
         let bin_ops = vec![
             ("+".to_string(), true),
