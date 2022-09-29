@@ -2,8 +2,8 @@ use crate::{
     nodes::{Call, Symbol},
     CompilerContext,
 };
-use std::collections::HashMap;
 use rand::{distributions::Alphanumeric, rngs::ThreadRng, Rng};
+use std::collections::HashMap;
 
 pub struct Spec {
     pub size: usize,
@@ -21,9 +21,7 @@ fn weighted_bool(rng: &mut ThreadRng, chance: f64) -> bool {
 
 impl Default for Spec {
     fn default() -> Self {
-        let un_ops = vec![
-            ("putchar".to_string(), false),
-        ];
+        let un_ops = vec![("putchar".to_string(), false)];
         let bin_ops = vec![
             ("+".to_string(), true),
             ("*".to_string(), true),
@@ -63,7 +61,6 @@ pub fn generate_random_program<Ctx: CompilerContext>(
     spec: &Spec,
     rng: &mut ThreadRng,
 ) -> Ctx::ID {
-    
     // eprintln!(">> {}", store.pretty(r));
     generate_random_program_impl::<Ctx>(_name, store, spec, rng)
 }
@@ -98,7 +95,7 @@ pub fn generate_random_program_impl<Ctx: CompilerContext>(
                     rng.gen_range('a'..='z').to_string() + &tail
                 } else {
                     let s = format!("arg_{}", arg_index);
-                    arg_index+=1;
+                    arg_index += 1;
                     s
                 };
                 inner_spec = inner_spec.add_symbol(arg_name.clone(), false, 0);

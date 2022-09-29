@@ -1,7 +1,7 @@
 use crate::compiler_context::CompilerContext;
 use crate::error::SteelErr;
+use log::{error, trace};
 use std::collections::HashMap;
-use log::{trace, error};
 use std::sync::{Arc, Mutex};
 
 type Imp<T, ID> = Arc<Mutex<dyn FnMut(&mut EvalState<T, ID>) -> T>>;
@@ -13,10 +13,7 @@ pub struct Impl<T, ID> {
 
 impl<T, ID> Impl<T, ID> {
     fn new(name: &'static str, imp: Imp<T, ID>) -> Self {
-        Self {
-            name,
-            imp,
-        }
+        Self { name, imp }
     }
 }
 
@@ -32,26 +29,29 @@ pub struct EvalState<T, ID> {
     pub function_stack: Vec<(ID, usize, usize)>, // name -> memory address to store result.
     // Record all the bindings (i.e. name->index in memory stack).
     pub bindings: HashMap<String, Vec<usize>>, // name -> memory address to load result.
-    pub mem_stack: Vec<T>, // results.
+    pub mem_stack: Vec<T>,                     // results.
 }
 
 impl<ID> Default for EvalState<i64, ID> {
     fn default() -> Self {
         let mut externs: Vec<Impl<i64, ID>> = Vec::new();
         let _putchar_def = externs.len();
-        externs.push(Impl::new("putchar", Arc::new(Mutex::new(|state: &mut EvalState<i64, ID>|{
-            let i = if let Some(i) = state.get_value_for("arg_0") {
-                i
-            } else {
-                return 0;
-            };
-            if let Some(c) = char::from_u32(*i as u32) {
-                print!("{}", c);
-                1
-            } else {
-                0
-            }
-        }))));
+        externs.push(Impl::new(
+            "putchar",
+            Arc::new(Mutex::new(|state: &mut EvalState<i64, ID>| {
+                let i = if let Some(i) = state.get_value_for("arg_0") {
+                    i
+                } else {
+                    return 0;
+                };
+                if let Some(c) = char::from_u32(*i as u32) {
+                    print!("{}", c);
+                    1
+                } else {
+                    0
+                }
+            })),
+        ));
 
         Self {
             externs,
@@ -62,7 +62,7 @@ impl<ID> Default for EvalState<i64, ID> {
     }
 }
 impl<T: Default + Clone, ID> EvalState<T, ID> {
-    pub fn setup_call_to(&mut self, expr: ID, res:usize, args: usize) -> usize {
+    pub fn setup_call_to(&mut self, expr: ID, res: usize, args: usize) -> usize {
         self.function_stack.push((expr, res, args)); // to evaluate...
         res
     }
@@ -87,10 +87,10 @@ impl<T, ID> EvalState<T, ID> {
     }
 }
 
-
 pub fn eval<C: CompilerContext>(context: &C, state: &mut EvalState<i64, C::ID>) -> Result<(), C::E>
-    where
-    <C as CompilerContext>::E: Into<SteelErr>, {
+where
+    <C as CompilerContext>::E: Into<SteelErr>,
+{
     while let Some((f, res_addr, args)) = state.function_stack.pop() {
         trace!("Step {:?}:", f);
         trace!("{}", context.pretty(f));
@@ -104,10 +104,11 @@ pub fn step<C: CompilerContext>(
     state: &mut EvalState<i64, C::ID>,
     id: C::ID,
     res_index: usize,
-    args: usize // number of args to pop
+    args: usize, // number of args to pop
 ) -> Result<(), C::E>
-    where
-    <C as CompilerContext>::E: Into<SteelErr>, {
+where
+    <C as CompilerContext>::E: Into<SteelErr>,
+{
     if let Some(s) = perform(context, state, id, res_index, args)? {
         state.mem_stack[res_index] = s;
         if args > 0 {
@@ -119,15 +120,16 @@ pub fn step<C: CompilerContext>(
     Ok(())
 }
 
-fn bin_op<C: CompilerContext, F: FnOnce(i64, i64)->i64>(
+fn bin_op<C: CompilerContext, F: FnOnce(i64, i64) -> i64>(
     _context: &C,
     state: &mut EvalState<i64, C::ID>,
     name: &str,
-    op: F) -> i64 {
+    op: F,
+) -> i64 {
     let l = state.get_value_for("arg_0").cloned();
     let r = state.get_value_for("arg_1").cloned();
     if let (Some(l), Some(r)) = (l, r) {
-        op(l,r)
+        op(l, r)
     } else {
         todo!("{} expects two arguments got {:?} {:?}", name, &l, &r);
     }
@@ -138,17 +140,18 @@ pub fn perform<C: CompilerContext>(
     state: &mut EvalState<i64, C::ID>,
     id: C::ID,
     res_index: usize,
-    args: usize // number of args to pop
+    args: usize, // number of args to pop
 ) -> Result<Option<i64>, C::E>
-    where
-    <C as CompilerContext>::E: Into<SteelErr>, {
+where
+    <C as CompilerContext>::E: Into<SteelErr>,
+{
     if let Ok(v) = context.get_i64(id) {
         return Ok(Some(*v));
     }
     if let Ok(s) = context.get_symbol(id) {
         // if let Some(bound) = s.bound_to {
-            // state.function_stack.push((bound, res_index));
-            // Ok(())
+        // state.function_stack.push((bound, res_index));
+        // Ok(())
         // }
         let r = if let Some(value) = state.get_value_for(&s.name) {
             *value
@@ -159,10 +162,10 @@ pub fn perform<C: CompilerContext>(
                     let mut imp = imp.lock().unwrap();
                     imp(state)
                 }
-                "+" => bin_op(context, state, "Addition", |l, r|l+r),
-                "-" => bin_op(context, state, "Subtraction", |l, r|l-r),
-                "*" => bin_op(context, state, "Multiplication", |l, r|l*r),
-                "/" => bin_op(context, state, "Division", |l, r|l/r),
+                "+" => bin_op(context, state, "Addition", |l, r| l + r),
+                "-" => bin_op(context, state, "Subtraction", |l, r| l - r),
+                "*" => bin_op(context, state, "Multiplication", |l, r| l * r),
+                "/" => bin_op(context, state, "Division", |l, r| l / r),
                 _ => todo!("Unknown variable: {}", s.name),
             }
         };
@@ -170,7 +173,7 @@ pub fn perform<C: CompilerContext>(
     }
     if let Ok(c) = context.get_call(id) {
         // load in all the args
-        let result = state.setup_call_to(c.callee, res_index, args+c.args.len());
+        let result = state.setup_call_to(c.callee, res_index, args + c.args.len());
         trace!("  inner {:?} -> {}", &result, context.pretty(c.callee));
         for (name, arg) in c.args.iter().rev() {
             trace!("    arg {:?} -> {}", &name, context.pretty(*arg));

@@ -194,7 +194,10 @@ where
         let mut ignore_prec = INIT_PRECENDENCE;
         if let Ok((input, right)) = expr(context, input, &mut ignore_prec) {
             let z = context.add(0);
-            let call = context.add(Call::new(op, vec![("arg_0".to_string(), z), ("arg_1".to_string(), right)]));
+            let call = context.add(Call::new(
+                op,
+                vec![("arg_0".to_string(), z), ("arg_1".to_string(), right)],
+            ));
             return Ok((input, call));
         }
         // Operator expression e.g. f=+.
@@ -214,7 +217,7 @@ where
         }
         Err(nom::Err::Error(SteelErr::MalformedExpression(
             report.to_string(),
-            "the end of the input".to_string()
+            "the end of the input".to_string(),
         )))
     }
 }

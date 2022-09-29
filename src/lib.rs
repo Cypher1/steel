@@ -6,9 +6,9 @@ mod compiler_context;
 pub mod ecs;
 mod error;
 pub mod gen_code;
+mod interpreter;
 pub mod nodes;
 mod parser;
-mod interpreter;
 mod pretty_printer;
 
 #[cfg(test)]
@@ -18,13 +18,12 @@ mod assertions;
 mod integration_tests;
 
 pub use crate::compiler_context::CompilerContext;
-use crate::interpreter::{EvalState, eval};
 pub use crate::error::SteelErr;
+use crate::interpreter::{eval, EvalState};
 use crate::parser::program;
 use log::{debug, error};
 
-pub fn run<T: CompilerContext
->(name: &str) {
+pub fn run<T: CompilerContext>(name: &str) {
     run_inner::<T>(name).expect("unexpected error");
 }
 
@@ -60,36 +59,35 @@ pub fn handle<S: CompilerContext>(line: &str) -> Result<i64, SteelErr> {
 
 #[cfg(test)]
 mod test {
-use super::*;
-use gen_code::{generate_random_program, Spec};
-use log::error;
+    use super::*;
+    use gen_code::{generate_random_program, Spec};
+    use log::error;
 
-fn test_with_program<Ctx: CompilerContext>(){
-    let size: usize = 100;
-    let spec = Spec::default().sized(size);
-    let mut rng = rand::thread_rng();
-    let mut store = ast::Ast::new();
-    let program = generate_random_program("ast generator", &mut store, &spec, &mut rng);
-    let program = store.pretty(program);
+    fn test_with_program<Ctx: CompilerContext>() {
+        let size: usize = 100;
+        let spec = Spec::default().sized(size);
+        let mut rng = rand::thread_rng();
+        let mut store = ast::Ast::new();
+        let program = generate_random_program("ast generator", &mut store, &spec, &mut rng);
+        let program = store.pretty(program);
 
-    match handle::<ecs::Ecs>(&program) {
-        Ok(r) => debug!("result {:?}", r),
-        Err(e) => {
-            error!("Should be able to eval program:");
-            error!("{}", program);
-            error!("error: {:?}", e);
+        match handle::<ecs::Ecs>(&program) {
+            Ok(r) => debug!("result {:?}", r),
+            Err(e) => {
+                error!("Should be able to eval program:");
+                error!("{}", program);
+                error!("error: {:?}", e);
+            }
         }
     }
-}
 
-#[test]
-fn can_handle_random_programs_ast() {
-    test_with_program::<ast::Ast>();
-}
+    #[test]
+    fn can_handle_random_programs_ast() {
+        test_with_program::<ast::Ast>();
+    }
 
-#[test]
-fn can_handle_random_programs_ecs() {
-    test_with_program::<ecs::Ecs>();
-}
-
+    #[test]
+    fn can_handle_random_programs_ecs() {
+        test_with_program::<ecs::Ecs>();
+    }
 }
