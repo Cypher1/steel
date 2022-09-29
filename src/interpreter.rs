@@ -2,18 +2,59 @@ use crate::compiler_context::CompilerContext;
 use crate::error::SteelErr;
 use std::collections::HashMap;
 use log::{trace, error};
+use std::sync::{Arc, Mutex};
+
+type Imp<T, ID> = Arc<Mutex<dyn FnMut(&mut EvalState<T, ID>) -> T>>;
+
+pub struct Impl<T, ID> {
+    name: &'static str,
+    imp: Imp<T, ID>,
+}
+
+impl<T, ID> Impl<T, ID> {
+    fn new(name: &'static str, imp: Imp<T, ID>) -> Self {
+        Self {
+            name,
+            imp,
+        }
+    }
+}
+
+impl<T, ID> std::fmt::Debug for Impl<T, ID> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
+        write!(f, "<{}>", self.name)
+    }
+}
 
 #[derive(Debug)]
 pub struct EvalState<T, ID> {
+    pub externs: Vec<Impl<T, ID>>,
     pub function_stack: Vec<(ID, usize, usize)>, // name -> memory address to store result.
     // Record all the bindings (i.e. name->index in memory stack).
     pub bindings: HashMap<String, Vec<usize>>, // name -> memory address to load result.
     pub mem_stack: Vec<T>, // results.
 }
 
-impl<T, ID> Default for EvalState<T, ID> {
+impl<ID> Default for EvalState<i64, ID> {
     fn default() -> Self {
+        let mut externs: Vec<Impl<i64, ID>> = Vec::new();
+        let _putchar_def = externs.len();
+        externs.push(Impl::new("putchar", Arc::new(Mutex::new(|state: &mut EvalState<i64, ID>|{
+            let i = if let Some(i) = state.get_value_for("arg_0") {
+                i
+            } else {
+                return 0;
+            };
+            if let Some(c) = char::from_u32(*i as u32) {
+                print!("{}", c);
+                1
+            } else {
+                0
+            }
+        }))));
+
         Self {
+            externs,
             function_stack: Vec::new(),
             bindings: HashMap::new(),
             mem_stack: Vec::new(),
@@ -31,12 +72,14 @@ impl<T: Default + Clone, ID> EvalState<T, ID> {
         self.mem_stack.push(T::default()); // assume it's a 0...
         self.setup_call_to(expr, index, args)
     }
+}
 
-    pub fn get_value_for(&mut self, name: &str) -> Option<T> {
+impl<T, ID> EvalState<T, ID> {
+    pub fn get_value_for(&mut self, name: &str) -> Option<&T> {
         let mut bindings = self.bindings.get(name).cloned().unwrap_or_default();
         while let Some(binding) = bindings.last() {
             if *binding < self.mem_stack.len() {
-                return Some(self.mem_stack[*binding].clone());
+                return Some(&self.mem_stack[*binding]);
             }
             bindings.pop();
         }
@@ -83,7 +126,7 @@ fn un_op<C: CompilerContext, F: FnOnce(i64)->i64>(
     op: F) -> i64 {
     let l = state.get_value_for("arg_0");
     if let Some(l) = l {
-        op(l)
+        op(*l)
     } else {
         todo!("{} expects one argument got {:?}", name, &l);
     }
@@ -94,8 +137,8 @@ fn bin_op<C: CompilerContext, F: FnOnce(i64, i64)->i64>(
     state: &mut EvalState<i64, C::ID>,
     name: &str,
     op: F) -> i64 {
-    let l = state.get_value_for("arg_0");
-    let r = state.get_value_for("arg_1");
+    let l = state.get_value_for("arg_0").cloned();
+    let r = state.get_value_for("arg_1").cloned();
     if let (Some(l), Some(r)) = (l, r) {
         op(l,r)
     } else {
@@ -121,17 +164,14 @@ pub fn perform<C: CompilerContext>(
             // Ok(())
         // }
         let r = if let Some(value) = state.get_value_for(&s.name) {
-            value
+            *value
         } else {
             match &*s.name {
-                "putchar" => un_op(context, state, "Putchar", |i|{
-                    if let Some(c) = char::from_u32(i as u32) {
-                        print!("{}", c);
-                        1
-                    } else {
-                        0
-                    }
-                }),
+                "putchar" => {
+                    let imp = state.externs[0].imp.clone();
+                    let mut imp = imp.lock().unwrap();
+                    imp(state)
+                }
                 "+" => bin_op(context, state, "Addition", |l, r|l+r),
                 "-" => bin_op(context, state, "Subtraction", |l, r|l-r),
                 "*" => bin_op(context, state, "Multiplication", |l, r|l*r),
