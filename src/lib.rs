@@ -43,6 +43,7 @@ fn run_inner<T: CompilerContext>(name: &str) -> Result<(), SteelErr> {
         debug!("line: {}", line);
         let store = handle::<T>(&line)?;
         debug!("{}: {:?}", name, store);
+        println!("{:?}", store);
     }
 }
 
