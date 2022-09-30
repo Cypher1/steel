@@ -58,9 +58,9 @@ pub fn handle<S: CompilerContext>(line: &str) -> Result<i64, SteelErr> {
     debug!("eval: {:?} {:?}", state, res);
     match res {
         Some(Value::I64(res)) => Ok(*res),
-        // TODO: Some(Value::Func(res)) => panic!("Returned an expression ID!? {:?}", res),
-        Some(Value::Extern(_func)) => panic!("Returned an extern func!? {:?}", res),
-        None => panic!("No value was placed in the return address!?"),
+        // TODO: Some(Value::Func(res)) => panic!("Returned an expression ID!? {:?}\n{}", res, line),
+        Some(Value::Extern(_func)) => panic!("Returned an extern func!? {:?}\n{}", res, line),
+        None => panic!("No value was placed in the return address!?\n{}", line),
     }
 }
 
