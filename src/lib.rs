@@ -71,6 +71,7 @@ mod test {
     use log::error;
 
     fn test_with_program<Ctx: CompilerContext>() {
+        // TODO: use https://docs.rs/crate/quickcheck/0.9.2
         let size: usize = 100;
         let spec = Spec::default().sized(size);
         let mut rng = rand::thread_rng();

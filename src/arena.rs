@@ -1,3 +1,5 @@
+// TODO: Use https://docs.rs/crate/generational-arena/0.2.8
+
 pub type ID = usize;
 
 #[derive(Debug)]
