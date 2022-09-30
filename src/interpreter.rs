@@ -13,7 +13,10 @@ pub struct Impl<ID> {
 }
 
 impl<ID> Impl<ID> {
-    fn new<F: 'static + FnMut(&mut EvalState<ID>) -> Value<ID>>(name: &'static str, imp: F) -> Self {
+    fn new<F: 'static + FnMut(&mut EvalState<ID>) -> Value<ID>>(
+        name: &'static str,
+        imp: F,
+    ) -> Self {
         Self {
             name,
             imp: Arc::new(Mutex::new(imp)),
@@ -45,7 +48,7 @@ pub struct EvalState<ID> {
     pub function_stack: Vec<(ID, usize, usize)>, // name -> memory address to store result.
     // Record all the bindings (i.e. name->index in memory stack).
     pub bindings: HashMap<String, Vec<usize>>, // name -> memory address to load result.
-    pub mem_stack: Vec<Value<ID>>,                     // results.
+    pub mem_stack: Vec<Value<ID>>,             // results.
 }
 
 impl<ID: std::fmt::Debug> EvalState<ID> {
@@ -58,7 +61,9 @@ impl<ID: std::fmt::Debug> EvalState<ID> {
     }
     fn run_extern(&mut self, name: &str) -> Value<ID> {
         // Get the Arc<Mutex<ImpFn>>
-        let imp = self.get_value_for(name).unwrap_or_else(||panic!("couldn't find {}", name));
+        let imp = self
+            .get_value_for(name)
+            .unwrap_or_else(|| panic!("couldn't find {}", name));
         if let Value::Extern(imp) = imp {
             let imp = imp.imp.clone();
             let mut imp = imp.lock().unwrap(); // Get the ImpFn.
@@ -104,7 +109,10 @@ impl<ID> EvalState<ID> {
     }
 
     pub fn bind_name(&mut self, name: &str, index: usize) {
-        let entries = self.bindings.entry(name.to_string()).or_insert_with(Vec::new);
+        let entries = self
+            .bindings
+            .entry(name.to_string())
+            .or_insert_with(Vec::new);
         entries.push(index); // Vec allows shadowing
     }
 
