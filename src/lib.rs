@@ -19,7 +19,7 @@ mod integration_tests;
 
 pub use crate::compiler_context::CompilerContext;
 pub use crate::error::SteelErr;
-use crate::interpreter::{eval, EvalState};
+use crate::interpreter::{eval, EvalState, Value};
 use crate::parser::program;
 use log::{debug, error};
 
@@ -54,8 +54,14 @@ pub fn handle<S: CompilerContext>(line: &str) -> Result<i64, SteelErr> {
     let mut state = EvalState::default();
     let result_index = state.setup_call(expr, 0);
     eval(&store, &mut state).map_err(Into::into)?;
-    debug!("eval: {:?} {:?}", state, state.mem_stack.get(result_index));
-    Ok(state.mem_stack[result_index])
+    let res = state.mem_stack.get(result_index);
+    debug!("eval: {:?} {:?}", state, res);
+    match res {
+        Some(Value::I64(res)) => Ok(*res),
+        // TODO: Some(Value::Func(res)) => panic!("Returned an expression ID!? {:?}", res),
+        Some(Value::Extern(_func)) => panic!("Returned an extern func!? {:?}", res),
+        None => panic!("No value was placed in the return address!?"),
+    }
 }
 
 #[cfg(test)]
