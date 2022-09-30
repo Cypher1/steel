@@ -53,12 +53,12 @@ impl<ID: std::fmt::Debug> EvalState<ID> {
         // add binding
         let name = imp.name;
         let index = self.bind_mem(Value::Extern(imp));
-        self.bind_name(&name, index);
+        self.bind_name(name, index);
         self
     }
     fn run_extern(&mut self, name: &str) -> Value<ID> {
         // Get the Arc<Mutex<ImpFn>>
-        let imp = self.get_value_for(name).expect(&format!("couldn't find {}", name));
+        let imp = self.get_value_for(name).unwrap_or_else(||panic!("couldn't find {}", name));
         if let Value::Extern(imp) = imp {
             let imp = imp.imp.clone();
             let mut imp = imp.lock().unwrap(); // Get the ImpFn.
