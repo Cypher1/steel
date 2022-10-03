@@ -23,6 +23,23 @@ use crate::interpreter::{eval, EvalState, Value};
 use crate::parser::program;
 use log::{debug, error};
 
+#[derive(Debug, Default)]
+pub struct Steps {
+    parse: bool,
+    print: bool,
+    eval: bool,
+}
+
+impl Steps {
+    pub fn all() -> Self {
+        Self {
+            parse: true,
+            print: true,
+            eval: true,
+        }
+    }
+}
+
 pub fn run<T: CompilerContext>(name: &str) {
     run_inner::<T>(name).expect("unexpected error");
 }
@@ -41,13 +58,13 @@ fn run_inner<T: CompilerContext>(name: &str) -> Result<(), SteelErr> {
             return Ok(());
         }
         debug!("line: {}", line);
-        let store = handle::<T>(&line)?;
+        let store = handle::<T>(&line, Steps::all())?;
         debug!("{}: {:?}", name, store);
         println!("{:?}", store);
     }
 }
 
-pub fn handle<S: CompilerContext>(line: &str) -> Result<i64, SteelErr> {
+pub fn handle<S: CompilerContext>(line: &str, steps: Steps) -> Result<i64, SteelErr> {
     let mut store = S::new();
     let (_input, expr) = program(&mut store, line)?;
     debug!("expr: {:?}", store.pretty(expr));
@@ -79,7 +96,7 @@ mod test {
         let program = generate_random_program("ast generator", &mut store, &spec, &mut rng);
         let program = store.pretty(program);
 
-        match handle::<ecs::Ecs>(&program) {
+        match handle::<ecs::Ecs>(&program, Steps::all()) {
             Ok(r) => debug!("result {:?}", r),
             Err(e) => {
                 error!("Should be able to eval program:");
