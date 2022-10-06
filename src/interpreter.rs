@@ -109,10 +109,10 @@ impl<ID: Clone + std::fmt::Debug> Default for EvalState<ID> {
             bindings: HashMap::new(),
             mem_stack: Vec::new(),
         }
-        .register_extern(Impl::new("+", |state| { bin_op(state, "Addition", |l, r| l + r) }))
-        .register_extern(Impl::new("-", |state| { bin_op(state, "Subtraction", |l, r| l - r) }))
-        .register_extern(Impl::new("*", |state| { bin_op(state, "Multiplication", |l, r| l * r) }))
-        .register_extern(Impl::new("/", |state| { bin_op(state, "Division", |l, r| l / r) }))
+        .register_extern(Impl::new("+", |state| { bin_op(state, "+", |l, r| l + r) }))
+        .register_extern(Impl::new("-", |state| { bin_op(state, "-", |l, r| l - r) }))
+        .register_extern(Impl::new("*", |state| { bin_op(state, "*", |l, r| l * r) }))
+        .register_extern(Impl::new("/", |state| { bin_op(state, "/", |l, r| l / r) }))
         .register_extern(Impl::new("putchar", |state: &mut EvalState<ID>| {
             if let Some(Value::I64(i)) = state.get_value_for("arg_0") {
                 if let Some(c) = char::from_u32(*i as u32) {
