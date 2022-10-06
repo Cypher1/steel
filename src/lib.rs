@@ -154,7 +154,6 @@ pub fn eval_program<S: CompilerContext>(
 mod test {
     use super::*;
     use gen_code::{generate_random_program, Spec};
-    use log::error;
 
     fn take_result<T: std::fmt::Debug, E: std::fmt::Debug>(program: &str, res: Result<T, E>) {
         // TODO: Should happen in an init phase.
@@ -162,8 +161,8 @@ mod test {
         match res {
             Ok(r) => debug!("result {:?}", r),
             Err(e) => {
-                error!("Should be able to eval program:");
-                error!("{}", program);
+                eprintln!("Should be able to eval program:");
+                eprintln!("{}", program);
                 panic!("error: {:?}", e);
             }
         }
