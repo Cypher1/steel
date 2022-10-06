@@ -193,7 +193,7 @@ pub fn step<C: CompilerContext>(
 where
     <C as CompilerContext>::E: Into<SteelErr>,
 {
-    trace!("BEFORE: {:?} with {:?}", &target, state.mem_stack);
+    trace!("state: {:?}", state.mem_stack);
     perform(context, state, &target);
     if target.owned_memory > 0 {
         trace!("Forgetting {:?} args", target.owned_memory);
@@ -215,7 +215,8 @@ where
     let id = match fn_ptr {
         MemPtr(index) => {
             let func = state.mem_stack.get(*index).expect("MEM PTR SHOULD EXIST").clone();
-            trace!("Running closure {:?} {:?}", func, target.owned_memory);
+            // should drop the closure.
+            trace!("running closure {:?} {:?}", func, target.owned_memory);
             state.mem_stack[target.return_address] = match func {
                 Value::Extern(imp) => state.run_extern(imp),
                 constant => constant,
@@ -225,7 +226,6 @@ where
         StaticPtr(id) => *id,
     };
     if let Ok(c) = context.get_call(id) {
-        trace!("Setup call {:?}", &c);
         // load in all the args
         state.setup_closure(c.callee, *return_address, owned_memory + c.args.len());
         trace!("  inner {:?} -> {}", &return_address, context.pretty(c.callee));
@@ -238,10 +238,10 @@ where
         return;
     }
     let res = if let Ok(v) = context.get_i64(id) {
-        trace!("Get constant i64 {}", &v);
+        trace!("get constant i64 {}", &v);
         Value::I64(*v)
     } else if let Ok(s) = context.get_symbol(id) {
-        trace!("Get symbol {}", &s.name);
+        trace!("get symbol {:?}", &s.name);
         state.get_value_for(&s.name).cloned().unwrap_or_else(
             || panic!("Should have a value for {}", &s.name),
         )
