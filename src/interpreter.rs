@@ -44,8 +44,27 @@ impl<ID> Default for Value<ID> {
 }
 
 #[derive(Debug)]
+pub enum FnPtr<ID> {
+    StaticPtr(ID),
+    MemPtr(usize), // Memory address
+}
+pub use FnPtr::*;
+
+pub struct StackFrame<ID> {
+    fn_ptr: FnPtr<ID>,
+    return_address: usize,
+    owned_memory: usize,
+}
+
+impl<ID: std::fmt::Debug> std::fmt::Debug for StackFrame<ID> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
+        write!(f, "*{:?} = {:?}({:?} args)", self.return_address, self.fn_ptr, self.owned_memory)
+    }
+}
+
+#[derive(Debug)]
 pub struct EvalState<ID> {
-    pub function_stack: Vec<(ID, usize, usize)>, // name -> memory address to store result.
+    pub function_stack: Vec<StackFrame<ID>>, // name -> memory address to store result.
     // Record all the bindings (i.e. name->index in memory stack).
     pub bindings: HashMap<String, Vec<usize>>, // name -> memory address to load result.
     pub mem_stack: Vec<Value<ID>>,             // results.
@@ -59,18 +78,11 @@ impl<ID: std::fmt::Debug> EvalState<ID> {
         self.bind_name(name, index);
         self
     }
-    fn run_extern(&mut self, name: &str) -> Value<ID> {
+    fn run_extern(&mut self, imp: Impl<ID>) -> Value<ID> {
         // Get the Arc<Mutex<ImpFn>>
-        let imp = self
-            .get_value_for(name)
-            .unwrap_or_else(|| panic!("couldn't find {}", name));
-        if let Value::Extern(imp) = imp {
-            let imp = imp.imp.clone();
-            let mut imp = imp.lock().unwrap(); // Get the ImpFn.
-            imp(self) // Run it
-        } else {
-            panic!("Expected an extern {:?}", imp)
-        }
+        let imp = imp.imp.clone();
+        let mut imp = imp.lock().unwrap(); // Get the ImpFn.
+        imp(self) // Run it
     }
 }
 
@@ -81,27 +93,22 @@ impl<ID: std::fmt::Debug> Default for EvalState<ID> {
             bindings: HashMap::new(),
             mem_stack: Vec::new(),
         }
+        .register_extern(Impl::new("+", |state| { bin_op(state, "Addition", |l, r| l + r) }))
+        .register_extern(Impl::new("-", |state| { bin_op(state, "Subtraction", |l, r| l - r) }))
+        .register_extern(Impl::new("*", |state| { bin_op(state, "Multiplication", |l, r| l * r) }))
+        .register_extern(Impl::new("/", |state| { bin_op(state, "Division", |l, r| l / r) }))
         .register_extern(Impl::new("putchar", |state: &mut EvalState<ID>| {
-            let i = if let Some(Value::I64(i)) = state.get_value_for("arg_0") {
-                i
-            } else {
-                return Value::I64(0);
-            };
-            if let Some(c) = char::from_u32(*i as u32) {
-                print!("{}", c);
-                Value::I64(1)
-            } else {
-                Value::I64(0)
+            if let Some(Value::I64(i)) = state.get_value_for("arg_0") {
+                if let Some(c) = char::from_u32(*i as u32) {
+                    print!("{}", c);
+                    return Value::I64(1);
+                }
             }
+            Value::I64(0) // Could not print the unexpected value
         }))
     }
 }
 impl<ID> EvalState<ID> {
-    pub fn setup_call_to(&mut self, expr: ID, res: usize, args: usize) -> usize {
-        self.function_stack.push((expr, res, args)); // to evaluate...
-        res
-    }
-
     pub fn bind_mem(&mut self, value: Value<ID>) -> usize {
         let index = self.mem_stack.len();
         self.mem_stack.push(value);
@@ -116,9 +123,27 @@ impl<ID> EvalState<ID> {
         entries.push(index); // Vec allows shadowing
     }
 
-    pub fn setup_call(&mut self, expr: ID, args: usize) -> usize {
-        let index = self.bind_mem(Value::default()); // assume it's a 0...
-        self.setup_call_to(expr, index, args)
+    pub fn setup_eval_to(&mut self, fn_ptr: FnPtr<ID>, return_address: usize, owned_memory: usize) {
+        self.function_stack.push(StackFrame {
+            fn_ptr,
+            return_address,
+            owned_memory,
+        }); // to evaluate...
+    }
+
+    pub fn setup_closure(&mut self, code: ID, return_address: usize, owned_memory: usize) -> usize {
+        let callee_index = self.bind_mem(Value::default()); // assume it's a 0...
+        // then run the closure
+        self.setup_eval_to(FnPtr::MemPtr(callee_index), return_address, owned_memory);
+        // but first fetch the 'code'.
+        self.setup_eval_to(FnPtr::StaticPtr(code), callee_index, 0);
+        return_address
+    }
+
+    pub fn setup_eval(&mut self, target: FnPtr<ID>, owned_memory: usize) -> usize {
+        let return_address = self.bind_mem(Value::default()); // assume it's a 0...
+        self.setup_eval_to(target, return_address, owned_memory);
+        return_address
     }
 
     pub fn get_value_for(&mut self, name: &str) -> Option<&Value<ID>> {
@@ -137,10 +162,12 @@ pub fn eval<C: CompilerContext>(context: &C, state: &mut EvalState<C::ID>) -> Re
 where
     <C as CompilerContext>::E: Into<SteelErr>,
 {
-    while let Some((f, res_addr, args)) = state.function_stack.pop() {
-        trace!("Step {:?}:", f);
-        trace!("{}", context.pretty(f));
-        step(context, state, f, res_addr, args)?;
+    while let Some(target) = state.function_stack.pop() {
+        trace!("Step {:?}:", target.fn_ptr);
+        if let StaticPtr(ptr) = target.fn_ptr {
+            trace!("{}", context.pretty(ptr));
+        }
+        step(context, state, target)?;
     }
     Ok(())
 }
@@ -148,89 +175,87 @@ where
 pub fn step<C: CompilerContext>(
     context: &C,
     state: &mut EvalState<C::ID>,
-    id: C::ID,
-    res_index: usize,
-    args: usize, // number of args to pop
+    target: StackFrame<C::ID>,
 ) -> Result<(), C::E>
 where
     <C as CompilerContext>::E: Into<SteelErr>,
 {
-    if let Some(s) = perform(context, state, id, res_index, args)? {
-        state.mem_stack[res_index] = s;
-        if args > 0 {
-            trace!("Forgetting {:?} args", args);
-            let final_length = state.mem_stack.len().saturating_sub(args);
-            state.mem_stack.truncate(final_length);
-        }
+    trace!("BEFORE: {:?} with {:?}", &target, state.mem_stack);
+    perform(context, state, &target);
+    if target.owned_memory > 0 {
+        trace!("Forgetting {:?} args", target.owned_memory);
+        let final_length = state.mem_stack.len().saturating_sub(target.owned_memory);
+        state.mem_stack.truncate(final_length);
     }
     Ok(())
-}
-
-fn bin_op<C: CompilerContext, F: FnOnce(i64, i64) -> i64>(
-    _context: &C,
-    state: &mut EvalState<C::ID>,
-    name: &str,
-    op: F,
-) -> Value<C::ID> {
-    let l = state.get_value_for("arg_0");
-    let l = if let Some(Value::I64(l)) = l {
-        *l
-    } else {
-        todo!("{} expects two i64 arguments got left: {:?}", name, &l);
-    };
-    let r = state.get_value_for("arg_1");
-    let r = if let Some(Value::I64(r)) = r {
-        *r
-    } else {
-        todo!("{} expects two i64 arguments got right: {:?}", name, &r);
-    };
-    Value::I64(op(l, r))
 }
 
 pub fn perform<C: CompilerContext>(
     context: &C,
     state: &mut EvalState<C::ID>,
-    id: C::ID,
-    res_index: usize,
-    args: usize, // number of args to pop
-) -> Result<Option<Value<C::ID>>, C::E>
+    target: &StackFrame<C::ID>,
+)
 where
     <C as CompilerContext>::E: Into<SteelErr>,
 {
-    if let Ok(v) = context.get_i64(id) {
-        return Ok(Some(Value::I64(*v)));
-    }
-    if let Ok(s) = context.get_symbol(id) {
-        // if let Some(bound) = s.bound_to {
-        // state.function_stack.push((bound, res_index));
-        // Ok(())
-        // }
-        let r = if let Some(value) = state.get_value_for(&s.name) {
-            value.clone()
-        } else {
-            match &*s.name {
-                "putchar" => state.run_extern("putchar"),
-                "+" => bin_op(context, state, "Addition", |l, r| l + r),
-                "-" => bin_op(context, state, "Subtraction", |l, r| l - r),
-                "*" => bin_op(context, state, "Multiplication", |l, r| l * r),
-                "/" => bin_op(context, state, "Division", |l, r| l / r),
-                _ => todo!("Unknown variable: {}", s.name),
-            }
-        };
-        return Ok(Some(r));
-    }
+    let StackFrame { fn_ptr, return_address, owned_memory } = target;
+    let id = match fn_ptr {
+        MemPtr(index) => {
+            let func = state.mem_stack.get(*index).expect("MEM PTR SHOULD EXIST").clone();
+            trace!("Running closure {:?} {:?}", func, target.owned_memory);
+            state.mem_stack[target.return_address] = match func {
+                Value::Extern(imp) => state.run_extern(imp),
+                constant => constant,
+            };
+            return; // done!
+        }
+        StaticPtr(id) => *id,
+    };
     if let Ok(c) = context.get_call(id) {
+        trace!("Setup call {:?}", &c);
         // load in all the args
-        let result = state.setup_call_to(c.callee, res_index, args + c.args.len());
-        trace!("  inner {:?} -> {}", &result, context.pretty(c.callee));
+        state.setup_closure(c.callee, *return_address, owned_memory + c.args.len());
+        trace!("  inner {:?} -> {}", &return_address, context.pretty(c.callee));
         for (name, arg) in c.args.iter().rev() {
             trace!("    arg {:?} -> {}", &name, context.pretty(*arg));
-            let index = state.setup_call(*arg, 0);
+            // TODO: Consider loading known values in without 'call'.
+            let index = state.setup_eval(FnPtr::StaticPtr(*arg), 0);
             state.bind_name(name, index);
         }
-        return Ok(None);
+        return;
     }
-    // format!("{{node? {:?}}}", id)
-    error!("Unknown node {}, {:?}", context.pretty(id), id);
-    todo!("Unknown node {:?}", id);
+    let res = if let Ok(v) = context.get_i64(id) {
+        trace!("Get constant i64 {}", &v);
+        Value::I64(*v)
+    } else if let Ok(s) = context.get_symbol(id) {
+        trace!("Get symbol {}", &s.name);
+        state.get_value_for(&s.name).cloned().unwrap_or_else(
+            || panic!("Should have a value for {}", &s.name),
+        )
+    } else {
+        // format!("{{node? {:?}}}", id)
+        error!("Unknown node {}, {:?}", context.pretty(id), id);
+        todo!("Unknown node {:?}", id);
+    };
+    state.mem_stack[target.return_address] = res;
+}
+
+fn bin_op<ID: std::fmt::Debug, F: FnOnce(i64, i64) -> i64>(
+    state: &mut EvalState<ID>,
+    name: &str,
+    op: F,
+) -> Value<ID> {
+    let l = state.get_value_for("arg_0");
+    let l = if let Some(Value::I64(l)) = l {
+        *l
+    } else {
+        todo!("{} expects two i64 arguments got arg_0: {:?}", name, &l);
+    };
+    let r = state.get_value_for("arg_1");
+    let r = if let Some(Value::I64(r)) = r {
+        *r
+    } else {
+        todo!("{} expects two i64 arguments got arg_1: {:?}", name, &r);
+    };
+    Value::I64(op(l, r))
 }

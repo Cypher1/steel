@@ -19,7 +19,7 @@ mod integration_tests;
 
 pub use crate::compiler_context::CompilerContext;
 pub use crate::error::SteelErr;
-use crate::interpreter::{eval, EvalState, Value};
+use crate::interpreter::{eval, EvalState, StaticPtr, Value};
 use crate::parser::program;
 use log::{debug, error};
 
@@ -69,7 +69,7 @@ pub fn handle<S: CompilerContext>(line: &str, steps: Steps) -> Result<i64, Steel
     let (_input, expr) = program(&mut store, line)?;
     debug!("expr: {:?}", store.pretty(expr));
     let mut state = EvalState::default();
-    let result_index = state.setup_call(expr, 0);
+    let result_index = state.setup_eval(StaticPtr(expr), 0);
     eval(&store, &mut state).map_err(Into::into)?;
     let res = state.mem_stack.get(result_index);
     debug!("eval: {:?} {:?}", state, res);
