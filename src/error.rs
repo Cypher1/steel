@@ -41,9 +41,15 @@ impl std::fmt::Display for SteelErr {
             }
             IOError(e) => write!(f, "Error while performing input/output: {}", e),
             UnexpectedEndOfInput => write!(f, "Expected an expression, found nothing"),
-            ReliedOnUnInitializedMemory(index) => write!(f, "Relied on uninitialized memory {:?}", index),
-            ReliedOnOutOfBoundsMemory(index) => write!(f, "Relied on out of bouds memory {:?}", index),
-            MissingArgumentExpectedByExtern(func, arg) => write!(f, "Expected argument {} for {}", arg, func),
+            ReliedOnUnInitializedMemory(index) => {
+                write!(f, "Relied on uninitialized memory {:?}", index)
+            }
+            ReliedOnOutOfBoundsMemory(index) => {
+                write!(f, "Relied on out of bouds memory {:?}", index)
+            }
+            MissingArgumentExpectedByExtern(func, arg) => {
+                write!(f, "Expected argument {} for {}", arg, func)
+            }
             MissingValueForBinding(name) => write!(f, "Expected value for {}", name),
             MalformedExpression(input, expected) => {
                 write!(f, "Expected {}, found {:?}", expected, input)

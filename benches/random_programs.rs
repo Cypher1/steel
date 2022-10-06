@@ -1,10 +1,10 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use log::debug;
 use steel::{
     ast, ecs,
     gen_code::{generate_random_program, Spec},
-    handle, handle_steps, CompilerContext, SteelErr, Tasks
+    handle, handle_steps, CompilerContext, SteelErr, Tasks,
 };
-use log::debug;
 
 fn benchmark_parse<T: CompilerContext>(
     name: &'static str,
@@ -19,7 +19,7 @@ fn benchmark_parse<T: CompilerContext>(
         |b| {
             debug!("testing {} with {}\n{}", name, spec.size, program);
             b.iter(|| handle::<T>(black_box(Tasks::parse(program))))
-        }
+        },
     );
 }
 
@@ -36,10 +36,11 @@ fn benchmark_eval<T: CompilerContext>(
         |b| {
             debug!("testing {} with {}\n{}", name, spec.size, program);
             let mut store = T::new();
-            let (id, _res) = handle_steps::<T>(&mut store, Tasks::parse(program)).expect("Should parse program without error");
+            let (id, _res) = handle_steps::<T>(&mut store, Tasks::parse(program))
+                .expect("Should parse program without error");
             let id = id.expect("Should have parsed a program");
             b.iter(|| handle_steps::<T>(&mut store, black_box(Tasks::pre_parsed(id).and_eval())))
-        }
+        },
     );
 }
 
@@ -56,20 +57,17 @@ fn benchmark_parse_and_eval_tasks<T: CompilerContext>(
         |b| {
             debug!("testing {} with {}\n{}", name, spec.size, program);
             b.iter(|| handle::<T>(black_box(Tasks::parse(program).and_eval())))
-        }
+        },
     );
 }
 
-fn benchmarks<T: CompilerContext>(name: &'static str,
-    program: &str,
-    spec: &Spec,
-    c: &mut Criterion,
-) where
+fn benchmarks<T: CompilerContext>(name: &'static str, program: &str, spec: &Spec, c: &mut Criterion)
+where
     SteelErr: From<<T as CompilerContext>::E>,
 {
-    benchmark_parse::<T>(name, &program, &spec, c);
-    benchmark_eval::<T>(name, &program, &spec, c);
-    benchmark_parse_and_eval_tasks::<T>(name, &program, &spec, c);
+    benchmark_parse::<T>(name, program, spec, c);
+    benchmark_eval::<T>(name, program, spec, c);
+    benchmark_parse_and_eval_tasks::<T>(name, program, spec, c);
 }
 
 fn criterion_benchmark(c: &mut Criterion) {

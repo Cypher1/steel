@@ -51,7 +51,11 @@ pub struct StackFrame<ID> {
     owned_memory: usize,
 }
 
-fn state_to_string<C: CompilerContext>(context: &C, state: &EvalState<C::ID>, target: &StackFrame<C::ID>) -> String {
+fn state_to_string<C: CompilerContext>(
+    context: &C,
+    state: &EvalState<C::ID>,
+    target: &StackFrame<C::ID>,
+) -> String {
     let owning = if target.owned_memory > 0 {
         format!("(owning {:?})", target.owned_memory)
     } else {
@@ -69,7 +73,11 @@ fn state_to_string<C: CompilerContext>(context: &C, state: &EvalState<C::ID>, ta
 
 impl<ID: std::fmt::Debug> std::fmt::Debug for StackFrame<ID> {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "*{:?} = {:?}({:?} args)", self.return_address, self.fn_ptr, self.owned_memory)
+        write!(
+            f,
+            "*{:?} = {:?}({:?} args)",
+            self.return_address, self.fn_ptr, self.owned_memory
+        )
     }
 }
 
@@ -104,10 +112,18 @@ impl<ID: Clone + std::fmt::Debug> Default for EvalState<ID> {
             bindings: HashMap::new(),
             mem_stack: Vec::new(),
         }
-        .register_extern(Impl::new("+", |state| { bin_op(state, "+", |l, r| l.wrapping_add(r)) }))
-        .register_extern(Impl::new("-", |state| { bin_op(state, "-", |l, r| l.wrapping_sub(r)) }))
-        .register_extern(Impl::new("*", |state| { bin_op(state, "*", |l, r| l.wrapping_mul(r)) }))
-        .register_extern(Impl::new("/", |state| { bin_op(state, "/", |l, r| if r != 0 {l / r} else {0}) }))
+        .register_extern(Impl::new("+", |state| {
+            bin_op(state, "+", |l, r| l.wrapping_add(r))
+        }))
+        .register_extern(Impl::new("-", |state| {
+            bin_op(state, "-", |l, r| l.wrapping_sub(r))
+        }))
+        .register_extern(Impl::new("*", |state| {
+            bin_op(state, "*", |l, r| l.wrapping_mul(r))
+        }))
+        .register_extern(Impl::new("/", |state| {
+            bin_op(state, "/", |l, r| if r != 0 { l / r } else { 0 })
+        }))
         .register_extern(Impl::new("putchar", |state: &mut EvalState<ID>| {
             if let Some(Value::I64(i)) = state.get_value_for("arg_0")? {
                 if let Some(c) = char::from_u32(*i as u32) {
@@ -133,7 +149,8 @@ impl<ID> EvalState<ID> {
     }
 
     fn get_mem(&self, index: usize) -> Result<&Value<ID>, SteelErr> {
-        self.try_get_mem(index)?.ok_or_else(||SteelErr::ReliedOnOutOfBoundsMemory(index))
+        self.try_get_mem(index)?
+            .ok_or(SteelErr::ReliedOnOutOfBoundsMemory(index))
     }
 
     fn drop_mem(&mut self, mem: usize) {
@@ -166,9 +183,13 @@ impl<ID> EvalState<ID> {
 
     pub fn setup_closure(&mut self, code: ID, return_address: usize, owned_memory: usize) -> usize {
         let callee_index = self.alloc(Value::UnInit); // explicitly store 'uninitialized' marker.
-        // then run the closure
+                                                      // then run the closure
         let closure_size = 1;
-        self.setup_eval_to(FnPtr::MemPtr(callee_index), return_address, owned_memory+closure_size);
+        self.setup_eval_to(
+            FnPtr::MemPtr(callee_index),
+            return_address,
+            owned_memory + closure_size,
+        );
         // but first fetch the 'code'.
         self.setup_eval_to(FnPtr::StaticPtr(code), callee_index, 0);
         return_address
@@ -227,7 +248,11 @@ pub fn perform<C: CompilerContext>(
 where
     <C as CompilerContext>::E: Into<SteelErr>,
 {
-    let StackFrame { fn_ptr, return_address, owned_memory } = target;
+    let StackFrame {
+        fn_ptr,
+        return_address,
+        owned_memory,
+    } = target;
     let id = match fn_ptr {
         MemPtr(index) => {
             let func = state.get_mem(*index)?.clone();
@@ -245,7 +270,11 @@ where
     if let Ok(c) = context.get_call(id) {
         // load in all the args
         state.setup_closure(c.callee, *return_address, owned_memory + c.args.len());
-        trace!("  inner {:?} -> {}", &return_address, context.pretty(c.callee));
+        trace!(
+            "  inner {:?} -> {}",
+            &return_address,
+            context.pretty(c.callee)
+        );
         for (name, arg) in c.args.iter().rev() {
             trace!("    arg {:?} -> {}", &name, context.pretty(*arg));
             // TODO: Consider loading known values in without 'call'.
@@ -259,8 +288,10 @@ where
         Value::I64(*v)
     } else if let Ok(s) = context.get_symbol(id) {
         trace!("get symbol {:?}", &s.name);
-        state.get_value_for(&s.name)?.cloned()
-            .ok_or_else(||SteelErr::MissingValueForBinding(s.name.to_string()))?
+        state
+            .get_value_for(&s.name)?
+            .cloned()
+            .ok_or_else(|| SteelErr::MissingValueForBinding(s.name.to_string()))?
     } else {
         // format!("{{node? {:?}}}", id)
         error!("Unknown node {}, {:?}", context.pretty(id), id);
@@ -279,13 +310,19 @@ fn bin_op<ID: Clone + std::fmt::Debug, F: FnOnce(i64, i64) -> i64>(
     let l = if let Some(Value::I64(l)) = l {
         l
     } else {
-        return Err(SteelErr::MissingArgumentExpectedByExtern(name.to_string(), "arg_0".to_string()));
+        return Err(SteelErr::MissingArgumentExpectedByExtern(
+            name.to_string(),
+            "arg_0".to_string(),
+        ));
     };
     let r = state.get_value_for("arg_1")?.cloned();
     let r = if let Some(Value::I64(r)) = r {
         r
     } else {
-        return Err(SteelErr::MissingArgumentExpectedByExtern(name.to_string(), "arg_1".to_string()));
+        return Err(SteelErr::MissingArgumentExpectedByExtern(
+            name.to_string(),
+            "arg_1".to_string(),
+        ));
     };
     Ok(Value::I64(op(l, r)))
 }

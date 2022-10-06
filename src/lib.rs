@@ -51,21 +51,28 @@ impl<'a, ID> Default for Tasks<'a, ID> {
 
 impl<'a, ID> Tasks<'a, ID> {
     pub fn parse(program: &'a str) -> Self {
-        Self {program: FromStr(program), ..Self::default()}
+        Self {
+            program: FromStr(program),
+            ..Self::default()
+        }
     }
     pub fn pre_parsed(program: ID) -> Self {
-        Self {program: FromStore(program), ..Self::default()}
+        Self {
+            program: FromStore(program),
+            ..Self::default()
+        }
     }
     pub fn and_print(self) -> Self {
-        Self {print: true, ..self}
+        Self {
+            print: true,
+            ..self
+        }
     }
     pub fn and_eval(self) -> Self {
-        Self {eval: true, ..self}
+        Self { eval: true, ..self }
     }
     pub fn all(program: &'a str) -> Self {
-        Self::parse(program)
-            .and_print()
-            .and_eval()
+        Self::parse(program).and_print().and_eval()
     }
 }
 
@@ -98,16 +105,17 @@ pub fn handle<S: CompilerContext>(steps: Tasks<S::ID>) -> Result<(Option<S::ID>,
     handle_steps(&mut store, steps)
 }
 
-pub fn handle_steps<S: CompilerContext>(store: &mut S, steps: Tasks<S::ID>) -> Result<(Option<S::ID>, i64), SteelErr> {
+pub fn handle_steps<S: CompilerContext>(
+    store: &mut S,
+    steps: Tasks<S::ID>,
+) -> Result<(Option<S::ID>, i64), SteelErr> {
     let (program_txt, expr) = match steps.program {
         Nothing => return Ok((None, 0)),
         FromStr(program_txt) => {
             let (_input, expr) = program(store, program_txt)?;
             (program_txt.to_string(), expr)
         }
-        FromStore(expr) => {
-            (store.pretty(expr), expr)
-        }
+        FromStore(expr) => (store.pretty(expr), expr),
     };
     debug!("expr: {:?}", store.pretty(expr));
     if steps.print {
@@ -119,7 +127,11 @@ pub fn handle_steps<S: CompilerContext>(store: &mut S, steps: Tasks<S::ID>) -> R
     Ok((Some(expr), 0)) // TODO: Find a better result value
 }
 
-pub fn eval_program<S: CompilerContext>(store: &mut S, expr: S::ID, program_txt: &str) -> Result<i64, SteelErr> {
+pub fn eval_program<S: CompilerContext>(
+    store: &mut S,
+    expr: S::ID,
+    program_txt: &str,
+) -> Result<i64, SteelErr> {
     let mut state = EvalState::default();
     let result_index = state.setup_eval(StaticPtr(expr), 0);
     eval(store, &mut state)?;
@@ -127,8 +139,13 @@ pub fn eval_program<S: CompilerContext>(store: &mut S, expr: S::ID, program_txt:
     debug!("eval: {:?} {:?}", state, res);
     match res {
         Some(Value::I64(res)) => Ok(*res),
-        Some(Value::Extern(_func)) => panic!("Returned an extern func!? {:?}\n{}", res, program_txt),
-        Some(Value::UnInit) => panic!("No value was placed in the return address!?\n{}", program_txt),
+        Some(Value::Extern(_func)) => {
+            panic!("Returned an extern func!? {:?}\n{}", res, program_txt)
+        }
+        Some(Value::UnInit) => panic!(
+            "No value was placed in the return address!?\n{}",
+            program_txt
+        ),
         None => panic!("The return address is out of bounds!?\n{}", program_txt),
     }
 }
@@ -157,22 +174,25 @@ mod test {
         let mut store = ast::Ast::new();
         let program = generate_random_program("ast generator", &mut store, &spec, &mut rng);
         let program = store.pretty(program);
-        take_result(&program, handle::<ecs::Ecs>(Tasks::parse(&program).and_eval()))
+        take_result(
+            &program,
+            handle::<ecs::Ecs>(Tasks::parse(&program).and_eval()),
+        )
     }
 
-    const SIMPLE_PROGRAM: &'static str = "putchar(48+9)";
-    const MEDIUM_PROGRAM: &'static str = "putchar(65)+putchar(66)+putchar(67)+putchar(10)";
+    const SIMPLE_PROGRAM: &str = "putchar(48+9)";
+    const MEDIUM_PROGRAM: &str = "putchar(65)+putchar(66)+putchar(67)+putchar(10)";
 
     #[test]
     fn can_handle_simple_program_ast() {
         let program = SIMPLE_PROGRAM;
-        take_result(&program, handle::<ast::Ast>(Tasks::all(program)))
+        take_result(program, handle::<ast::Ast>(Tasks::all(program)))
     }
 
     #[test]
     fn can_handle_medium_program_ast() {
         let program = MEDIUM_PROGRAM;
-        take_result(&program, handle::<ast::Ast>(Tasks::all(program)))
+        take_result(program, handle::<ast::Ast>(Tasks::all(program)))
     }
 
     #[test]
@@ -193,13 +213,13 @@ mod test {
     #[test]
     fn can_handle_simple_program_ecs() {
         let program = SIMPLE_PROGRAM;
-        take_result(&program, handle::<ecs::Ecs>(Tasks::all(program)))
+        take_result(program, handle::<ecs::Ecs>(Tasks::all(program)))
     }
 
     #[test]
     fn can_handle_medium_program_ecs() {
         let program = MEDIUM_PROGRAM;
-        take_result(&program, handle::<ecs::Ecs>(Tasks::all(program)))
+        take_result(program, handle::<ecs::Ecs>(Tasks::all(program)))
     }
 
     #[test]
@@ -216,5 +236,4 @@ mod test {
             }
         }
     }
-
 }
