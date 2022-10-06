@@ -38,12 +38,6 @@ pub enum Value<ID> {
     Extern(Impl<ID>), // reference to an extern...
 }
 
-impl<ID> Default for Value<ID> {
-    fn default() -> Self {
-        Self::UnInit
-    }
-}
-
 #[derive(Debug)]
 pub enum FnPtr<ID> {
     StaticPtr(ID),
