@@ -2,7 +2,7 @@ use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use steel::{
     ast, ecs,
     gen_code::{generate_random_program, Spec},
-    handle, CompilerContext, SteelErr, Steps
+    handle, CompilerContext, SteelErr, Tasks
 };
 
 fn criterion_benchmark_with<T: CompilerContext>(
@@ -16,7 +16,7 @@ fn criterion_benchmark_with<T: CompilerContext>(
     eprintln!("testing {} with {}\n{}", name, spec.size, program);
     c.bench_function(
         &format!("{} parse random program {}", name, spec.size),
-        |b| b.iter(|| handle::<T>(black_box(program), Steps::all())),
+        |b| b.iter(|| handle::<T>(black_box(Tasks::all(program))))
     );
 }
 

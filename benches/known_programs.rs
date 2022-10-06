@@ -1,13 +1,13 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
-use steel::{ast, ecs, handle, CompilerContext, SteelErr};
+use steel::{ast, ecs, handle, CompilerContext, SteelErr, Tasks};
 
 fn criterion_benchmark_with<T: CompilerContext>(name: &'static str, c: &mut Criterion)
 where
     SteelErr: From<<T as CompilerContext>::E>,
 {
     c.bench_function(&format!("{} 123", name), |b| {
-        b.iter(|| handle::<T>(black_box("123")).unwrap())
+        b.iter(|| handle::<T>(black_box(Tasks::all("123"))).unwrap())
     });
 }
 
