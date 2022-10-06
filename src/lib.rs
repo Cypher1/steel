@@ -162,7 +162,7 @@ mod test {
             Err(e) => {
                 error!("Should be able to eval program:");
                 error!("{}", program);
-                error!("error: {:?}", e);
+                panic!("error: {:?}", e);
             }
         }
     }
