@@ -278,22 +278,13 @@ mod test {
 
     #[test]
     fn parse_symbol() {
-        assert_eq!(
-            symbol_raw("hello").unwrap(),
-            ("", Symbol::new("hello"))
-        );
+        assert_eq!(symbol_raw("hello").unwrap(), ("", Symbol::new("hello")));
     }
 
     #[test]
     fn parse_symbol_with_underscores() {
-        assert_eq!(
-            symbol_raw("he_llo").unwrap(),
-            ("", Symbol::new("he_llo"))
-        );
-        assert_eq!(
-            symbol_raw("_e_llo").unwrap(),
-            ("", Symbol::new("_e_llo"))
-        );
+        assert_eq!(symbol_raw("he_llo").unwrap(), ("", Symbol::new("he_llo")));
+        assert_eq!(symbol_raw("_e_llo").unwrap(), ("", Symbol::new("_e_llo")));
     }
 
     #[test]
