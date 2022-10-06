@@ -2,7 +2,7 @@ use crate::arena::{ArenaError, ID};
 use crate::nodes::*;
 use std::marker::PhantomData;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum EcsError {
     InternalError(ArenaError),
     ComponentNotFound(ID),

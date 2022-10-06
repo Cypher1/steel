@@ -4,7 +4,7 @@ use log::{error, trace};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
-type Imp<ID> = Arc<Mutex<dyn FnMut(&mut EvalState<ID>) -> Value<ID>>>;
+type Imp<ID> = Arc<Mutex<dyn FnMut(&mut EvalState<ID>) -> Result<Value<ID>, SteelErr>>>;
 
 #[derive(Clone)]
 pub struct Impl<ID> {
@@ -13,7 +13,7 @@ pub struct Impl<ID> {
 }
 
 impl<ID> Impl<ID> {
-    fn new<F: 'static + FnMut(&mut EvalState<ID>) -> Value<ID>>(
+    fn new<F: 'static + FnMut(&mut EvalState<ID>) -> Result<Value<ID>, SteelErr>>(
         name: &'static str,
         imp: F,
     ) -> Self {
@@ -89,7 +89,7 @@ impl<ID: std::fmt::Debug> EvalState<ID> {
         self.bind_name(name, index);
         self
     }
-    fn run_extern(&mut self, imp: Impl<ID>) -> Value<ID> {
+    fn run_extern(&mut self, imp: Impl<ID>) -> Result<Value<ID>, SteelErr> {
         // Get the Arc<Mutex<ImpFn>>
         let imp = imp.imp.clone();
         let mut imp = imp.lock().unwrap(); // Get the ImpFn.
@@ -109,13 +109,13 @@ impl<ID: Clone + std::fmt::Debug> Default for EvalState<ID> {
         .register_extern(Impl::new("*", |state| { bin_op(state, "*", |l, r| l * r) }))
         .register_extern(Impl::new("/", |state| { bin_op(state, "/", |l, r| l / r) }))
         .register_extern(Impl::new("putchar", |state: &mut EvalState<ID>| {
-            if let Some(Value::I64(i)) = state.get_value_for("arg_0") {
+            if let Some(Value::I64(i)) = state.get_value_for("arg_0")? {
                 if let Some(c) = char::from_u32(*i as u32) {
                     print!("{}", c);
-                    return Value::I64(1);
+                    return Ok(Value::I64(1));
                 }
             }
-            Value::I64(0) // Could not print the unexpected value
+            Ok(Value::I64(0)) // Could not print the unexpected value
         }))
     }
 }
@@ -124,16 +124,16 @@ impl<ID> EvalState<ID> {
         self.mem_stack[index] = value;
     }
 
-    fn try_get_mem(&self, index: usize) -> Option<&Value<ID>> {
+    fn try_get_mem(&self, index: usize) -> Result<Option<&Value<ID>>, SteelErr> {
         let r = self.mem_stack.get(index);
         if let Some(Value::UnInit) = r {
-            panic!("Relied on uninitialized memory {:?}", index);
+            return Err(SteelErr::ReliedOnUnInitializedMemory(index));
         }
-        r
+        Ok(r)
     }
 
-    fn get_mem(&self, index: usize) -> &Value<ID> {
-        self.try_get_mem(index).unwrap_or_else(||panic!("Got out of bounds memory: {:?}", index))
+    fn get_mem(&self, index: usize) -> Result<&Value<ID>, SteelErr> {
+        self.try_get_mem(index)?.ok_or_else(||SteelErr::ReliedOnOutOfBoundsMemory(index))
     }
 
     fn drop_mem(&mut self, mem: usize) {
@@ -180,19 +180,19 @@ impl<ID> EvalState<ID> {
         return_address
     }
 
-    pub fn get_value_for(&mut self, name: &str) -> Option<&Value<ID>> {
+    pub fn get_value_for(&mut self, name: &str) -> Result<Option<&Value<ID>>, SteelErr> {
         let mut bindings = self.bindings.get(name).cloned().unwrap_or_default();
         while let Some(binding) = bindings.last() {
-            if let Some(value) = self.try_get_mem(*binding) {
-                return Some(value);
+            if let Some(value) = self.try_get_mem(*binding)? {
+                return Ok(Some(value));
             }
             bindings.pop();
         }
-        None
+        Ok(None)
     }
 }
 
-pub fn eval<C: CompilerContext>(context: &C, state: &mut EvalState<C::ID>) -> Result<(), C::E>
+pub fn eval<C: CompilerContext>(context: &C, state: &mut EvalState<C::ID>) -> Result<(), SteelErr>
 where
     <C as CompilerContext>::E: Into<SteelErr>,
 {
@@ -207,12 +207,12 @@ pub fn step<C: CompilerContext>(
     context: &C,
     state: &mut EvalState<C::ID>,
     target: StackFrame<C::ID>,
-) -> Result<(), C::E>
+) -> Result<(), SteelErr>
 where
     <C as CompilerContext>::E: Into<SteelErr>,
 {
     trace!("state: {:?}", state.mem_stack);
-    perform(context, state, &target);
+    perform(context, state, &target)?;
     if target.owned_memory > 0 {
         state.drop_mem(target.owned_memory);
     }
@@ -223,22 +223,22 @@ pub fn perform<C: CompilerContext>(
     context: &C,
     state: &mut EvalState<C::ID>,
     target: &StackFrame<C::ID>,
-)
+) -> Result<(), SteelErr>
 where
     <C as CompilerContext>::E: Into<SteelErr>,
 {
     let StackFrame { fn_ptr, return_address, owned_memory } = target;
     let id = match fn_ptr {
         MemPtr(index) => {
-            let func = state.get_mem(*index).clone();
+            let func = state.get_mem(*index)?.clone();
             // should drop the closure.
             trace!("running closure {:?} {:?}", func, target.owned_memory);
             let res = match func {
-                Value::Extern(imp) => state.run_extern(imp),
+                Value::Extern(imp) => state.run_extern(imp)?,
                 constant => constant,
             };
             state.set_mem(target.return_address, res);
-            return; // done!
+            return Ok(()); // done!
         }
         StaticPtr(id) => *id,
     };
@@ -252,14 +252,14 @@ where
             let index = state.setup_eval(FnPtr::StaticPtr(*arg), 0);
             state.bind_name(name, index);
         }
-        return;
+        return Ok(());
     }
     let res = if let Ok(v) = context.get_i64(id) {
         trace!("get constant i64 {}", &v);
         Value::I64(*v)
     } else if let Ok(s) = context.get_symbol(id) {
         trace!("get symbol {:?}", &s.name);
-        state.get_value_for(&s.name).cloned().unwrap_or_else(
+        state.get_value_for(&s.name)?.cloned().unwrap_or_else(
             || panic!("Should have a value for {}", &s.name),
         )
     } else {
@@ -268,24 +268,25 @@ where
         todo!("Unknown node {:?}", id);
     };
     state.set_mem(target.return_address, res);
+    Ok(())
 }
 
 fn bin_op<ID: Clone + std::fmt::Debug, F: FnOnce(i64, i64) -> i64>(
     state: &mut EvalState<ID>,
     name: &str,
     op: F,
-) -> Value<ID> {
-    let l = state.get_value_for("arg_0").cloned();
+) -> Result<Value<ID>, SteelErr> {
+    let l = state.get_value_for("arg_0")?.cloned();
     let l = if let Some(Value::I64(l)) = l {
         l
     } else {
         panic!("{} expects two i64 arguments got arg_0: {:?}\n{:?}", name, &l, &state);
     };
-    let r = state.get_value_for("arg_1").cloned();
+    let r = state.get_value_for("arg_1")?.cloned();
     let r = if let Some(Value::I64(r)) = r {
         r
     } else {
         panic!("{} expects two i64 arguments got arg_1: {:?}\n{:?}", name, &r, &state);
     };
-    Value::I64(op(l, r))
+    Ok(Value::I64(op(l, r)))
 }

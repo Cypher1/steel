@@ -10,6 +10,8 @@ pub enum SteelErr {
         precendence: i32,
     },
     UnexpectedEndOfInput,
+    ReliedOnUnInitializedMemory(usize),
+    ReliedOnOutOfBoundsMemory(usize),
     MalformedExpression(String, String),
     ParserError {
         input: String,
@@ -37,6 +39,8 @@ impl std::fmt::Display for SteelErr {
             }
             IOError(e) => write!(f, "Error while performing input/output: {}", e),
             UnexpectedEndOfInput => write!(f, "Expected an expression, found nothing"),
+            ReliedOnUnInitializedMemory(index) => write!(f, "Relied on uninitialized memory {:?}", index),
+            ReliedOnOutOfBoundsMemory(index) => write!(f, "Relied on out of bouds memory {:?}", index),
             MalformedExpression(input, expected) => {
                 write!(f, "Expected {}, found {:?}", expected, input)
             }

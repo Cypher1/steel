@@ -122,7 +122,7 @@ pub fn handle_steps<S: CompilerContext>(store: &mut S, steps: Tasks<S::ID>) -> R
 pub fn eval_program<S: CompilerContext>(store: &mut S, expr: S::ID, program_txt: &str) -> Result<i64, SteelErr> {
     let mut state = EvalState::default();
     let result_index = state.setup_eval(StaticPtr(expr), 0);
-    eval(store, &mut state).map_err(Into::into)?;
+    eval(store, &mut state)?;
     let res = state.mem_stack.get(result_index);
     debug!("eval: {:?} {:?}", state, res);
     match res {
@@ -152,15 +152,14 @@ mod test {
         }
     }
 
-    fn test_with_random_program<Ctx: CompilerContext>() {
+    fn test_with_random_program<Ctx: CompilerContext>(size: usize) {
         // TODO: use https://docs.rs/crate/quickcheck/0.9.2
-        let size: usize = 100;
         let spec = Spec::default().sized(size);
         let mut rng = rand::thread_rng();
         let mut store = ast::Ast::new();
         let program = generate_random_program("ast generator", &mut store, &spec, &mut rng);
         let program = store.pretty(program);
-        take_result(&program, handle::<ecs::Ecs>(Tasks::all(&program)))
+        take_result(&program, handle::<ecs::Ecs>(Tasks::parse(&program).and_eval()))
     }
 
     const SIMPLE_PROGRAM: &'static str = "putchar(48+9)";
@@ -180,7 +179,17 @@ mod test {
 
     #[test]
     fn can_handle_random_programs_ast() {
-        test_with_random_program::<ast::Ast>();
+        test_with_random_program::<ast::Ast>(100);
+    }
+
+    #[ignore]
+    #[test]
+    fn can_handle_most_random_programs_ast() {
+        for i in 0..100 {
+            for _run in 0..1000 {
+                test_with_random_program::<ast::Ast>(i);
+            }
+        }
     }
 
     #[test]
@@ -197,6 +206,17 @@ mod test {
 
     #[test]
     fn can_handle_random_programs_ecs() {
-        test_with_random_program::<ecs::Ecs>();
+        test_with_random_program::<ecs::Ecs>(100);
     }
+
+    #[ignore]
+    #[test]
+    fn can_handle_most_random_programs_ecs() {
+        for i in 0..100 {
+            for _run in 0..1000 {
+                test_with_random_program::<ecs::Ecs>(i);
+            }
+        }
+    }
+
 }

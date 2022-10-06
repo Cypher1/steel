@@ -7,7 +7,7 @@ pub struct Arena<T> {
     members: Vec<Item<T>>,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ArenaError {
     IndexEmpty(ID),
     IndexOutOfBounds(ID, ID),
