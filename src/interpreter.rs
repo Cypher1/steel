@@ -26,7 +26,7 @@ impl<ID> Impl<ID> {
 
 impl<ID> std::fmt::Debug for Impl<ID> {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "<{}>", self.name)
+        write!(f, "'{}'", self.name)
     }
 }
 
