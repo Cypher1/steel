@@ -162,9 +162,18 @@ mod test {
         take_result(&program, handle::<ecs::Ecs>(Tasks::all(&program)))
     }
 
+    const SIMPLE_PROGRAM: &'static str = "putchar(48+9)";
+    const MEDIUM_PROGRAM: &'static str = "putchar(65)+putchar(66)+putchar(67)+putchar(10)";
+
     #[test]
     fn can_handle_simple_program_ast() {
-        let program = "putchar(48+9)";
+        let program = SIMPLE_PROGRAM;
+        take_result(&program, handle::<ast::Ast>(Tasks::all(program)))
+    }
+
+    #[test]
+    fn can_handle_medium_program_ast() {
+        let program = MEDIUM_PROGRAM;
         take_result(&program, handle::<ast::Ast>(Tasks::all(program)))
     }
 
@@ -175,7 +184,13 @@ mod test {
 
     #[test]
     fn can_handle_simple_program_ecs() {
-        let program = "putchar(48+9)";
+        let program = SIMPLE_PROGRAM;
+        take_result(&program, handle::<ecs::Ecs>(Tasks::all(program)))
+    }
+
+    #[test]
+    fn can_handle_medium_program_ecs() {
+        let program = MEDIUM_PROGRAM;
         take_result(&program, handle::<ecs::Ecs>(Tasks::all(program)))
     }
 
