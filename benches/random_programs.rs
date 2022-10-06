@@ -30,7 +30,7 @@ fn benchmark_eval<T: CompilerContext>(
 {
     eprintln!("testing {} with {}\n{}", name, spec.size, program);
     c.bench_function(
-        &format!("{} parse random program {}", name, spec.size),
+        &format!("{} eval random program {}", name, spec.size),
         |b| {
             let mut store = T::new();
             let (id, _res) = handle_steps::<T>(&mut store, Tasks::parse(program)).expect("Should parse program without error");
@@ -50,7 +50,7 @@ fn benchmark_parse_and_eval_tasks<T: CompilerContext>(
 {
     eprintln!("testing {} with {}\n{}", name, spec.size, program);
     c.bench_function(
-        &format!("{} parse random program {}", name, spec.size),
+        &format!("{} parse and eval random program {}", name, spec.size),
         |b| b.iter(|| handle::<T>(black_box(Tasks::parse(program).and_eval())))
     );
 }
