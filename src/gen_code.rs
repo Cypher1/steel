@@ -6,7 +6,7 @@ use rand::{distributions::Alphanumeric, rngs::ThreadRng, Rng};
 use std::collections::HashMap;
 
 pub struct Spec {
-    pub size: usize,
+    pub size: Option<usize>,
     pub arity: usize,
     symbols: HashMap<usize, Vec<(String, bool)>>,
 }
@@ -32,7 +32,7 @@ impl Default for Spec {
         symbols.insert(2, bin_ops);
         symbols.insert(1, un_ops);
         Self {
-            size: 1,
+            size: Some(1),
             arity: 0,
             symbols,
         }
@@ -50,7 +50,7 @@ impl Spec {
         self
     }
     pub fn sized(mut self, size: usize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 }
@@ -71,10 +71,11 @@ pub fn generate_random_program_impl<Ctx: CompilerContext>(
     spec: &Spec,
     rng: &mut ThreadRng,
 ) -> Ctx::ID {
-    if spec.size > 1 {
+    let size = spec.size.unwrap_or_else(||rng.gen_range(1..1000));
+    if size > 1 {
         let mut args = vec![];
-        let mut args_size: usize = rng.gen_range(1..spec.size);
-        let inner_size: usize = spec.size - args_size - 1;
+        let mut args_size: usize = rng.gen_range(1..size);
+        let inner_size: usize = size - args_size - 1;
         let mut inner_spec = Spec::default().sized(inner_size);
         if args_size > 0 {
             let arg_range = (args_size as f64).sqrt() as usize;
