@@ -203,8 +203,9 @@ mod test {
     #[ignore]
     #[test]
     fn can_handle_most_random_programs_ast() {
-        for i in 0..1000 {
-            for _run in 0..10000 {
+        for i in 1..100 {
+            eprintln!("ast: testing programs of size {:?}", i);
+            for _run in 0..100 {
                 test_with_random_program::<ast::Ast>(i);
             }
         }
@@ -230,8 +231,9 @@ mod test {
     #[ignore]
     #[test]
     fn can_handle_most_random_programs_ecs() {
-        for i in 0..1000 {
-            for _run in 0..10000 {
+        for i in 1..100 {
+            eprintln!("ecs: testing programs of size {:?}", i);
+            for _run in 0..100 {
                 test_with_random_program::<ecs::Ecs>(i);
             }
         }
