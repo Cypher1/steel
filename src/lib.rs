@@ -23,8 +23,10 @@ use crate::interpreter::{eval, EvalState, StaticPtr, Value};
 use crate::parser::program;
 use log::{debug, error};
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub enum GetProgram<'a, ID> {
+    #[default]
+    Nothing,
     FromStr(&'a str),
     FromStore(ID),
 }
@@ -37,13 +39,33 @@ pub struct Tasks<'a, ID> {
     eval: bool,
 }
 
-impl<'a, ID> Tasks<'a, ID> {
-    pub fn all(program: &'a str) -> Self {
+impl<'a, ID> Default for Tasks<'a, ID> {
+    fn default() -> Self {
         Self {
-            program: FromStr(program),
-            print: true,
-            eval: true,
+            program: Nothing,
+            print: false,
+            eval: false,
         }
+    }
+}
+
+impl<'a, ID> Tasks<'a, ID> {
+    pub fn parse(program: &'a str) -> Self {
+        Self {program: FromStr(program), ..Self::default()}
+    }
+    pub fn pre_parsed(program: ID) -> Self {
+        Self {program: FromStore(program), ..Self::default()}
+    }
+    pub fn and_print(self) -> Self {
+        Self {print: true, ..self}
+    }
+    pub fn and_eval(self) -> Self {
+        Self {eval: true, ..self}
+    }
+    pub fn all(program: &'a str) -> Self {
+        Self::parse(program)
+            .and_print()
+            .and_eval()
     }
 }
 
@@ -71,13 +93,14 @@ fn run_inner<T: CompilerContext>(name: &str) -> Result<(), SteelErr> {
     }
 }
 
-pub fn handle<S: CompilerContext>(steps: Tasks<S::ID>) -> Result<i64, SteelErr> {
+pub fn handle<S: CompilerContext>(steps: Tasks<S::ID>) -> Result<(Option<S::ID>, i64), SteelErr> {
     let mut store = S::new();
     handle_steps(&mut store, steps)
 }
 
-pub fn handle_steps<S: CompilerContext>(store: &mut S, steps: Tasks<S::ID>) -> Result<i64, SteelErr> {
+pub fn handle_steps<S: CompilerContext>(store: &mut S, steps: Tasks<S::ID>) -> Result<(Option<S::ID>, i64), SteelErr> {
     let (program_txt, expr) = match steps.program {
+        Nothing => return Ok((None, 0)),
         FromStr(program_txt) => {
             let (_input, expr) = program(store, program_txt)?;
             (program_txt.to_string(), expr)
@@ -86,13 +109,14 @@ pub fn handle_steps<S: CompilerContext>(store: &mut S, steps: Tasks<S::ID>) -> R
             (store.pretty(expr), expr)
         }
     };
+    debug!("expr: {:?}", store.pretty(expr));
     if steps.print {
-        debug!("expr: {:?}", store.pretty(expr));
+        eprintln!(" {:?}", store.pretty(expr));
     }
     if steps.eval {
-        return eval_program(store, expr, &program_txt);
+        return Ok((Some(expr), eval_program(store, expr, &program_txt)?));
     }
-    Ok(0) // TODO: Find a better result value
+    Ok((Some(expr), 0)) // TODO: Find a better result value
 }
 
 pub fn eval_program<S: CompilerContext>(store: &mut S, expr: S::ID, program_txt: &str) -> Result<i64, SteelErr> {
