@@ -4,6 +4,7 @@ use steel::{
     gen_code::{generate_random_program, Spec},
     handle, handle_steps, CompilerContext, SteelErr, Tasks
 };
+use log::debug;
 
 fn benchmark_parse<T: CompilerContext>(
     name: &'static str,
@@ -13,10 +14,12 @@ fn benchmark_parse<T: CompilerContext>(
 ) where
     SteelErr: From<<T as CompilerContext>::E>,
 {
-    eprintln!("testing {} with {}\n{}", name, spec.size, program);
     c.bench_function(
         &format!("{} parse random program {}", name, spec.size),
-        |b| b.iter(|| handle::<T>(black_box(Tasks::parse(program))))
+        |b| {
+            debug!("testing {} with {}\n{}", name, spec.size, program);
+            b.iter(|| handle::<T>(black_box(Tasks::parse(program))))
+        }
     );
 }
 
@@ -28,10 +31,10 @@ fn benchmark_eval<T: CompilerContext>(
 ) where
     SteelErr: From<<T as CompilerContext>::E>,
 {
-    eprintln!("testing {} with {}\n{}", name, spec.size, program);
     c.bench_function(
         &format!("{} eval random program {}", name, spec.size),
         |b| {
+            debug!("testing {} with {}\n{}", name, spec.size, program);
             let mut store = T::new();
             let (id, _res) = handle_steps::<T>(&mut store, Tasks::parse(program)).expect("Should parse program without error");
             let id = id.expect("Should have parsed a program");
@@ -48,10 +51,12 @@ fn benchmark_parse_and_eval_tasks<T: CompilerContext>(
 ) where
     SteelErr: From<<T as CompilerContext>::E>,
 {
-    eprintln!("testing {} with {}\n{}", name, spec.size, program);
     c.bench_function(
         &format!("{} parse and eval random program {}", name, spec.size),
-        |b| b.iter(|| handle::<T>(black_box(Tasks::parse(program).and_eval())))
+        |b| {
+            debug!("testing {} with {}\n{}", name, spec.size, program);
+            b.iter(|| handle::<T>(black_box(Tasks::parse(program).and_eval())))
+        }
     );
 }
 
@@ -68,6 +73,7 @@ fn benchmarks<T: CompilerContext>(name: &'static str,
 }
 
 fn criterion_benchmark(c: &mut Criterion) {
+    let _ = env_logger::builder().is_test(true).try_init();
     let mut rng = rand::thread_rng();
     for i in 0..4 {
         let size: usize = 10usize.pow(i);
