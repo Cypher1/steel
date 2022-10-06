@@ -151,7 +151,7 @@ mod test {
         }
     }
 
-    fn test_with_program<Ctx: CompilerContext>() {
+    fn test_with_random_program<Ctx: CompilerContext>() {
         // TODO: use https://docs.rs/crate/quickcheck/0.9.2
         let size: usize = 100;
         let spec = Spec::default().sized(size);
@@ -170,7 +170,7 @@ mod test {
 
     #[test]
     fn can_handle_random_programs_ast() {
-        test_with_program::<ast::Ast>();
+        test_with_random_program::<ast::Ast>();
     }
 
     #[test]
@@ -181,6 +181,6 @@ mod test {
 
     #[test]
     fn can_handle_random_programs_ecs() {
-        test_with_program::<ecs::Ecs>();
+        test_with_random_program::<ecs::Ecs>();
     }
 }
