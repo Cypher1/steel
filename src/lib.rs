@@ -157,6 +157,8 @@ mod test {
     use log::error;
 
     fn take_result<T: std::fmt::Debug, E: std::fmt::Debug>(program: &str, res: Result<T, E>) {
+        // TODO: Should happen in an init phase.
+        let _ = env_logger::builder().is_test(true).try_init();
         match res {
             Ok(r) => debug!("result {:?}", r),
             Err(e) => {
