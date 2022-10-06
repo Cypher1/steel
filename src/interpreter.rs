@@ -259,9 +259,8 @@ where
         Value::I64(*v)
     } else if let Ok(s) = context.get_symbol(id) {
         trace!("get symbol {:?}", &s.name);
-        state.get_value_for(&s.name)?.cloned().unwrap_or_else(
-            || panic!("Should have a value for {}", &s.name),
-        )
+        state.get_value_for(&s.name)?.cloned()
+            .ok_or_else(||SteelErr::MissingValueForBinding(s.name.to_string()))?
     } else {
         // format!("{{node? {:?}}}", id)
         error!("Unknown node {}, {:?}", context.pretty(id), id);
@@ -280,13 +279,13 @@ fn bin_op<ID: Clone + std::fmt::Debug, F: FnOnce(i64, i64) -> i64>(
     let l = if let Some(Value::I64(l)) = l {
         l
     } else {
-        panic!("{} expects two i64 arguments got arg_0: {:?}\n{:?}", name, &l, &state);
+        return Err(SteelErr::MissingArgumentExpectedByExtern(name.to_string(), "arg_0".to_string()));
     };
     let r = state.get_value_for("arg_1")?.cloned();
     let r = if let Some(Value::I64(r)) = r {
         r
     } else {
-        panic!("{} expects two i64 arguments got arg_1: {:?}\n{:?}", name, &r, &state);
+        return Err(SteelErr::MissingArgumentExpectedByExtern(name.to_string(), "arg_1".to_string()));
     };
     Ok(Value::I64(op(l, r)))
 }

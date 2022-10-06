@@ -12,6 +12,8 @@ pub enum SteelErr {
     UnexpectedEndOfInput,
     ReliedOnUnInitializedMemory(usize),
     ReliedOnOutOfBoundsMemory(usize),
+    MissingArgumentExpectedByExtern(String, String),
+    MissingValueForBinding(String),
     MalformedExpression(String, String),
     ParserError {
         input: String,
@@ -41,6 +43,8 @@ impl std::fmt::Display for SteelErr {
             UnexpectedEndOfInput => write!(f, "Expected an expression, found nothing"),
             ReliedOnUnInitializedMemory(index) => write!(f, "Relied on uninitialized memory {:?}", index),
             ReliedOnOutOfBoundsMemory(index) => write!(f, "Relied on out of bouds memory {:?}", index),
+            MissingArgumentExpectedByExtern(func, arg) => write!(f, "Expected argument {} for {}", arg, func),
+            MissingValueForBinding(name) => write!(f, "Expected value for {}", name),
             MalformedExpression(input, expected) => {
                 write!(f, "Expected {}, found {:?}", expected, input)
             }

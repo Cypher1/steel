@@ -127,8 +127,6 @@ pub fn eval_program<S: CompilerContext>(store: &mut S, expr: S::ID, program_txt:
     debug!("eval: {:?} {:?}", state, res);
     match res {
         Some(Value::I64(res)) => Ok(*res),
-        // TODO: Some(Value::Func(res)) => panic!("Returned an expression ID!? {:?}\n{}", res,
-        // program_txt),
         Some(Value::Extern(_func)) => panic!("Returned an extern func!? {:?}\n{}", res, program_txt),
         Some(Value::UnInit) => panic!("No value was placed in the return address!?\n{}", program_txt),
         None => panic!("The return address is out of bounds!?\n{}", program_txt),
