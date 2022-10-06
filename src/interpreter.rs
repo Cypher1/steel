@@ -56,6 +56,22 @@ pub struct StackFrame<ID> {
     owned_memory: usize,
 }
 
+fn state_to_string<C: CompilerContext>(context: &C, state: &EvalState<C::ID>, target: &StackFrame<C::ID>) -> String {
+    let owning = if target.owned_memory > 0 {
+        format!("(owning {:?})", target.owned_memory)
+    } else {
+        "".to_string()
+    };
+    match target.fn_ptr {
+        StaticPtr(ptr) => {
+            format!("code {:?}{} -> {}", ptr, owning, context.pretty(ptr))
+        }
+        MemPtr(index) => {
+            format!("value {:?}{} -> {:?}", index, owning, state.mem_stack.get(index))
+        }
+    }
+}
+
 impl<ID: std::fmt::Debug> std::fmt::Debug for StackFrame<ID> {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
         write!(f, "*{:?} = {:?}({:?} args)", self.return_address, self.fn_ptr, self.owned_memory)
@@ -163,10 +179,7 @@ where
     <C as CompilerContext>::E: Into<SteelErr>,
 {
     while let Some(target) = state.function_stack.pop() {
-        trace!("Step {:?}:", target.fn_ptr);
-        if let StaticPtr(ptr) = target.fn_ptr {
-            trace!("{}", context.pretty(ptr));
-        }
+        trace!("Evaluating {}", state_to_string(context, state, &target));
         step(context, state, target)?;
     }
     Ok(())
