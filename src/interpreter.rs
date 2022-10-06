@@ -62,7 +62,7 @@ fn state_to_string<C: CompilerContext>(context: &C, state: &EvalState<C::ID>, ta
             format!("code {:?}{} -> {}", ptr, owning, context.pretty(ptr))
         }
         MemPtr(index) => {
-            format!("value {:?}{} -> {:?}", index, owning, state.mem_stack.get(index))
+            format!("value {:?}{} -> {:?}", index, owning, state.get_mem(index))
         }
     }
 }
@@ -85,7 +85,7 @@ impl<ID: std::fmt::Debug> EvalState<ID> {
     fn register_extern(mut self, imp: Impl<ID>) -> Self {
         // add binding
         let name = imp.name;
-        let index = self.bind_mem(Value::Extern(imp));
+        let index = self.alloc(Value::Extern(imp));
         self.bind_name(name, index);
         self
     }
@@ -120,7 +120,29 @@ impl<ID: Clone + std::fmt::Debug> Default for EvalState<ID> {
     }
 }
 impl<ID> EvalState<ID> {
-    pub fn bind_mem(&mut self, value: Value<ID>) -> usize {
+    fn set_mem(&mut self, index: usize, value: Value<ID>) {
+        self.mem_stack[index] = value;
+    }
+
+    fn try_get_mem(&self, index: usize) -> Option<&Value<ID>> {
+        let r = self.mem_stack.get(index);
+        if let Some(Value::UnInit) = r {
+            panic!("Relied on uninitialized memory {:?}", index);
+        }
+        r
+    }
+
+    fn get_mem(&self, index: usize) -> &Value<ID> {
+        self.try_get_mem(index).unwrap_or_else(||panic!("Got out of bounds memory: {:?}", index))
+    }
+
+    fn drop_mem(&mut self, mem: usize) {
+        trace!("forgetting {:?} args", mem);
+        let final_length = self.mem_stack.len().saturating_sub(mem);
+        self.mem_stack.truncate(final_length);
+    }
+
+    fn alloc(&mut self, value: Value<ID>) -> usize {
         let index = self.mem_stack.len();
         self.mem_stack.push(value);
         index
@@ -143,16 +165,17 @@ impl<ID> EvalState<ID> {
     }
 
     pub fn setup_closure(&mut self, code: ID, return_address: usize, owned_memory: usize) -> usize {
-        let callee_index = self.bind_mem(Value::default()); // assume it's a 0...
+        let callee_index = self.alloc(Value::UnInit); // explicitly store 'uninitialized' marker.
         // then run the closure
-        self.setup_eval_to(FnPtr::MemPtr(callee_index), return_address, owned_memory);
+        let closure_size = 1;
+        self.setup_eval_to(FnPtr::MemPtr(callee_index), return_address, owned_memory+closure_size);
         // but first fetch the 'code'.
         self.setup_eval_to(FnPtr::StaticPtr(code), callee_index, 0);
         return_address
     }
 
     pub fn setup_eval(&mut self, target: FnPtr<ID>, owned_memory: usize) -> usize {
-        let return_address = self.bind_mem(Value::default()); // assume it's a 0...
+        let return_address = self.alloc(Value::UnInit); // explicitly store 'uninitialized' marker.
         self.setup_eval_to(target, return_address, owned_memory);
         return_address
     }
@@ -160,8 +183,8 @@ impl<ID> EvalState<ID> {
     pub fn get_value_for(&mut self, name: &str) -> Option<&Value<ID>> {
         let mut bindings = self.bindings.get(name).cloned().unwrap_or_default();
         while let Some(binding) = bindings.last() {
-            if *binding < self.mem_stack.len() {
-                return Some(&self.mem_stack[*binding]);
+            if let Some(value) = self.try_get_mem(*binding) {
+                return Some(value);
             }
             bindings.pop();
         }
@@ -191,9 +214,7 @@ where
     trace!("state: {:?}", state.mem_stack);
     perform(context, state, &target);
     if target.owned_memory > 0 {
-        trace!("Forgetting {:?} args", target.owned_memory);
-        let final_length = state.mem_stack.len().saturating_sub(target.owned_memory);
-        state.mem_stack.truncate(final_length);
+        state.drop_mem(target.owned_memory);
     }
     Ok(())
 }
@@ -209,13 +230,14 @@ where
     let StackFrame { fn_ptr, return_address, owned_memory } = target;
     let id = match fn_ptr {
         MemPtr(index) => {
-            let func = state.mem_stack.get(*index).expect("MEM PTR SHOULD EXIST").clone();
+            let func = state.get_mem(*index).clone();
             // should drop the closure.
             trace!("running closure {:?} {:?}", func, target.owned_memory);
-            state.mem_stack[target.return_address] = match func {
+            let res = match func {
                 Value::Extern(imp) => state.run_extern(imp),
                 constant => constant,
             };
+            state.set_mem(target.return_address, res);
             return; // done!
         }
         StaticPtr(id) => *id,
@@ -245,7 +267,7 @@ where
         error!("Unknown node {}, {:?}", context.pretty(id), id);
         todo!("Unknown node {:?}", id);
     };
-    state.mem_stack[target.return_address] = res;
+    state.set_mem(target.return_address, res);
 }
 
 fn bin_op<ID: Clone + std::fmt::Debug, F: FnOnce(i64, i64) -> i64>(
