@@ -8,17 +8,17 @@ pub trait NodeStore<ID, T, E> {
 
 pub trait CompilerContext:
     NodeStore<Self::ID, Call<Self::ID>, Self::E>
-    + NodeStore<Self::ID, Symbol<Self::ID>, Self::E>
+    + NodeStore<Self::ID, Symbol, Self::E>
     + NodeStore<Self::ID, i64, Self::E>
 {
     type ID: Copy + std::fmt::Debug;
     type E: Into<crate::error::SteelErr>;
 
     fn new() -> Self;
-    fn get_symbol(&self, id: Self::ID) -> Result<&Symbol<Self::ID>, Self::E> {
+    fn get_symbol(&self, id: Self::ID) -> Result<&Symbol, Self::E> {
         self.get(id)
     }
-    fn get_symbol_mut(&mut self, id: Self::ID) -> Result<&mut Symbol<Self::ID>, Self::E> {
+    fn get_symbol_mut(&mut self, id: Self::ID) -> Result<&mut Symbol, Self::E> {
         self.get_mut(id)
     }
     fn get_call(&self, id: Self::ID) -> Result<&Call<Self::ID>, Self::E> {

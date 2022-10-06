@@ -50,14 +50,14 @@ fn identifier_tail(input: &str) -> SResult<&str> {
     take_while(is_identifier_char)(input)
 }
 
-pub fn symbol_raw<P>(og_input: &str) -> SResult<Symbol<P>> {
+pub fn symbol_raw(og_input: &str) -> SResult<Symbol> {
     let (input, (head, tail)) = tuple((identifier_head, identifier_tail))(og_input)?;
 
     let name = &og_input[0..head.len() + tail.len()];
 
     Ok((input, Symbol::new(name)))
 }
-pub fn binding<'source, ID, E: Into<SteelErr>, C: NodeStore<ID, Symbol<ID>, E>>(
+pub fn binding<'source, ID, E: Into<SteelErr>, C: NodeStore<ID, Symbol, E>>(
     _context: &mut C,
     input: &'source str,
 ) -> SResult<'source, String> {
@@ -69,7 +69,7 @@ pub fn binding<'source, ID, E: Into<SteelErr>, C: NodeStore<ID, Symbol<ID>, E>>(
     Ok((input, name.to_string()))
 }
 
-pub fn symbol<'source, ID, E: Into<SteelErr>, C: NodeStore<ID, Symbol<ID>, E>>(
+pub fn symbol<'source, ID, E: Into<SteelErr>, C: NodeStore<ID, Symbol, E>>(
     context: &mut C,
     input: &'source str,
 ) -> SResult<'source, ID> {
@@ -90,10 +90,10 @@ const INIT_PRECENDENCE: Precedence = MIN_PRECENDENCE;
 const MUL_PRECENDENCE: Precedence = 2;
 const PLUS_PRECENDENCE: Precedence = 1;
 
-pub fn operator_raw<'source, ID>(
+pub fn operator_raw<'source>(
     input: &'source str,
     min_prec: &mut Precedence, // TODO: reject operators of the wrong prec...
-) -> SResult<'source, Symbol<ID>> {
+) -> SResult<'source, Symbol> {
     let (input, name) = take_while_m_n(1, 3, is_operator_char)(input)?;
     let precendence = match name {
         "-" | "+" => PLUS_PRECENDENCE,
@@ -107,7 +107,7 @@ pub fn operator_raw<'source, ID>(
     Ok((input, Symbol::operator(name)))
 }
 
-pub fn operator<'source, ID, E: Into<SteelErr>, C: NodeStore<ID, Symbol<ID>, E>>(
+pub fn operator<'source, ID, E: Into<SteelErr>, C: NodeStore<ID, Symbol, E>>(
     context: &mut C,
     input: &'source str,
     min_prec: &mut Precedence,
@@ -279,7 +279,7 @@ mod test {
     #[test]
     fn parse_symbol() {
         assert_eq!(
-            symbol_raw::<()>("hello").unwrap(),
+            symbol_raw("hello").unwrap(),
             ("", Symbol::new("hello"))
         );
     }
@@ -287,11 +287,11 @@ mod test {
     #[test]
     fn parse_symbol_with_underscores() {
         assert_eq!(
-            symbol_raw::<()>("he_llo").unwrap(),
+            symbol_raw("he_llo").unwrap(),
             ("", Symbol::new("he_llo"))
         );
         assert_eq!(
-            symbol_raw::<()>("_e_llo").unwrap(),
+            symbol_raw("_e_llo").unwrap(),
             ("", Symbol::new("_e_llo"))
         );
     }
@@ -299,11 +299,11 @@ mod test {
     #[test]
     fn parse_non_symbol() {
         assert_err_is!(
-            symbol_raw::<()>("#lol"),
+            symbol_raw("#lol"),
             "Parsing Error: Failed in Tag while parsing #lol"
         );
         assert_err_is!(
-            symbol_raw::<()>("123"),
+            symbol_raw("123"),
             "Parsing Error: Failed in Tag while parsing 123"
         );
     }
@@ -312,27 +312,27 @@ mod test {
     fn parse_operator() {
         let mut prec = INIT_PRECENDENCE;
         assert_eq!(
-            operator_raw::<()>("||", &mut prec).unwrap(),
+            operator_raw("||", &mut prec).unwrap(),
             ("", Symbol::operator("||"))
         );
         let mut prec = INIT_PRECENDENCE;
         assert_eq!(
-            operator_raw::<()>("+", &mut prec).unwrap(),
+            operator_raw("+", &mut prec).unwrap(),
             ("", Symbol::operator("+"))
         );
         let mut prec = MUL_PRECENDENCE;
         assert_eq!(
-            operator_raw::<()>("*", &mut prec).unwrap(),
+            operator_raw("*", &mut prec).unwrap(),
             ("", Symbol::operator("*"))
         );
         let mut prec = PLUS_PRECENDENCE;
         assert_eq!(
-            operator_raw::<()>("*", &mut prec).unwrap(),
+            operator_raw("*", &mut prec).unwrap(),
             ("", Symbol::operator("*"))
         );
         let mut prec = INIT_PRECENDENCE;
         assert_eq!(
-            operator_raw::<()>("*", &mut prec).unwrap(),
+            operator_raw("*", &mut prec).unwrap(),
             ("", Symbol::operator("*"))
         );
     }
@@ -341,7 +341,7 @@ mod test {
     fn parse_operator_in_wrong_precendence() {
         let mut prec = MUL_PRECENDENCE;
         assert_err_is!(
-            operator_raw::<()>("+", &mut prec),
+            operator_raw("+", &mut prec),
             format!(
                 "Parsing Error: Unexpected operator due to max precendence setting ({})",
                 PLUS_PRECENDENCE
@@ -353,12 +353,12 @@ mod test {
     fn parse_non_operator() {
         let mut prec = INIT_PRECENDENCE;
         assert_err_is!(
-            operator_raw::<()>("#lol", &mut prec),
+            operator_raw("#lol", &mut prec),
             "Parsing Error: Failed in TakeWhileMN while parsing #lol"
         );
         let mut prec = INIT_PRECENDENCE;
         assert_err_is!(
-            operator_raw::<()>("123", &mut prec),
+            operator_raw("123", &mut prec),
             "Parsing Error: Failed in TakeWhileMN while parsing 123"
         );
     }

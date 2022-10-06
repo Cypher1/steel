@@ -110,11 +110,9 @@ pub fn generate_random_program_impl<Ctx: CompilerContext>(
         if let Some(symbols) = &spec.symbols.get(&spec.arity) {
             let symbol_index: usize = rng.gen_range(0..symbols.len());
             let (name, is_operator) = &symbols[symbol_index];
-            let bound_to = None; // TODO:
             return store.add(Symbol {
                 name: name.to_string(),
                 is_operator: *is_operator,
-                bound_to,
             });
         }
     }

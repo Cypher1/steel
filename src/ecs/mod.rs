@@ -18,12 +18,12 @@ use arena_providers::*;
 #[derive(Debug, Default)]
 pub struct Ecs {
     entities: Arena<Entity>,
-    symbols: Arena<Symbol<ID>>,
+    symbols: Arena<Symbol>,
     calls: Arena<Call<ID>>,
     int64_values: Arena<i64>,
 }
 
-make_arena_provider!(Ecs, Symbol<ID>, Symbol, symbols);
+make_arena_provider!(Ecs, Symbol, Symbol, symbols);
 make_arena_provider!(Ecs, Call<ID>, Call, calls);
 make_arena_provider!(Ecs, i64, I64, int64_values);
 
@@ -104,10 +104,10 @@ mod test {
 
         let hello = ctx.add(Symbol::new("hello"));
 
-        let sym: &Symbol<ID> = ctx.get(hello)?;
+        let sym: &Symbol = ctx.get(hello)?;
         assert_eq!(
             format!("{:?}", sym),
-            "Symbol { name: \"hello\", is_operator: false, bound_to: None }"
+            "Symbol { name: \"hello\", is_operator: false }"
         );
         Ok(())
     }
@@ -131,12 +131,12 @@ mod test {
         let world = ctx.add(Symbol::new("world"));
 
         assert_eq!(
-            format!("{:?}", ctx.get::<Symbol<ID>>(hello)),
-            "Ok(Symbol { name: \"hello\", is_operator: false, bound_to: None })"
+            format!("{:?}", ctx.get::<Symbol>(hello)),
+            "Ok(Symbol { name: \"hello\", is_operator: false })"
         );
         assert_eq!(
-            format!("{:?}", ctx.get::<Symbol<ID>>(world)),
-            "Ok(Symbol { name: \"world\", is_operator: false, bound_to: None })"
+            format!("{:?}", ctx.get::<Symbol>(world)),
+            "Ok(Symbol { name: \"world\", is_operator: false })"
         );
     }
 
