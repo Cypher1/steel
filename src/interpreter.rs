@@ -104,10 +104,10 @@ impl<ID: Clone + std::fmt::Debug> Default for EvalState<ID> {
             bindings: HashMap::new(),
             mem_stack: Vec::new(),
         }
-        .register_extern(Impl::new("+", |state| { bin_op(state, "+", |l, r| l + r) }))
-        .register_extern(Impl::new("-", |state| { bin_op(state, "-", |l, r| l - r) }))
-        .register_extern(Impl::new("*", |state| { bin_op(state, "*", |l, r| l * r) }))
-        .register_extern(Impl::new("/", |state| { bin_op(state, "/", |l, r| l / r) }))
+        .register_extern(Impl::new("+", |state| { bin_op(state, "+", |l, r| l.wrapping_add(r)) }))
+        .register_extern(Impl::new("-", |state| { bin_op(state, "-", |l, r| l.wrapping_sub(r)) }))
+        .register_extern(Impl::new("*", |state| { bin_op(state, "*", |l, r| l.wrapping_mul(r)) }))
+        .register_extern(Impl::new("/", |state| { bin_op(state, "/", |l, r| if r != 0 {l / r} else {0}) }))
         .register_extern(Impl::new("putchar", |state: &mut EvalState<ID>| {
             if let Some(Value::I64(i)) = state.get_value_for("arg_0")? {
                 if let Some(c) = char::from_u32(*i as u32) {
