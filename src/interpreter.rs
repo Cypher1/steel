@@ -86,7 +86,7 @@ impl<ID: std::fmt::Debug> EvalState<ID> {
     }
 }
 
-impl<ID: std::fmt::Debug> Default for EvalState<ID> {
+impl<ID: Clone + std::fmt::Debug> Default for EvalState<ID> {
     fn default() -> Self {
         Self {
             function_stack: Vec::new(),
@@ -240,22 +240,22 @@ where
     state.mem_stack[target.return_address] = res;
 }
 
-fn bin_op<ID: std::fmt::Debug, F: FnOnce(i64, i64) -> i64>(
+fn bin_op<ID: Clone + std::fmt::Debug, F: FnOnce(i64, i64) -> i64>(
     state: &mut EvalState<ID>,
     name: &str,
     op: F,
 ) -> Value<ID> {
-    let l = state.get_value_for("arg_0");
+    let l = state.get_value_for("arg_0").cloned();
     let l = if let Some(Value::I64(l)) = l {
-        *l
+        l
     } else {
-        panic!("{} expects two i64 arguments got arg_0: {:?}", name, &l);
+        panic!("{} expects two i64 arguments got arg_0: {:?}\n{:?}", name, &l, &state);
     };
-    let r = state.get_value_for("arg_1");
+    let r = state.get_value_for("arg_1").cloned();
     let r = if let Some(Value::I64(r)) = r {
-        *r
+        r
     } else {
-        panic!("{} expects two i64 arguments got arg_1: {:?}", name, &r);
+        panic!("{} expects two i64 arguments got arg_1: {:?}\n{:?}", name, &r, &state);
     };
     Value::I64(op(l, r))
 }
