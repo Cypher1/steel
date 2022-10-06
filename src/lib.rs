@@ -180,9 +180,15 @@ mod test {
             handle::<ecs::Ecs>(Tasks::parse(&program).and_eval()),
         )
     }
-
+    const DEVIOUS_PROGRAM: &str = "0(putchar())";
     const SIMPLE_PROGRAM: &str = "putchar(48+9)";
     const MEDIUM_PROGRAM: &str = "putchar(65)+putchar(66)+putchar(67)+putchar(10)";
+
+    #[test]
+    fn can_handle_devious_program_ast() {
+        let program = DEVIOUS_PROGRAM;
+        take_result(program, handle::<ast::Ast>(Tasks::all(program)))
+    }
 
     #[test]
     fn can_handle_simple_program_ast() {
@@ -210,6 +216,12 @@ mod test {
                 test_with_random_program::<ast::Ast>(i);
             }
         }
+    }
+
+    #[test]
+    fn can_handle_devious_program_ecs() {
+        let program = DEVIOUS_PROGRAM;
+        take_result(program, handle::<ecs::Ecs>(Tasks::all(program)))
     }
 
     #[test]
