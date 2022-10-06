@@ -32,6 +32,7 @@ impl<ID> std::fmt::Debug for Impl<ID> {
 
 #[derive(Clone, Debug)]
 pub enum Value<ID> {
+    UnInit,
     I64(i64), // a raw i64 value.
     // TODO: Func(ID), // reference to an 'expression' like thing that can be evaluated in some context.
     Extern(Impl<ID>), // reference to an extern...
@@ -39,7 +40,7 @@ pub enum Value<ID> {
 
 impl<ID> Default for Value<ID> {
     fn default() -> Self {
-        Self::I64(0)
+        Self::UnInit
     }
 }
 
