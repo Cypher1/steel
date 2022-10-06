@@ -249,13 +249,13 @@ fn bin_op<ID: std::fmt::Debug, F: FnOnce(i64, i64) -> i64>(
     let l = if let Some(Value::I64(l)) = l {
         *l
     } else {
-        todo!("{} expects two i64 arguments got arg_0: {:?}", name, &l);
+        panic!("{} expects two i64 arguments got arg_0: {:?}", name, &l);
     };
     let r = state.get_value_for("arg_1");
     let r = if let Some(Value::I64(r)) = r {
         *r
     } else {
-        todo!("{} expects two i64 arguments got arg_1: {:?}", name, &r);
+        panic!("{} expects two i64 arguments got arg_1: {:?}", name, &r);
     };
     Value::I64(op(l, r))
 }
