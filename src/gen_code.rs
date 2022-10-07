@@ -75,7 +75,6 @@ impl Default for Spec {
     }
 }
 
-
 pub fn generate_random_program<Ctx: CompilerContext>(
     _name: &'static str,
     store: &mut Ctx,
@@ -92,7 +91,7 @@ pub fn generate_random_program_impl<Ctx: CompilerContext>(
     spec: &Spec,
     rng: &mut ThreadRng,
 ) -> Ctx::ID {
-    let size = spec.size.unwrap_or_else(||rng.gen_range(1..1000));
+    let size = spec.size.unwrap_or_else(|| rng.gen_range(1..1000));
     if size > 1 {
         let mut args = vec![];
         let mut args_size: usize = rng.gen_range(1..size);
@@ -126,7 +125,12 @@ pub fn generate_random_program_impl<Ctx: CompilerContext>(
         let callee = generate_random_program(_name, store, &inner_spec, rng);
         return store.add(Call { callee, args });
     }
-    let symbols: Vec<Spec> = spec.in_scope.iter().filter(|s| s.is_in_scope(spec)).cloned().collect();
+    let symbols: Vec<Spec> = spec
+        .in_scope
+        .iter()
+        .filter(|s| s.is_in_scope(spec))
+        .cloned()
+        .collect();
     if !symbols.is_empty() && weighted_bool(rng, CHANCE_OF_SYMBOL) {
         let symbol_index: usize = rng.gen_range(0..symbols.len());
         let spec = &symbols[symbol_index];

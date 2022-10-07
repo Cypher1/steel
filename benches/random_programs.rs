@@ -57,7 +57,11 @@ fn benchmark_parse_and_eval_tasks<T: CompilerContext>(
     SteelErr: From<<T as CompilerContext>::E>,
 {
     c.bench_function(
-        &format!("{} parse and eval random program {}", name, render_size(spec)),
+        &format!(
+            "{} parse and eval random program {}",
+            name,
+            render_size(spec)
+        ),
         |b| {
             debug!("testing {} with {}\n{}", name, render_size(spec), program);
             b.iter(|| handle::<T>(black_box(Tasks::parse(program).and_eval())))
