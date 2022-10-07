@@ -21,25 +21,25 @@ pub struct Spec {
 }
 
 impl Spec {
-    pub fn new(name: &str, is_operator: bool, in_scope: Vec<Spec>) -> Self {
+    pub fn new(name: &str, is_operator: bool) -> Self {
         Self {
             name: name.to_string(),
             size: None,
             is_operator,
-            in_scope,
+            in_scope: Vec::new(),
         }
     }
 
     pub fn symbol(name: &str) -> Self {
-        Self::new(name, false, Vec::new())
+        Self::new(name, false)
     }
 
     pub fn operator(name: &str, n_args: usize) -> Self {
-        let mut in_scope = vec![];
+        let mut spec = Self::new(name, true);
         for i in 0..n_args {
-            in_scope.push(Spec::symbol(&format!("arg_{}", i)));
+            spec = spec.add_symbol(Spec::symbol(&format!("arg_{}", i)));
         }
-        Self::new(name, true, in_scope)
+        spec
     }
 
     pub fn named(mut self, name: String) -> Self {
@@ -65,18 +65,13 @@ impl Spec {
 
 impl Default for Spec {
     fn default() -> Self {
-        Self {
-            name: "main".to_string(),
-            is_operator: false,
-            size: Some(1),
-            in_scope: vec![
-                Spec::symbol("putchar"),
-                Spec::operator("+", 2),
-                Spec::operator("*", 2),
-                Spec::operator("/", 2),
-                Spec::operator("-", 2),
-            ],
-        }
+        Self::symbol("main")
+            .sized(100)
+            .add_symbol(Spec::symbol("putchar"))
+            .add_symbol(Spec::operator("+", 2))
+            .add_symbol(Spec::operator("*", 2))
+            .add_symbol(Spec::operator("/", 2))
+            .add_symbol(Spec::operator("-", 2))
     }
 }
 
