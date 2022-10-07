@@ -168,7 +168,7 @@ mod test {
         }
     }
 
-    fn test_with_random_program<Ctx: CompilerContext>(size: usize) {
+    fn test_with_random_program<Ctx: CompilerContext>(size: usize) -> String {
         // TODO: use https://docs.rs/crate/quickcheck/0.9.2
         let spec = Spec::default().sized(size);
         let mut rng = rand::thread_rng();
@@ -178,7 +178,8 @@ mod test {
         take_result(
             &program,
             handle::<ecs::Ecs>(Tasks::parse(&program).and_eval()),
-        )
+        );
+        program
     }
     const DEVIOUS_PROGRAM: &str = "0(putchar())";
     const SIMPLE_PROGRAM: &str = "putchar(48+9)";
@@ -205,7 +206,7 @@ mod test {
 
     #[test]
     fn can_handle_random_programs_ast() {
-        test_with_random_program::<ast::Ast>(100);
+        eprintln!("sample program: {}", test_with_random_program::<ast::Ast>(100));
     }
 
     #[ignore]
@@ -240,7 +241,7 @@ mod test {
 
     #[test]
     fn can_handle_random_programs_ecs() {
-        test_with_random_program::<ecs::Ecs>(100);
+        eprintln!("sample program: {}", test_with_random_program::<ecs::Ecs>(100));
     }
 
     #[ignore]
