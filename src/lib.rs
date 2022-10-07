@@ -208,7 +208,7 @@ mod test {
     fn can_handle_random_programs_ast() {
         eprintln!(
             "sample program: {}",
-            test_with_random_program::<ast::Ast>(100)
+            test_with_random_program::<ast::Ast>(1000)
         );
     }
 
@@ -246,7 +246,7 @@ mod test {
     fn can_handle_random_programs_ecs() {
         eprintln!(
             "sample program: {}",
-            test_with_random_program::<ecs::Ecs>(100)
+            test_with_random_program::<ecs::Ecs>(1000)
         );
     }
 

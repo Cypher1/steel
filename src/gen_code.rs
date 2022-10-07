@@ -3,16 +3,18 @@ use crate::{
     CompilerContext,
 };
 use rand::{distributions::Alphanumeric, rngs::ThreadRng, Rng};
+use log::trace;
 
-static CHANCE_OF_POTENTIALLY_LARGE_CONSTANT: f64 = 0.05;
-static CHANCE_OF_SYMBOL: f64 = 0.5;
-static CHANCE_OF_NAMED_ARG: f64 = 0.25;
+static CHANCE_OF_POTENTIALLY_LARGE_CONSTANT: f64 = 0.01;
+static CHANCE_OF_SYMBOL: f64 = 0.99;
+static CHANCE_OF_NAMED_ARG: f64 = 0.15;
+static CHANCE_OF_CALL_WITH_NO_ARGS: f64 = 0.15;
 
 fn weighted_bool(rng: &mut ThreadRng, chance: f64) -> bool {
     rng.gen_range(0f64..=1f64) < chance
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct Spec {
     pub size: Option<usize>,
     name: String,
@@ -61,6 +63,7 @@ impl Spec {
         // TODO: check if all the required args are in `context`.
         for req in &self.in_scope {
             if !req.is_in_scope(context) {
+                trace!("{}: Missing argument {}", self.name, req.name);
                 return false;
             }
         }
@@ -69,6 +72,7 @@ impl Spec {
                 return true;
             }
         }
+        trace!("Missing symbol {}", self.name);
         false
     }
 }
@@ -102,20 +106,16 @@ pub fn generate_random_program_impl<Ctx: CompilerContext>(
     rng: &mut ThreadRng,
 ) -> Ctx::ID {
     let size = spec.size.unwrap_or_else(|| rng.gen_range(1..1000));
-    if size > 1 {
+    let mut args_size: usize = rng.gen_range(0..=size);
+    let arg_range = (args_size as f64).sqrt() as usize;
+    let num_args: usize = rng.gen_range(0..=arg_range);
+    if size > args_size && (num_args > 0 || weighted_bool(rng, CHANCE_OF_CALL_WITH_NO_ARGS)){
         let mut args = vec![];
-        let mut args_size: usize = rng.gen_range(1..size);
         let inner_size: usize = size - args_size - 1;
         let mut inner_spec = spec.clone().named("self".to_string()).sized(inner_size);
-        let arg_range = (args_size as f64).sqrt() as usize;
-        let num_args: usize = rng.gen_range(0..=arg_range);
         args_size -= num_args; // at least one node per arg.
         let mut arg_index = 0;
         for _ in 0..num_args {
-            let arg_size: usize = rng.gen_range(1..=1 + args_size);
-            let arg_spec = spec.clone().sized(arg_size);
-            args_size -= arg_size - 1;
-            let arg_id = generate_random_program(_name, store, &arg_spec, rng);
             let tail: String = rng
                 .sample_iter(&Alphanumeric)
                 .take(3)
@@ -128,6 +128,10 @@ pub fn generate_random_program_impl<Ctx: CompilerContext>(
                 arg_index += 1;
                 s
             };
+            let arg_size: usize = rng.gen_range(1..=1 + args_size);
+            let arg_spec = spec.clone().named(arg_name.clone()).sized(arg_size);
+            args_size -= arg_size - 1;
+            let arg_id = generate_random_program(_name, store, &arg_spec, rng);
             // assume no higher-order arguments.
             inner_spec = inner_spec.add_symbol(arg_spec);
             args.push((arg_name, arg_id));
@@ -135,6 +139,7 @@ pub fn generate_random_program_impl<Ctx: CompilerContext>(
         let callee = generate_random_program(_name, store, &inner_spec, rng);
         return store.add(Call { callee, args });
     }
+    trace!("in scope: {:?}", &spec.in_scope);
     let symbols: Vec<Spec> = spec
         .in_scope
         .iter()
