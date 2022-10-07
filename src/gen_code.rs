@@ -67,7 +67,7 @@ impl Default for Spec {
     fn default() -> Self {
         Self::symbol("main")
             .sized(100)
-            .add_symbol(Spec::symbol("putchar"))
+            .add_symbol(Spec::symbol("putchar").add_symbol(Spec::symbol("arg_0")))
             .add_symbol(Spec::operator("+", 2))
             .add_symbol(Spec::operator("*", 2))
             .add_symbol(Spec::operator("/", 2))

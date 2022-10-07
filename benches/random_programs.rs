@@ -7,7 +7,9 @@ use steel::{
 };
 
 fn render_size(spec: &Spec) -> String {
-    spec.size.map(|s| s.to_string()).unwrap_or_else(|| "".to_string())
+    spec.size
+        .map(|s| s.to_string())
+        .unwrap_or_else(|| "".to_string())
 }
 
 fn benchmark_parse<T: CompilerContext>(
