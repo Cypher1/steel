@@ -77,31 +77,29 @@ pub fn generate_random_program_impl<Ctx: CompilerContext>(
         let mut args_size: usize = rng.gen_range(1..size);
         let inner_size: usize = size - args_size - 1;
         let mut inner_spec = Spec::default().sized(inner_size);
-        if args_size > 0 {
-            let arg_range = (args_size as f64).sqrt() as usize;
-            let num_args: usize = rng.gen_range(1..=arg_range);
-            args_size -= num_args; // at least one node per arg.
-            let mut arg_index = 0;
-            for _ in 0..num_args {
-                let arg_size: usize = rng.gen_range(1..=1 + args_size);
-                let arg_spec = Spec::default().sized(arg_size);
-                args_size -= arg_size - 1;
-                let arg_id = generate_random_program(_name, store, &arg_spec, rng);
-                let tail: String = rng
-                    .sample_iter(&Alphanumeric)
-                    .take(3)
-                    .map(char::from)
-                    .collect();
-                let arg_name = if weighted_bool(rng, CHANCE_OF_NAMED_ARG) {
-                    rng.gen_range('a'..='z').to_string() + &tail
-                } else {
-                    let s = format!("arg_{}", arg_index);
-                    arg_index += 1;
-                    s
-                };
-                inner_spec = inner_spec.add_symbol(arg_name.clone(), false, 0);
-                args.push((arg_name, arg_id));
-            }
+        let arg_range = (args_size as f64).sqrt() as usize;
+        let num_args: usize = rng.gen_range(0..=arg_range);
+        args_size -= num_args; // at least one node per arg.
+        let mut arg_index = 0;
+        for _ in 0..num_args {
+            let arg_size: usize = rng.gen_range(1..=1 + args_size);
+            let arg_spec = Spec::default().sized(arg_size);
+            args_size -= arg_size - 1;
+            let arg_id = generate_random_program(_name, store, &arg_spec, rng);
+            let tail: String = rng
+                .sample_iter(&Alphanumeric)
+                .take(3)
+                .map(char::from)
+                .collect();
+            let arg_name = if weighted_bool(rng, CHANCE_OF_NAMED_ARG) {
+                rng.gen_range('a'..='z').to_string() + &tail
+            } else {
+                let s = format!("arg_{}", arg_index);
+                arg_index += 1;
+                s
+            };
+            inner_spec = inner_spec.add_symbol(arg_name.clone(), false, 0);
+            args.push((arg_name, arg_id));
         }
         inner_spec = inner_spec.arity(args.len());
         let callee = generate_random_program(_name, store, &inner_spec, rng);
