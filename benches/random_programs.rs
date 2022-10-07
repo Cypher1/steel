@@ -6,6 +6,10 @@ use steel::{
     handle, handle_steps, CompilerContext, SteelErr, Tasks,
 };
 
+fn render_size(spec: &Spec) -> String {
+    spec.size.map(|s| s.to_string()).unwrap_or("".to_string())
+}
+
 fn benchmark_parse<T: CompilerContext>(
     name: &'static str,
     program: &str,
@@ -15,9 +19,9 @@ fn benchmark_parse<T: CompilerContext>(
     SteelErr: From<<T as CompilerContext>::E>,
 {
     c.bench_function(
-        &format!("{} parse random program {}", name, spec.size),
+        &format!("{} parse random program {}", name, render_size(spec)),
         |b| {
-            debug!("testing {} with {}\n{}", name, spec.size, program);
+            debug!("testing {} with {}\n{}", name, render_size(spec), program);
             b.iter(|| handle::<T>(black_box(Tasks::parse(program))))
         },
     );
@@ -32,9 +36,9 @@ fn benchmark_eval<T: CompilerContext>(
     SteelErr: From<<T as CompilerContext>::E>,
 {
     c.bench_function(
-        &format!("{} eval random program {}", name, spec.size),
+        &format!("{} eval random program {}", name, render_size(spec)),
         |b| {
-            debug!("testing {} with {}\n{}", name, spec.size, program);
+            debug!("testing {} with {}\n{}", name, render_size(spec), program);
             let mut store = T::new();
             let (id, _res) = handle_steps::<T>(&mut store, Tasks::parse(program))
                 .expect("Should parse program without error");
@@ -53,9 +57,9 @@ fn benchmark_parse_and_eval_tasks<T: CompilerContext>(
     SteelErr: From<<T as CompilerContext>::E>,
 {
     c.bench_function(
-        &format!("{} parse and eval random program {}", name, spec.size),
+        &format!("{} parse and eval random program {}", name, render_size(spec)),
         |b| {
-            debug!("testing {} with {}\n{}", name, spec.size, program);
+            debug!("testing {} with {}\n{}", name, render_size(spec), program);
             b.iter(|| handle::<T>(black_box(Tasks::parse(program).and_eval())))
         },
     );

@@ -14,7 +14,7 @@ fn weighted_bool(rng: &mut ThreadRng, chance: f64) -> bool {
 
 #[derive(Clone)]
 pub struct Spec {
-    size: Option<usize>,
+    pub size: Option<usize>,
     name: String,
     is_operator: bool,
     in_scope: Vec<Spec>,
