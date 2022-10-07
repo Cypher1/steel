@@ -185,7 +185,8 @@ mod test {
     const MEDIUM_PROGRAM: &str = "putchar(65)+putchar(66)+putchar(67)+putchar(10)";
 
     #[test]
-    fn can_handle_devious_program_ast() {
+    #[should_panic]
+    fn cannot_handle_devious_program_ast() {
         let program = DEVIOUS_PROGRAM;
         take_result(program, handle::<ast::Ast>(Tasks::all(program)))
     }
@@ -219,7 +220,8 @@ mod test {
     }
 
     #[test]
-    fn can_handle_devious_program_ecs() {
+    #[should_panic]
+    fn cannot_handle_devious_program_ecs() {
         let program = DEVIOUS_PROGRAM;
         take_result(program, handle::<ecs::Ecs>(Tasks::all(program)))
     }
