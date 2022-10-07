@@ -57,8 +57,18 @@ impl Spec {
         self
     }
 
-    fn is_in_scope(&self, _context: &Spec) -> bool {
-        // TODO: check if all the required args are in `_context`.
+    fn is_in_scope(&self, context: &Spec) -> bool {
+        // TODO: check if all the required args are in `context`.
+        for req in &self.in_scope {
+            if !req.is_in_scope(context) {
+                return false;
+            }
+        }
+        for sym in &context.in_scope {
+            if sym.name == self.name {
+                return true;
+            }
+        }
         false
     }
 }
