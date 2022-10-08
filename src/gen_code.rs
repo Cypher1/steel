@@ -110,10 +110,16 @@ pub fn generate_random_program_impl<Ctx: CompilerContext>(
     let arg_range = (args_size as f64).sqrt() as usize;
     let num_args: usize = rng.gen_range(0..=arg_range);
     if size > args_size && (num_args > 0 || weighted_bool(rng, CHANCE_OF_CALL_WITH_NO_ARGS)){
+        let mut starter = spec.clone();
+        starter.in_scope = starter
+            .in_scope
+            .drain(0..)
+            .filter(|s| s.name.starts_with("arg_"))
+            .collect();
+        args_size -= num_args; // at least one node per arg.
         let mut args = vec![];
         let inner_size: usize = size - args_size - 1;
-        let mut inner_spec = spec.clone().named("self".to_string()).sized(inner_size);
-        args_size -= num_args; // at least one node per arg.
+        let mut inner_spec = starter.clone().named("self".to_string()).sized(inner_size);
         let mut arg_index = 0;
         for _ in 0..num_args {
             let tail: String = rng
@@ -129,7 +135,7 @@ pub fn generate_random_program_impl<Ctx: CompilerContext>(
                 s
             };
             let arg_size: usize = rng.gen_range(1..=1 + args_size);
-            let arg_spec = spec.clone().named(arg_name.clone()).sized(arg_size);
+            let arg_spec = starter.clone().named(arg_name.clone()).sized(arg_size);
             args_size -= arg_size - 1;
             let arg_id = generate_random_program(_name, store, &arg_spec, rng);
             // assume no higher-order arguments.
