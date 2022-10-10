@@ -133,7 +133,7 @@ pub fn eval_program<S: CompilerContext>(
     program_txt: &str,
 ) -> Result<i64, SteelErr> {
     let mut state = EvalState::default();
-    let result_index = state.setup_eval(StaticPtr(expr), 0);
+    let result_index = state.setup_eval(StaticPtr(expr), Vec::new());
     eval(store, &mut state)?;
     let res = state.mem_stack.get(result_index);
     debug!("eval: {:?} {:?}", state, res);
@@ -186,7 +186,6 @@ mod test {
     const MEDIUM_PROGRAM: &str = "putchar(65)+putchar(66)+putchar(67)+putchar(10)";
 
     #[test]
-    #[should_panic]
     fn cannot_handle_devious_program_ast() {
         let program = DEVIOUS_PROGRAM;
         take_result(program, handle::<ast::Ast>(Tasks::all(program)))
@@ -224,7 +223,6 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
     fn cannot_handle_devious_program_ecs() {
         let program = DEVIOUS_PROGRAM;
         take_result(program, handle::<ecs::Ecs>(Tasks::all(program)))

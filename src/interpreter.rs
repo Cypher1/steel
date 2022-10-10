@@ -48,7 +48,7 @@ pub use FnPtr::*;
 pub struct StackFrame<ID> {
     fn_ptr: FnPtr<ID>,
     return_address: usize,
-    owned_memory: usize,
+    bindings: Vec<(String, usize)>,
 }
 
 fn state_to_string<C: CompilerContext>(
@@ -56,8 +56,8 @@ fn state_to_string<C: CompilerContext>(
     state: &EvalState<C::ID>,
     target: &StackFrame<C::ID>,
 ) -> String {
-    let owning = if target.owned_memory > 0 {
-        format!("(owning {:?})", target.owned_memory)
+    let owning = if !target.bindings.is_empty() {
+        format!("(owning {:?})", target.bindings)
     } else {
         "".to_string()
     };
@@ -75,8 +75,8 @@ impl<ID: std::fmt::Debug> std::fmt::Debug for StackFrame<ID> {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
         write!(
             f,
-            "*{:?} = {:?}({:?} args)",
-            self.return_address, self.fn_ptr, self.owned_memory
+            "*{:?} = {:?}({:?})",
+            self.return_address, self.fn_ptr, self.bindings
         )
     }
 }
@@ -173,31 +173,31 @@ impl<ID> EvalState<ID> {
         entries.push(index); // Vec allows shadowing
     }
 
-    pub fn setup_eval_to(&mut self, fn_ptr: FnPtr<ID>, return_address: usize, owned_memory: usize) {
+    pub fn setup_eval_to(&mut self, fn_ptr: FnPtr<ID>, return_address: usize, bindings: Vec<(String, usize)>) {
         self.function_stack.push(StackFrame {
             fn_ptr,
             return_address,
-            owned_memory,
+            bindings,
         }); // to evaluate...
     }
 
-    pub fn setup_closure(&mut self, code: ID, return_address: usize, owned_memory: usize) -> usize {
+    pub fn setup_closure(&mut self, code: ID, return_address: usize, mut bindings: Vec<(String, usize)>) -> usize {
         let callee_index = self.alloc(Value::UnInit); // explicitly store 'uninitialized' marker.
                                                       // then run the closure
-        let closure_size = 1;
+        bindings.push(("self".to_string(), callee_index));
         self.setup_eval_to(
             FnPtr::MemPtr(callee_index),
             return_address,
-            owned_memory + closure_size,
+            Vec::new(),
         );
         // but first fetch the 'code'.
-        self.setup_eval_to(FnPtr::StaticPtr(code), callee_index, 0);
+        self.setup_eval_to(FnPtr::StaticPtr(code), callee_index, bindings);
         return_address
     }
 
-    pub fn setup_eval(&mut self, target: FnPtr<ID>, owned_memory: usize) -> usize {
+    pub fn setup_eval(&mut self, target: FnPtr<ID>, bindings: Vec<(String, usize)>) -> usize {
         let return_address = self.alloc(Value::UnInit); // explicitly store 'uninitialized' marker.
-        self.setup_eval_to(target, return_address, owned_memory);
+        self.setup_eval_to(target, return_address, bindings);
         return_address
     }
 
@@ -234,9 +234,9 @@ where
 {
     trace!("state: {:?}", state.mem_stack);
     perform(context, state, &target)?;
-    if target.owned_memory > 0 {
-        state.drop_mem(target.owned_memory);
-    }
+    // if target.bindings > 0 {
+        // state.drop_mem(target.bindings);
+    // }
     Ok(())
 }
 
@@ -251,13 +251,16 @@ where
     let StackFrame {
         fn_ptr,
         return_address,
-        owned_memory,
+        bindings,
     } = target;
+    for (name, index) in bindings {
+        state.bind_name(name, *index);
+    }
     let id = match fn_ptr {
         MemPtr(index) => {
             let func = state.get_mem(*index)?.clone();
             // should drop the closure.
-            trace!("running closure {:?} {:?}", func, target.owned_memory);
+            trace!("running closure {:?} {:?}", func, target.bindings);
             let res = match func {
                 Value::Extern(imp) => state.run_extern(imp)?,
                 constant => constant,
@@ -269,17 +272,23 @@ where
     };
     if let Ok(c) = context.get_call(id) {
         // load in all the args
-        state.setup_closure(c.callee, *return_address, owned_memory + c.args.len());
+        let mut args = vec![];
+        let mut todos = vec![];
+        for (name, arg) in c.args.iter().rev() {
+            trace!("    arg {:?} -> {}", &name, context.pretty(*arg));
+            let index = state.alloc(Value::UnInit);
+            args.push((name.to_string(), index));
+            // TODO: Consider loading known values in without 'call'.
+            todos.push((arg, index));
+        }
+        state.setup_closure(c.callee, *return_address, args);
         trace!(
             "  inner {:?} -> {}",
             &return_address,
             context.pretty(c.callee)
         );
-        for (name, arg) in c.args.iter().rev() {
-            trace!("    arg {:?} -> {}", &name, context.pretty(*arg));
-            // TODO: Consider loading known values in without 'call'.
-            let index = state.setup_eval(FnPtr::StaticPtr(*arg), 0);
-            state.bind_name(name, index);
+        for (arg, index) in todos {
+            state.setup_eval_to(FnPtr::StaticPtr(*arg), index, Vec::new());
         }
         return Ok(());
     }
