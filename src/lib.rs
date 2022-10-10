@@ -142,7 +142,7 @@ pub fn eval_program<S: CompilerContext>(
         Some(Value::Extern(_func)) => {
             panic!("Returned an extern func!? {:?}\n{}", res, program_txt)
         }
-        Some(Value::UnInit) => panic!(
+        Some(Value::Uninit) => panic!(
             "No value was placed in the return address!?\n{}",
             program_txt
         ),

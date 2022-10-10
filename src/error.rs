@@ -2,7 +2,7 @@ use nom::error::ParseError;
 
 #[must_use]
 pub enum SteelErr {
-    ParseErrorParseInt(String, std::num::ParseIntError),
+    MalformedInteger(String, std::num::ParseIntError),
     IOError(std::io::Error),
     AstError(crate::ast::AstError),
     EcsError(crate::ecs::EcsError),
@@ -10,7 +10,7 @@ pub enum SteelErr {
         precendence: i32,
     },
     UnexpectedEndOfInput,
-    ReliedOnUnInitializedMemory(usize),
+    ReliedOnUninitializedMemory(usize),
     ReliedOnOutOfBoundsMemory(usize),
     MissingArgumentExpectedByExtern(String, String),
     MissingValueForBinding(String),
@@ -36,12 +36,12 @@ impl std::fmt::Display for SteelErr {
                 "Unexpected operator due to max precendence setting ({})",
                 precendence
             ),
-            ParseErrorParseInt(input, error) => {
+            MalformedInteger(input, error) => {
                 write!(f, "Failed to parse int due to {:?} in {}", error, input)
             }
             IOError(e) => write!(f, "Error while performing input/output: {}", e),
             UnexpectedEndOfInput => write!(f, "Expected an expression, found nothing"),
-            ReliedOnUnInitializedMemory(index) => {
+            ReliedOnUninitializedMemory(index) => {
                 write!(f, "Relied on uninitialized memory {:?}", index)
             }
             ReliedOnOutOfBoundsMemory(index) => {
@@ -100,7 +100,7 @@ impl nom::error::FromExternalError<&str, std::num::ParseIntError> for SteelErr {
         _kind: nom::error::ErrorKind,
         e: std::num::ParseIntError,
     ) -> Self {
-        ParseErrorParseInt(input.to_string(), e)
+        MalformedInteger(input.to_string(), e)
     }
 }
 

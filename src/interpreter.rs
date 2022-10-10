@@ -32,7 +32,7 @@ impl<ID> std::fmt::Debug for Impl<ID> {
 
 #[derive(Clone, Debug)]
 pub enum Value<ID> {
-    UnInit,
+    Uninit,
     I64(i64), // a raw i64 value.
     // TODO: Func(ID), // reference to an 'expression' like thing that can be evaluated in some context.
     Extern(Impl<ID>), // reference to an extern...
@@ -142,8 +142,8 @@ impl<ID> EvalState<ID> {
 
     fn try_get_mem(&self, index: usize) -> Result<Option<&Value<ID>>, SteelErr> {
         let r = self.mem_stack.get(index);
-        if let Some(Value::UnInit) = r {
-            return Err(SteelErr::ReliedOnUnInitializedMemory(index));
+        if let Some(Value::Uninit) = r {
+            return Err(SteelErr::ReliedOnUninitializedMemory(index));
         }
         Ok(r)
     }
@@ -182,7 +182,7 @@ impl<ID> EvalState<ID> {
     }
 
     pub fn setup_closure(&mut self, code: ID, return_address: usize, mut bindings: Vec<(String, usize)>) -> usize {
-        let callee_index = self.alloc(Value::UnInit); // explicitly store 'uninitialized' marker.
+        let callee_index = self.alloc(Value::Uninit); // explicitly store 'uninitialized' marker.
                                                       // then run the closure
         bindings.push(("self".to_string(), callee_index));
         self.setup_eval_to(
@@ -196,7 +196,7 @@ impl<ID> EvalState<ID> {
     }
 
     pub fn setup_eval(&mut self, target: FnPtr<ID>, bindings: Vec<(String, usize)>) -> usize {
-        let return_address = self.alloc(Value::UnInit); // explicitly store 'uninitialized' marker.
+        let return_address = self.alloc(Value::Uninit); // explicitly store 'uninitialized' marker.
         self.setup_eval_to(target, return_address, bindings);
         return_address
     }
@@ -276,7 +276,7 @@ where
         let mut todos = vec![];
         for (name, arg) in c.args.iter().rev() {
             trace!("    arg {:?} -> {}", &name, context.pretty(*arg));
-            let index = state.alloc(Value::UnInit);
+            let index = state.alloc(Value::Uninit);
             args.push((name.to_string(), index));
             // TODO: Consider loading known values in without 'call'.
             todos.push((arg, index));
