@@ -49,7 +49,7 @@ pub fn pretty_impl<C: CompilerContext + ?Sized>(context: &C, id: C::ID) -> (Stri
             return (
                 format!("{}{}", if c.args.len() < 2 { &callee } else { "" }, args),
                 true,
-                false
+                false,
             );
         }
         if is_expr || is_op {

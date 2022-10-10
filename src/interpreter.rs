@@ -173,7 +173,12 @@ impl<ID> EvalState<ID> {
         entries.push(index); // Vec allows shadowing
     }
 
-    pub fn setup_eval_to(&mut self, fn_ptr: FnPtr<ID>, return_address: usize, bindings: Vec<(String, usize)>) {
+    pub fn setup_eval_to(
+        &mut self,
+        fn_ptr: FnPtr<ID>,
+        return_address: usize,
+        bindings: Vec<(String, usize)>,
+    ) {
         self.function_stack.push(StackFrame {
             fn_ptr,
             return_address,
@@ -181,15 +186,16 @@ impl<ID> EvalState<ID> {
         }); // to evaluate...
     }
 
-    pub fn setup_closure(&mut self, code: ID, return_address: usize, mut bindings: Vec<(String, usize)>) -> usize {
+    pub fn setup_closure(
+        &mut self,
+        code: ID,
+        return_address: usize,
+        mut bindings: Vec<(String, usize)>,
+    ) -> usize {
         let callee_index = self.alloc(Value::Uninit); // explicitly store 'uninitialized' marker.
                                                       // then run the closure
         bindings.push(("self".to_string(), callee_index));
-        self.setup_eval_to(
-            FnPtr::MemPtr(callee_index),
-            return_address,
-            Vec::new(),
-        );
+        self.setup_eval_to(FnPtr::MemPtr(callee_index), return_address, Vec::new());
         // but first fetch the 'code'.
         self.setup_eval_to(FnPtr::StaticPtr(code), callee_index, bindings);
         return_address
@@ -235,7 +241,7 @@ where
     trace!("state: {:?}", state.mem_stack);
     perform(context, state, &target)?;
     // if target.bindings > 0 {
-        // state.drop_mem(target.bindings);
+    // state.drop_mem(target.bindings);
     // }
     Ok(())
 }

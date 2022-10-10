@@ -2,8 +2,8 @@ use crate::{
     nodes::{Call, Symbol},
     CompilerContext,
 };
-use rand::{distributions::Alphanumeric, rngs::ThreadRng, Rng};
 use log::trace;
+use rand::{distributions::Alphanumeric, rngs::ThreadRng, Rng};
 
 static CHANCE_OF_POTENTIALLY_LARGE_CONSTANT: f64 = 0.01;
 static CHANCE_OF_SYMBOL: f64 = 0.99;
@@ -109,7 +109,7 @@ pub fn generate_random_program_impl<Ctx: CompilerContext>(
     let mut args_size: usize = rng.gen_range(0..=size);
     let arg_range = (args_size as f64).sqrt() as usize;
     let num_args: usize = rng.gen_range(0..=arg_range);
-    if size > args_size && (num_args > 0 || weighted_bool(rng, CHANCE_OF_CALL_WITH_NO_ARGS)){
+    if size > args_size && (num_args > 0 || weighted_bool(rng, CHANCE_OF_CALL_WITH_NO_ARGS)) {
         let mut starter = spec.clone();
         starter.in_scope = starter
             .in_scope
