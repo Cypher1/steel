@@ -8,6 +8,7 @@ mod error;
 pub mod gen_code;
 mod interpreter;
 pub mod nodes;
+mod optimizer;
 mod parser;
 mod pretty_printer;
 

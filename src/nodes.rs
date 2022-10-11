@@ -1,3 +1,8 @@
+#[derive(Debug, Default, PartialEq, Eq, Ord, PartialOrd, Hash)]
+pub struct OptimizerData<P> {
+    pub equivalent_to: Vec<P>,
+}
+
 #[derive(Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
 pub struct Symbol {
     // TODO: Intern strings

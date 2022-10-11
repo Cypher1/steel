@@ -1,4 +1,4 @@
-use crate::nodes::{Call, Symbol};
+use crate::nodes::{Call, OptimizerData, Symbol};
 
 pub trait NodeStore<ID, T, E> {
     fn add(&mut self, value: T) -> ID;
@@ -9,6 +9,7 @@ pub trait NodeStore<ID, T, E> {
 pub trait CompilerContext:
     NodeStore<Self::ID, Call<Self::ID>, Self::E>
     + NodeStore<Self::ID, Symbol, Self::E>
+    + NodeStore<Self::ID, OptimizerData<Self::ID>, Self::E>
     + NodeStore<Self::ID, i64, Self::E>
 {
     type ID: Copy + std::fmt::Debug;

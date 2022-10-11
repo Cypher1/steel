@@ -21,11 +21,13 @@ pub struct Ecs {
     symbols: Arena<Symbol>,
     calls: Arena<Call<ID>>,
     int64_values: Arena<i64>,
+    optimizer_data: Arena<OptimizerData<ID>>,
 }
 
-make_arena_provider!(Ecs, Symbol, Symbol, symbols);
-make_arena_provider!(Ecs, Call<ID>, Call, calls);
-make_arena_provider!(Ecs, i64, I64, int64_values);
+make_arena_provider!(Ecs, Symbol, symbol, symbols);
+make_arena_provider!(Ecs, Call<ID>, call, calls);
+make_arena_provider!(Ecs, i64, i_64, int64_values);
+make_arena_provider!(Ecs, OptimizerData<ID>, optimizer_data, optimizer_data);
 
 impl CompilerContext for Ecs {
     type ID = ID;
@@ -40,6 +42,7 @@ impl CompilerContext for Ecs {
             + self.symbols.active_mem_usage()
             + self.calls.active_mem_usage()
             + self.int64_values.active_mem_usage()
+            + self.optimizer_data.active_mem_usage()
     }
 
     fn mem_usage(&self) -> usize {
@@ -48,6 +51,7 @@ impl CompilerContext for Ecs {
             + self.symbols.mem_usage()
             + self.calls.mem_usage()
             + self.int64_values.mem_usage()
+            + self.optimizer_data.mem_usage()
     }
 }
 

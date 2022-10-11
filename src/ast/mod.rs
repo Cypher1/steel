@@ -21,7 +21,7 @@ use AstError::*;
 
 #[derive(Debug, Default)]
 pub struct Ast {
-    members: Arena<Node>,
+    members: Arena<(Node, OptimizerData<ID>)>, // All nodes have optimizer_data!
 }
 
 impl Ast {
@@ -34,6 +34,7 @@ impl CompilerContext for Ast
 where
     Self: NodeStore<ID, i64, AstError>,
     Self: NodeStore<ID, Symbol, AstError>,
+    Self: NodeStore<ID, OptimizerData<ID>, AstError>,
     Self: NodeStore<ID, Call<ID>, AstError>,
 {
     type ID = ID;
@@ -54,13 +55,26 @@ where
 
 impl NodeStore<ID, Node, ArenaError> for Ast {
     fn add(&mut self, value: Node) -> ID {
-        self.members.add(value)
+        self.members.add((value, OptimizerData::default()))
     }
     fn get(&self, id: ID) -> Result<&Node, ArenaError> {
-        self.members.get(id)
+        Ok(&self.members.get(id)?.0)
     }
     fn get_mut(&mut self, id: ID) -> Result<&mut Node, ArenaError> {
-        self.members.get_mut(id)
+        Ok(&mut self.members.get_mut(id)?.0)
+    }
+}
+
+impl NodeStore<ID, OptimizerData<ID>, AstError> for Ast {
+    fn add(&mut self, _value: OptimizerData<ID>) -> ID {
+        // TODO: Structure the traits better
+        panic!("Can't add optimizer data without an associated node")
+    }
+    fn get(&self, id: ID) -> Result<&OptimizerData<ID>, AstError> {
+        Ok(&self.members.get(id)?.1)
+    }
+    fn get_mut(&mut self, id: ID) -> Result<&mut OptimizerData<ID>, AstError> {
+        Ok(&mut self.members.get_mut(id)?.1)
     }
 }
 

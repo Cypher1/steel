@@ -31,11 +31,12 @@ impl<T> Clone for ComponentID<T> {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
-pub enum Entity {
-    Symbol(ComponentID<Symbol>),
-    Call(ComponentID<Call<ID>>),
-    I64(ComponentID<i64>),
+#[derive(Default, Debug, Copy, Clone)]
+pub struct Entity {
+    pub symbol: Option<ComponentID<Symbol>>,
+    pub call: Option<ComponentID<Call<ID>>>,
+    pub i_64: Option<ComponentID<i64>>,
+    pub optimizer_data: Option<ComponentID<OptimizerData<ID>>>,
 }
 
 #[cfg(test)]

@@ -38,7 +38,7 @@ impl<T, S: ArenaProvider<T>> Provider<T> for S {
 
 #[macro_export]
 macro_rules! make_arena_provider {
-    ($ctx: ty, $type: ty, $kind: tt, $accessor: tt) => {
+    ($ctx: ty, $type: ty, $kind: ident, $accessor: tt) => {
         impl ArenaProvider<$type> for $ctx {
             fn entities(&self) -> &Arena<Entity> {
                 &self.entities
@@ -47,10 +47,13 @@ macro_rules! make_arena_provider {
                 &mut self.entities
             }
             fn make_entity(id: ID) -> Entity {
-                Entity::$kind(ComponentID {
-                    id,
-                    ty: PhantomData,
-                })
+                Entity {
+                    $kind: Some(ComponentID {
+                        id,
+                        ty: PhantomData,
+                    }),
+                    ..Entity::default()
+                }
             }
             fn arena(&self) -> (&Arena<Entity>, &Arena<$type>) {
                 (&self.entities, &self.$accessor)
@@ -60,16 +63,18 @@ macro_rules! make_arena_provider {
             }
             fn get_impl(&self, id: ID) -> Result<&$type, EcsError> {
                 let ent = *self.entities.get(id)?;
-                match ent {
-                    Entity::$kind(component_id) => Ok(self.get_component(component_id)?),
-                    _ => Err(EcsError::ComponentNotFound(id)),
+                if let Some(component_id) = ent.$kind {
+                    Ok(self.get_component(component_id)?)
+                } else {
+                    Err(EcsError::ComponentNotFound(id))
                 }
             }
             fn get_mut_impl(&mut self, id: ID) -> Result<&mut $type, EcsError> {
                 let ent = *self.entities.get(id)?;
-                match ent {
-                    Entity::$kind(component_id) => Ok(self.get_component_mut(component_id)?),
-                    _ => Err(EcsError::ComponentNotFound(id)),
+                if let Some(component_id) = ent.$kind {
+                    Ok(self.get_component_mut(component_id)?)
+                } else {
+                    Err(EcsError::ComponentNotFound(id))
                 }
             }
         }
