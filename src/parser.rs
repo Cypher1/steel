@@ -293,11 +293,11 @@ mod test {
     fn parse_non_symbol() {
         assert_err_is!(
             symbol_raw("#lol"),
-            "Parsing Error: Failed in Tag while parsing #lol"
+            "Parsing Error: Failed in Alt while parsing #lol\nand Failed in Tag while parsing #lol expected _"
         );
         assert_err_is!(
             symbol_raw("123"),
-            "Parsing Error: Failed in Tag while parsing 123"
+            "Parsing Error: Failed in Alt while parsing 123\nand Failed in Tag while parsing 123 expected _"
         );
     }
 
