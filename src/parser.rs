@@ -17,6 +17,7 @@ fn tag(raw: &str) -> impl Fn(&str) -> SResult<&str> + '_ {
     move |input: &str| {
         let (input, _) = multispace0::<&str, SteelErr>(input)?;
         raw_tag::<&str, &str, SteelErr>(raw)(input)
+            .map_err(|e| SteelErr::ErrorExpected(Box::new(e.into()), raw.to_string()).into())
     }
 }
 

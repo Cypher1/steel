@@ -19,6 +19,7 @@ pub enum SteelErr {
         input: String,
         code: nom::error::ErrorKind,
     }, // Parse
+    ErrorExpected(Box<SteelErr>, String),
     Multi(Box<SteelErr>, Box<SteelErr>),
 }
 
@@ -56,6 +57,9 @@ impl std::fmt::Display for SteelErr {
             }
             ParserError { input, code } => {
                 write!(f, "Failed in {:?} while parsing {}", code, input)
+            }
+            ErrorExpected(err, exp) => {
+                write!(f, "{:?} expected {}", err, exp)
             }
             AstError(e) => write!(f, "{:?}", e),
             EcsError(e) => write!(f, "{:?}", e),
