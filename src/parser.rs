@@ -175,6 +175,7 @@ where
     if let Ok((input, _)) = tag("(")(input) {
         let mut ignore_prec = INIT_PRECENDENCE;
         let (input, wrapped) = expr(context, input, &mut ignore_prec)?;
+        // TODO: handle larger expressions (before ')' )
         let (input, _) = tag(")")(input)?;
         return Ok((input, wrapped));
     }
