@@ -64,6 +64,15 @@ impl CompilerContext for Ecs {
         for (id, symbol) in (&mut self.symbols).into_iter().enumerate() {
             symbol_fn(id, symbol);
         }
+        for (id, call) in (&mut self.calls).into_iter().enumerate() {
+            call_fn(id, call);
+        }
+        for (id, i64_value) in (&mut self.i64_values).into_iter().enumerate() {
+            i64_fn(id, i64_value);
+        }
+        for (id, optimizer_data) in (&mut self.optimizer_data).into_iter().enumerate() {
+            optimize_data_fn(id, optimizer_data);
+        }
     }
 }
 
