@@ -59,6 +59,9 @@ where
         i64_fn: ForEachNode<Self, i64>,
         optimizer_data_fn: ForEachNode<Self, OptimizerData<Self::ID>>,
     ) {
+        for (id, node) in (&mut self.members).into_iter().enumerate() {
+
+        }
     }
 }
 

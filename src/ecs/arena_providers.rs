@@ -7,8 +7,8 @@ pub trait ArenaProvider<T> {
     fn entities(&self) -> &Arena<Entity>;
     fn entities_mut(&mut self) -> &mut Arena<Entity>;
     fn make_entity(id: ID) -> Entity;
-    fn arena(&self) -> (&Arena<Entity>, &Arena<T>);
-    fn arena_mut(&mut self) -> (&mut Arena<Entity>, &mut Arena<T>);
+    fn arena(&self) -> (&Arena<Entity>, &Arena<(ID, T)>);
+    fn arena_mut(&mut self) -> (&mut Arena<Entity>, &mut Arena<(ID, T)>);
     fn get_impl(&self, id: ID) -> Result<&T, EcsError>;
     fn get_mut_impl(&mut self, id: ID) -> Result<&mut T, EcsError>;
 }
@@ -18,15 +18,15 @@ impl<T, S: ArenaProvider<T>> Provider<T> for S {
     fn add_with_id<F: FnOnce(ID) -> T>(&mut self, value: F) -> ID {
         let (entities, arena) = self.arena_mut();
         entities.add_with_id(|id| {
-            let node = arena.add(value(id)); // raw id and raw component id.
+            let node = arena.add((id, value(id))); // raw id and raw component id.
             Self::make_entity(node)
         })
     }
     fn get_component(&self, id: Self::ID) -> Result<&T, EcsError> {
-        Ok(self.arena().1.get(id.id)?)
+        Ok(&self.arena().1.get(id.id)?.1)
     }
     fn get_component_mut(&mut self, id: Self::ID) -> Result<&mut T, EcsError> {
-        Ok(self.arena_mut().1.get_mut(id.id)?)
+        Ok(&mut self.arena_mut().1.get_mut(id.id)?.1)
     }
     fn get_component_for_entity(&self, id: ID) -> Result<&T, EcsError> {
         self.get_impl(id)
@@ -55,10 +55,10 @@ macro_rules! make_arena_provider {
                     ..Entity::default()
                 }
             }
-            fn arena(&self) -> (&Arena<Entity>, &Arena<$type>) {
+            fn arena(&self) -> (&Arena<Entity>, &Arena<(ID, $type)>) {
                 (&self.entities, &self.$accessor)
             }
-            fn arena_mut(&mut self) -> (&mut Arena<Entity>, &mut Arena<$type>) {
+            fn arena_mut(&mut self) -> (&mut Arena<Entity>, &mut Arena<(ID, $type)>) {
                 (&mut self.entities, &mut self.$accessor)
             }
             fn get_impl(&self, id: ID) -> Result<&$type, EcsError> {

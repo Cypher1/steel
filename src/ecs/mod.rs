@@ -18,15 +18,15 @@ use arena_providers::*;
 #[derive(Debug, Default)]
 pub struct Ecs {
     entities: Arena<Entity>,
-    symbols: Arena<Symbol>,
-    calls: Arena<Call<ID>>,
-    int64_values: Arena<i64>,
-    optimizer_data: Arena<OptimizerData<ID>>,
+    symbols: Arena<(ID, Symbol)>,
+    calls: Arena<(ID, Call<ID>)>,
+    i64_values: Arena<(ID, i64)>,
+    optimizer_data: Arena<(ID, OptimizerData<ID>)>,
 }
 
 make_arena_provider!(Ecs, Symbol, symbol, symbols);
 make_arena_provider!(Ecs, Call<ID>, call, calls);
-make_arena_provider!(Ecs, i64, i_64, int64_values);
+make_arena_provider!(Ecs, i64, i_64, i64_values);
 make_arena_provider!(Ecs, OptimizerData<ID>, optimizer_data, optimizer_data);
 
 impl CompilerContext for Ecs {
@@ -41,7 +41,7 @@ impl CompilerContext for Ecs {
             + self.entities.active_mem_usage()
             + self.symbols.active_mem_usage()
             + self.calls.active_mem_usage()
-            + self.int64_values.active_mem_usage()
+            + self.i64_values.active_mem_usage()
             + self.optimizer_data.active_mem_usage()
     }
 
@@ -50,7 +50,7 @@ impl CompilerContext for Ecs {
             + self.entities.mem_usage()
             + self.symbols.mem_usage()
             + self.calls.mem_usage()
-            + self.int64_values.mem_usage()
+            + self.i64_values.mem_usage()
             + self.optimizer_data.mem_usage()
     }
 
@@ -61,17 +61,17 @@ impl CompilerContext for Ecs {
         i64_fn: ForEachNode<Self, i64>,
         optimizer_data_fn: ForEachNode<Self, OptimizerData<Self::ID>>,
     ) {
-        for (id, symbol) in (&mut self.symbols).into_iter().enumerate() {
-            symbol_fn(id, symbol);
+        for (id, symbol) in &mut self.symbols {
+            symbol_fn(*id, symbol);
         }
-        for (id, call) in (&mut self.calls).into_iter().enumerate() {
-            call_fn(id, call);
+        for (id, call) in &mut self.calls {
+            call_fn(*id, call);
         }
-        for (id, i64_value) in (&mut self.i64_values).into_iter().enumerate() {
-            i64_fn(id, i64_value);
+        for (id, i64_value) in &mut self.i64_values {
+            i64_fn(*id, i64_value);
         }
-        for (id, optimizer_data) in (&mut self.optimizer_data).into_iter().enumerate() {
-            optimize_data_fn(id, optimizer_data);
+        for (id, optimizer_data) in &mut self.optimizer_data {
+            optimizer_data_fn(*id, optimizer_data);
         }
     }
 }
