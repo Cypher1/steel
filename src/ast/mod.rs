@@ -1,5 +1,5 @@
 use crate::arena::{Arena, ArenaError, ID};
-use crate::compiler_context::{CompilerContext, NodeStore};
+use crate::compiler_context::{CompilerContext, ForEachNode, NodeStore};
 use crate::nodes::*;
 
 mod node;
@@ -50,6 +50,10 @@ where
 
     fn mem_usage(&self) -> usize {
         std::mem::size_of::<Self>() + self.members.mem_usage()
+    }
+
+    fn for_each(&mut self, symbol_fn: ForEachNode<Self, Symbol>, call_fn: ForEachNode<Self, Call<Self::ID>>, i64_fn: ForEachNode<Self, i64>, optimizer_data_fn: ForEachNode<Self, OptimizerData<Self::ID>>) {
+
     }
 }
 

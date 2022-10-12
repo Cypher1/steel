@@ -1,5 +1,5 @@
 use crate::arena::{Arena, ID};
-use crate::compiler_context::{CompilerContext, NodeStore};
+use crate::compiler_context::{CompilerContext, ForEachNode, NodeStore};
 use crate::nodes::*;
 use std::marker::PhantomData;
 
@@ -52,6 +52,10 @@ impl CompilerContext for Ecs {
             + self.calls.mem_usage()
             + self.int64_values.mem_usage()
             + self.optimizer_data.mem_usage()
+    }
+
+    fn for_each(&mut self, symbol_fn: ForEachNode<Self, Symbol>, call_fn: ForEachNode<Self, Call<Self::ID>>, i64_fn: ForEachNode<Self, i64>, optimizer_data_fn: ForEachNode<Self, OptimizerData<Self::ID>>) {
+
     }
 }
 

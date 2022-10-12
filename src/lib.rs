@@ -37,8 +37,8 @@ use GetProgram::*;
 pub struct Tasks<'a, ID> {
     program: GetProgram<'a, ID>,
     print: bool,
-    optimise: bool,
-    print_optimised: bool,
+    optimize: bool,
+    print_optimized: bool,
     eval: bool,
 }
 
@@ -47,8 +47,8 @@ impl<'a, ID> Default for Tasks<'a, ID> {
         Self {
             program: Nothing,
             print: false,
-            optimise: false,
-            print_optimised: false,
+            optimize: false,
+            print_optimized: false,
             eval: false,
         }
     }
@@ -67,9 +67,9 @@ impl<'a, ID> Tasks<'a, ID> {
             ..Self::default()
         }
     }
-    pub fn and_optimise(self) -> Self {
+    pub fn and_optimize(self) -> Self {
         Self {
-            optimise: true,
+            optimize: true,
             ..self
         }
     }
@@ -91,7 +91,7 @@ impl<'a, ID> Tasks<'a, ID> {
     pub fn all(program: &'a str) -> Self {
         Self::parse(program)
             .and_print()
-            .and_optimise()
+            .and_optimize()
             .and_print_optimized()
             .and_eval()
     }
@@ -140,6 +140,14 @@ pub fn handle_steps<S: CompilerContext>(
     };
     debug!("expr: {:?}", store.pretty(expr));
     if steps.print {
+        eprintln!(" {:?}", store.pretty(expr));
+    }
+    let expr = if steps.optimize {
+        store.optimize(expr)
+    } else {
+        expr
+    };
+    if steps.print_optimized {
         eprintln!(" {:?}", store.pretty(expr));
     }
     if steps.eval {
