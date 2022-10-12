@@ -61,14 +61,15 @@ impl CompilerContext for Ecs {
         i64_fn: ForEachNode<Self, i64>,
         optimizer_data_fn: ForEachNode<Self, OptimizerData<Self::ID>>,
     ) {
+        // TODO: Parallel?
+        for (id, i64_value) in &mut self.i64_values {
+            i64_fn(*id, i64_value);
+        }
         for (id, symbol) in &mut self.symbols {
             symbol_fn(*id, symbol);
         }
         for (id, call) in &mut self.calls {
             call_fn(*id, call);
-        }
-        for (id, i64_value) in &mut self.i64_values {
-            i64_fn(*id, i64_value);
         }
         for (id, optimizer_data) in &mut self.optimizer_data {
             optimizer_data_fn(*id, optimizer_data);

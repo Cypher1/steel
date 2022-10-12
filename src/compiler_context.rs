@@ -6,7 +6,7 @@ pub trait NodeStore<ID, T, E> {
     fn get_mut(&mut self, id: ID) -> Result<&mut T, E>;
 }
 
-pub type ForEachNode<'a, C, T> = &'a dyn Fn(<C as CompilerContext>::ID, &mut T);
+pub type ForEachNode<'a, C, T> = &'a mut dyn FnMut(<C as CompilerContext>::ID, &mut T);
 
 pub trait CompilerContext:
     NodeStore<Self::ID, Call<Self::ID>, Self::E>

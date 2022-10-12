@@ -4,16 +4,16 @@ pub fn optimize<C: CompilerContext + ?Sized>(context: &mut C, id: C::ID) -> C::I
     loop {
         let mut fixed_point = false;
         context.for_each(
-            &|id, symbol| {
+            &mut |id, symbol| {
 
             },
-            &|id, call| {
+            &mut |id, call| {
 
             },
-            &|id, i64_value| {
+            &mut |id, i64_value| {
 
             },
-            &|id, optimizer_data| {
+            &mut |id, optimizer_data| {
 
             },
         );
