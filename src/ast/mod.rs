@@ -52,8 +52,13 @@ where
         std::mem::size_of::<Self>() + self.members.mem_usage()
     }
 
-    fn for_each(&mut self, symbol_fn: ForEachNode<Self, Symbol>, call_fn: ForEachNode<Self, Call<Self::ID>>, i64_fn: ForEachNode<Self, i64>, optimizer_data_fn: ForEachNode<Self, OptimizerData<Self::ID>>) {
-
+    fn for_each(
+        &mut self,
+        symbol_fn: ForEachNode<Self, Symbol>,
+        call_fn: ForEachNode<Self, Call<Self::ID>>,
+        i64_fn: ForEachNode<Self, i64>,
+        optimizer_data_fn: ForEachNode<Self, OptimizerData<Self::ID>>,
+    ) {
     }
 }
 

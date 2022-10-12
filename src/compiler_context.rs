@@ -36,7 +36,13 @@ pub trait CompilerContext:
     fn get_i64_mut(&mut self, id: Self::ID) -> Result<&mut i64, Self::E> {
         self.get_mut(id)
     }
-    fn for_each(&mut self, symbol_fn: ForEachNode<Self, Symbol>, call_fn: ForEachNode<Self, Call<Self::ID>>, i64_fn: ForEachNode<Self, i64>, optimizer_data_fn: ForEachNode<Self, OptimizerData<Self::ID>>);
+    fn for_each(
+        &mut self,
+        symbol_fn: ForEachNode<Self, Symbol>,
+        call_fn: ForEachNode<Self, Call<Self::ID>>,
+        i64_fn: ForEachNode<Self, i64>,
+        optimizer_data_fn: ForEachNode<Self, OptimizerData<Self::ID>>,
+    );
     fn active_mem_usage(&self) -> usize;
     fn mem_usage(&self) -> usize;
     fn pretty(&self, id: Self::ID) -> String {
