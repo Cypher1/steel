@@ -61,6 +61,9 @@ impl CompilerContext for Ecs {
         i64_fn: ForEachNode<Self, i64>,
         optimizer_data_fn: ForEachNode<Self, OptimizerData<Self::ID>>,
     ) {
+        for (id, symbol) in (&mut self.symbols).into_iter().enumerate() {
+            symbol_fn(id, symbol);
+        }
     }
 }
 
