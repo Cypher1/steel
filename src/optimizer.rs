@@ -1,23 +1,20 @@
 use crate::compiler_context::CompilerContext;
+use std::sync::atomic::{AtomicBool, Ordering::Relaxed};
 
 pub fn optimize<C: CompilerContext + ?Sized>(context: &mut C, id: C::ID) -> C::ID {
     loop {
-        let mut fixed_point = false;
+        let fixed_point = AtomicBool::new(true);
         context.for_each(
-            &mut |id, symbol| {
-
+            &|id, symbol| {
             },
-            &mut |id, call| {
-
+            &|id, call| {
             },
-            &mut |id, i64_value| {
-
+            &|id, i64_value| {
             },
-            &mut |id, optimizer_data| {
-
+            &|id, optimizer_data| {
             },
         );
-        if fixed_point {
+        if fixed_point.load(Relaxed) {
             break;
         }
     }
