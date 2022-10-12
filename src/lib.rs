@@ -210,6 +210,16 @@ mod test {
         );
         program
     }
+
+    fn test_random_programs<Ctx: CompilerContext>(name: &str, max_size: usize, runs: usize) {
+        for i in 1..max_size {
+            eprintln!("{}: testing programs of size {:?}", name, i);
+            for _run in 0..runs {
+                test_with_random_program::<Ctx>(i);
+            }
+        }
+    }
+
     const DEVIOUS_PROGRAM: &str = "0(putchar())";
     const SIMPLE_PROGRAM: &str = "putchar(48+9)";
     const MEDIUM_PROGRAM: &str = "putchar(65)+putchar(66)+putchar(67)+putchar(10)";
@@ -240,15 +250,15 @@ mod test {
         );
     }
 
+    #[test]
+    fn can_handle_small_random_programs_ast() {
+        test_random_programs::<ast::Ast>("ast", 100, 100);
+    }
+
     #[ignore]
     #[test]
     fn can_handle_most_random_programs_ast() {
-        for i in 1..100 {
-            eprintln!("ast: testing programs of size {:?}", i);
-            for _run in 0..100 {
-                test_with_random_program::<ast::Ast>(i);
-            }
-        }
+        test_random_programs::<ast::Ast>("ast", 1000, 1000);
     }
 
     #[test]
@@ -277,14 +287,14 @@ mod test {
         );
     }
 
+    #[test]
+    fn can_handle_small_random_programs_ecs() {
+        test_random_programs::<ecs::Ecs>("ecs", 100, 100);
+    }
+
     #[ignore]
     #[test]
     fn can_handle_most_random_programs_ecs() {
-        for i in 1..100 {
-            eprintln!("ecs: testing programs of size {:?}", i);
-            for _run in 0..100 {
-                test_with_random_program::<ecs::Ecs>(i);
-            }
-        }
+        test_random_programs::<ecs::Ecs>("ecs", 1000, 1000);
     }
 }
