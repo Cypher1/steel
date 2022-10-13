@@ -1,5 +1,5 @@
 use crate::{
-    nodes::{Call, Symbol},
+    nodes::{Call, Symbol, I64Value, Shared},
     CompilerContext,
 };
 use log::trace;
@@ -143,7 +143,7 @@ pub fn generate_random_program_impl<Ctx: CompilerContext>(
             args.push((arg_name, arg_id));
         }
         let callee = generate_random_program(_name, store, &inner_spec, rng);
-        return store.add(Call { callee, args });
+        return store.add(Call { callee, args, shared: Shared::default() });
     }
     trace!("in scope: {:?}", &spec.in_scope);
     let symbols: Vec<Spec> = spec
@@ -158,6 +158,7 @@ pub fn generate_random_program_impl<Ctx: CompilerContext>(
         return store.add(Symbol {
             name: spec.name.to_string(),
             is_operator: spec.is_operator,
+            shared: Shared::default(),
         });
     }
     let value: i64 = if weighted_bool(rng, CHANCE_OF_POTENTIALLY_LARGE_CONSTANT) {
@@ -165,5 +166,8 @@ pub fn generate_random_program_impl<Ctx: CompilerContext>(
     } else {
         rng.gen_range(-5i64..=5i64) // some small value.
     };
-    store.add(value)
+    store.add(I64Value {
+        value,
+        shared: Shared::default(),
+    })
 }

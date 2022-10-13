@@ -1,6 +1,6 @@
 use crate::compiler_context::{CompilerContext, NodeStore};
 use crate::error::SteelErr;
-use crate::nodes::{Call, Symbol};
+use crate::nodes::{Call, Symbol, I64Value};
 use nom::{
     branch::alt,
     bytes::complete::{tag as raw_tag, take_while, take_while1, take_while_m_n},
@@ -30,12 +30,12 @@ pub fn number_i64_raw(input: &str) -> SResult<i64> {
     Ok((input, if sign == "-" { -value } else { value }))
 }
 
-pub fn number_i64<'source, ID, E: Into<SteelErr>, C: NodeStore<ID, i64, E>>(
+pub fn number_i64<'source, ID, E: Into<SteelErr>, C: NodeStore<ID, I64Value<ID>, E>>(
     context: &mut C,
     input: &'source str,
 ) -> SResult<'source, ID> {
     let (input, value) = number_i64_raw(input)?;
-    let id = context.add(value);
+    let id = context.add(I64Value::from(value));
     Ok((input, id))
 }
 
@@ -51,14 +51,14 @@ fn identifier_tail(input: &str) -> SResult<&str> {
     take_while(is_identifier_char)(input)
 }
 
-pub fn symbol_raw(og_input: &str) -> SResult<Symbol> {
+pub fn symbol_raw<ID>(og_input: &str) -> SResult<Symbol<ID>> {
     let (input, (head, tail)) = tuple((identifier_head, identifier_tail))(og_input)?;
 
     let name = &og_input[0..head.len() + tail.len()];
 
     Ok((input, Symbol::new(name)))
 }
-pub fn binding<'source, ID, E: Into<SteelErr>, C: NodeStore<ID, Symbol, E>>(
+pub fn binding<'source, ID, E: Into<SteelErr>, C: NodeStore<ID, Symbol<ID>, E>>(
     _context: &mut C,
     input: &'source str,
 ) -> SResult<'source, String> {
@@ -70,7 +70,7 @@ pub fn binding<'source, ID, E: Into<SteelErr>, C: NodeStore<ID, Symbol, E>>(
     Ok((input, name.to_string()))
 }
 
-pub fn symbol<'source, ID, E: Into<SteelErr>, C: NodeStore<ID, Symbol, E>>(
+pub fn symbol<'source, ID, E: Into<SteelErr>, C: NodeStore<ID, Symbol<ID>, E>>(
     context: &mut C,
     input: &'source str,
 ) -> SResult<'source, ID> {
@@ -91,10 +91,10 @@ const INIT_PRECENDENCE: Precedence = MIN_PRECENDENCE;
 const MUL_PRECENDENCE: Precedence = 2;
 const PLUS_PRECENDENCE: Precedence = 1;
 
-pub fn operator_raw<'source>(
+pub fn operator_raw<'source, ID>(
     input: &'source str,
     min_prec: &mut Precedence, // TODO: reject operators of the wrong prec...
-) -> SResult<'source, Symbol> {
+) -> SResult<'source, Symbol<ID>> {
     let (input, name) = take_while_m_n(1, 3, is_operator_char)(input)?;
     let precendence = match name {
         "-" | "+" => PLUS_PRECENDENCE,
@@ -108,7 +108,7 @@ pub fn operator_raw<'source>(
     Ok((input, Symbol::operator(name)))
 }
 
-pub fn operator<'source, ID, E: Into<SteelErr>, C: NodeStore<ID, Symbol, E>>(
+pub fn operator<'source, ID, E: Into<SteelErr>, C: NodeStore<ID, Symbol<ID>, E>>(
     context: &mut C,
     input: &'source str,
     min_prec: &mut Precedence,
@@ -195,7 +195,7 @@ where
         // Prefix operator e.g. -3.
         let mut ignore_prec = INIT_PRECENDENCE;
         if let Ok((input, right)) = expr(context, input, &mut ignore_prec) {
-            let z = context.add(0);
+            let z = context.add(I64Value::from(0));
             let call = context.add(Call::new(
                 op,
                 vec![("arg_0".to_string(), z), ("arg_1".to_string(), right)],
@@ -277,6 +277,16 @@ where
 mod test {
     use super::*;
     use crate::assert_err_is;
+
+    type Symbol = super::Symbol<()>;
+
+    fn symbol_raw(name: &str) -> SResult<Symbol> {
+        super::symbol_raw::<()>(name)
+    }
+
+    fn operator_raw<'source>(name: &'source str, prec: &mut i32) -> SResult<'source, Symbol> {
+        super::operator_raw::<()>(name, prec)
+    }
 
     #[test]
     fn parse_symbol() {

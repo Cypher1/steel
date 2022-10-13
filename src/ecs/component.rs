@@ -33,9 +33,9 @@ impl<T> Clone for ComponentID<T> {
 
 #[derive(Default, Debug, Copy, Clone)]
 pub struct Entity {
-    pub symbol: Option<ComponentID<Symbol>>,
+    pub symbol: Option<ComponentID<Symbol<ID>>>,
     pub call: Option<ComponentID<Call<ID>>>,
-    pub i_64: Option<ComponentID<i64>>,
+    pub i_64: Option<ComponentID<I64Value<ID>>>,
     pub optimizer_data: Option<ComponentID<OptimizerData<ID>>>,
 }
 

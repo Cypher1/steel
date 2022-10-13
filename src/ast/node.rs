@@ -3,9 +3,9 @@ use crate::nodes::*;
 
 #[derive(Debug)]
 pub enum Node {
-    Symbol(Symbol),
+    Symbol(Symbol<ID>),
     Call(Call<ID>),
-    I64(i64),
+    I64(I64Value<ID>),
 }
 
 #[cfg(test)]
@@ -21,7 +21,7 @@ mod test {
 
         assert_eq!(
             format!("{:?}", ctx.get(hello)),
-            "Ok(Symbol(Symbol { name: \"hello\", is_operator: false }))"
+            "Ok(Symbol(Symbol { name: \"hello\", is_operator: false, shared: {} }))"
         );
     }
 
@@ -34,11 +34,11 @@ mod test {
 
         assert_eq!(
             format!("{:?}", ctx.get(hello)),
-            "Ok(Symbol(Symbol { name: \"hello\", is_operator: false }))"
+            "Ok(Symbol(Symbol { name: \"hello\", is_operator: false, shared: {} }))"
         );
         assert_eq!(
             format!("{:?}", ctx.get(world)),
-            "Ok(Symbol(Symbol { name: \"world\", is_operator: false }))"
+            "Ok(Symbol(Symbol { name: \"world\", is_operator: false, shared: {} }))"
         );
     }
 
@@ -52,7 +52,7 @@ mod test {
 
         assert_eq!(
             format!("{:?}", ctx.get(reference)),
-            format!("Ok(Call(Call {{ callee: {:?}, args: [] }}))", reference)
+            format!("Ok(Call(Call {{ callee: {:?}, args: [], shared: {{}} }}))", reference)
         );
     }
     */
@@ -68,7 +68,7 @@ mod test {
         assert_eq!(
             format!("{:?}", ctx.get(reference)),
             format!(
-                "Ok(Call(Call {{ callee: {:?}, args: [(\"arg_0\", {:?})] }}))",
+                "Ok(Call(Call {{ callee: {:?}, args: [(\"arg_0\", {:?})], shared: {{}} }}))",
                 hello, world
             )
         );
@@ -80,8 +80,8 @@ mod test {
         let mut ctx: Arena<Node> = Arena::new();
 
         let plus = ctx.add(Symbol::new("plus"));
-        let a = ctx.add(32i64);
-        let b = ctx.add(12i64);
+        let a = ctx.add(I64Value::from(32i64));
+        let b = ctx.add(I64Value::from(12i64));
         let reference = ctx.add(Call::new(
             plus,
             vec![("arg_0".to_string(), a), ("arg_1".to_string(), b)],
@@ -90,7 +90,7 @@ mod test {
         assert_eq!(
             format!("{:?}", ctx.get(reference)),
             format!(
-                "Ok(Call(Call {{ callee: {:?}, args: [(\"arg_0\", {:?}), (\"arg_1\", {:?})] }}))",
+                "Ok(Call(Call {{ callee: {:?}, args: [(\"arg_0\", {:?}), (\"arg_1\", {:?})], shared: {{}} }}))",
                 plus, a, b
             )
         );

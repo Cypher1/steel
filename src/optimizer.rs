@@ -11,8 +11,6 @@ pub fn optimize<C: CompilerContext + ?Sized>(context: &mut C, id: C::ID) -> C::I
             },
             &|id, i64_value| {
             },
-            &|id, optimizer_data| {
-            },
         );
         if fixed_point.load(Relaxed) {
             break;

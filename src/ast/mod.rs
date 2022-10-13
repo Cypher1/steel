@@ -21,7 +21,7 @@ use AstError::*;
 
 #[derive(Debug, Default)]
 pub struct Ast {
-    members: Arena<(Node, OptimizerData<ID>)>, // All nodes have optimizer_data!
+    members: Arena<Node>,
 }
 
 impl Ast {
@@ -32,9 +32,8 @@ impl Ast {
 
 impl CompilerContext for Ast
 where
-    Self: NodeStore<ID, i64, AstError>,
-    Self: NodeStore<ID, Symbol, AstError>,
-    Self: NodeStore<ID, OptimizerData<ID>, AstError>,
+    Self: NodeStore<ID, I64Value<ID>, AstError>,
+    Self: NodeStore<ID, Symbol<ID>, AstError>,
     Self: NodeStore<ID, Call<ID>, AstError>,
 {
     type ID = ID;
@@ -54,16 +53,15 @@ where
 
     fn for_each(
         &mut self,
-        symbol_fn: ForEachNode<Self, Symbol>,
+        symbol_fn: ForEachNode<Self, Symbol<Self::ID>>,
         call_fn: ForEachNode<Self, Call<Self::ID>>,
-        i64_fn: ForEachNode<Self, i64>,
-        optimizer_data_fn: ForEachNode<Self, OptimizerData<Self::ID>>,
+        i64_fn: ForEachNode<Self, I64Value<Self::ID>>,
     ) {
         for (id, node) in (&mut self.members).into_iter().enumerate() {
             match node {
-                Symbol(node) => symbol_fn(id, &mut node),
-                Call(node) => call_fn(id, &mut node),
-                I64(node) => i64_fn(id, &mut node),
+                Node::Symbol(node) => symbol_fn(id, node),
+                Node::Call(node) => call_fn(id, node),
+                Node::I64(node) => i64_fn(id, node),
             }
         }
     }
@@ -71,26 +69,13 @@ where
 
 impl NodeStore<ID, Node, ArenaError> for Ast {
     fn add(&mut self, value: Node) -> ID {
-        self.members.add((value, OptimizerData::default()))
+        self.members.add(value)
     }
     fn get(&self, id: ID) -> Result<&Node, ArenaError> {
-        Ok(&self.members.get(id)?.0)
+        Ok(self.members.get(id)?)
     }
     fn get_mut(&mut self, id: ID) -> Result<&mut Node, ArenaError> {
-        Ok(&mut self.members.get_mut(id)?.0)
-    }
-}
-
-impl NodeStore<ID, OptimizerData<ID>, AstError> for Ast {
-    fn add(&mut self, _value: OptimizerData<ID>) -> ID {
-        // TODO: Structure the traits better
-        panic!("Can't add optimizer data without an associated node")
-    }
-    fn get(&self, id: ID) -> Result<&OptimizerData<ID>, AstError> {
-        Ok(&self.members.get(id)?.1)
-    }
-    fn get_mut(&mut self, id: ID) -> Result<&mut OptimizerData<ID>, AstError> {
-        Ok(&mut self.members.get_mut(id)?.1)
+        Ok(self.members.get_mut(id)?)
     }
 }
 
@@ -127,9 +112,9 @@ macro_rules! wrap_node {
     };
 }
 
-wrap_node!(Symbol, Symbol);
+wrap_node!(Symbol<ID>, Symbol);
 wrap_node!(Call<ID>, Call);
-wrap_node!(i64, I64);
+wrap_node!(I64Value<ID>, I64);
 
 #[cfg(test)]
 mod test {
@@ -143,7 +128,7 @@ mod test {
 
         assert_eq!(
             format!("{:?}", ctx.get_symbol(hello)),
-            "Ok(Symbol { name: \"hello\", is_operator: false })"
+            "Ok(Symbol { name: \"hello\", is_operator: false, shared: {} })"
         );
     }
 
@@ -156,11 +141,11 @@ mod test {
 
         assert_eq!(
             format!("{:?}", ctx.get_symbol(hello)),
-            "Ok(Symbol { name: \"hello\", is_operator: false })"
+            "Ok(Symbol { name: \"hello\", is_operator: false, shared: {} })"
         );
         assert_eq!(
             format!("{:?}", ctx.get_symbol(world)),
-            "Ok(Symbol { name: \"world\", is_operator: false })"
+            "Ok(Symbol { name: \"world\", is_operator: false, shared: {} })"
         );
     }
 
@@ -186,7 +171,7 @@ mod test {
 
         assert_eq!(
             format!("{:?}", ctx.get_call(reference)),
-            format!("Ok(Call {{ callee: {:?}, args: [] }})", reference)
+            format!("Ok(Call {{ callee: {:?}, args: [], shared: {{}} }})", reference)
         );
     }
     */
@@ -202,7 +187,7 @@ mod test {
         assert_eq!(
             format!("{:?}", ctx.get_call(reference)),
             format!(
-                "Ok(Call {{ callee: {:?}, args: [(\"arg_0\", {:?})] }})",
+                "Ok(Call {{ callee: {:?}, args: [(\"arg_0\", {:?})], shared: {{}} }})",
                 hello, world
             )
         );
@@ -214,8 +199,8 @@ mod test {
         let mut ctx: Ast = Ast::new();
 
         let plus = ctx.add(Symbol::new("plus"));
-        let a = ctx.add(32i64);
-        let b = ctx.add(12i64);
+        let a = ctx.add(I64Value::from(32i64));
+        let b = ctx.add(I64Value::from(12i64));
         let reference = ctx.add(Call::new(
             plus,
             vec![("arg_0".to_string(), a), ("arg_1".to_string(), b)],
@@ -224,7 +209,7 @@ mod test {
         assert_eq!(
             format!("{:?}", ctx.get_call(reference)),
             format!(
-                "Ok(Call {{ callee: {:?}, args: [(\"arg_0\", {:?}), (\"arg_1\", {:?})] }})",
+                "Ok(Call {{ callee: {:?}, args: [(\"arg_0\", {:?}), (\"arg_1\", {:?})], shared: {{}} }})",
                 plus, a, b
             )
         );

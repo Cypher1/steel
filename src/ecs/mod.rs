@@ -18,16 +18,14 @@ use arena_providers::*;
 #[derive(Debug, Default)]
 pub struct Ecs {
     entities: Arena<Entity>,
-    symbols: Arena<(ID, Symbol)>,
+    symbols: Arena<(ID, Symbol<ID>)>,
     calls: Arena<(ID, Call<ID>)>,
-    i64_values: Arena<(ID, i64)>,
-    optimizer_data: Arena<(ID, OptimizerData<ID>)>,
+    i64_values: Arena<(ID, I64Value<ID>)>,
 }
 
-make_arena_provider!(Ecs, Symbol, symbol, symbols);
+make_arena_provider!(Ecs, Symbol<ID>, symbol, symbols);
 make_arena_provider!(Ecs, Call<ID>, call, calls);
-make_arena_provider!(Ecs, i64, i_64, i64_values);
-make_arena_provider!(Ecs, OptimizerData<ID>, optimizer_data, optimizer_data);
+make_arena_provider!(Ecs, I64Value<ID>, i_64, i64_values);
 
 impl CompilerContext for Ecs {
     type ID = ID;
@@ -42,7 +40,6 @@ impl CompilerContext for Ecs {
             + self.symbols.active_mem_usage()
             + self.calls.active_mem_usage()
             + self.i64_values.active_mem_usage()
-            + self.optimizer_data.active_mem_usage()
     }
 
     fn mem_usage(&self) -> usize {
@@ -51,15 +48,13 @@ impl CompilerContext for Ecs {
             + self.symbols.mem_usage()
             + self.calls.mem_usage()
             + self.i64_values.mem_usage()
-            + self.optimizer_data.mem_usage()
     }
 
     fn for_each(
         &mut self,
-        symbol_fn: ForEachNode<Self, Symbol>,
+        symbol_fn: ForEachNode<Self, Symbol<Self::ID>>,
         call_fn: ForEachNode<Self, Call<Self::ID>>,
-        i64_fn: ForEachNode<Self, i64>,
-        optimizer_data_fn: ForEachNode<Self, OptimizerData<Self::ID>>,
+        i64_fn: ForEachNode<Self, I64Value<Self::ID>>,
     ) {
         // TODO: Parallel?
         for (id, i64_value) in &mut self.i64_values {
@@ -70,9 +65,6 @@ impl CompilerContext for Ecs {
         }
         for (id, call) in &mut self.calls {
             call_fn(*id, call);
-        }
-        for (id, optimizer_data) in &mut self.optimizer_data {
-            optimizer_data_fn(*id, optimizer_data);
         }
     }
 }
@@ -123,6 +115,7 @@ impl Ecs {
 mod test {
     use super::*;
     type Call = super::Call<ID>;
+    type Symbol = super::Symbol<ID>;
 
     #[test]
     fn can_construct_node() -> Result<(), EcsError> {
@@ -133,7 +126,7 @@ mod test {
         let sym: &Symbol = ctx.get(hello)?;
         assert_eq!(
             format!("{:?}", sym),
-            "Symbol { name: \"hello\", is_operator: false }"
+            "Symbol { name: \"hello\", is_operator: false, shared: {} }"
         );
         Ok(())
     }
@@ -158,11 +151,11 @@ mod test {
 
         assert_eq!(
             format!("{:?}", ctx.get::<Symbol>(hello)),
-            "Ok(Symbol { name: \"hello\", is_operator: false })"
+            "Ok(Symbol { name: \"hello\", is_operator: false, shared: {} })"
         );
         assert_eq!(
             format!("{:?}", ctx.get::<Symbol>(world)),
-            "Ok(Symbol { name: \"world\", is_operator: false })"
+            "Ok(Symbol { name: \"world\", is_operator: false, shared: {} })"
         );
     }
 
@@ -174,7 +167,7 @@ mod test {
 
         assert_eq!(
             format!("{:?}", ctx.get::<Call>(reference)),
-            format!("Ok(Call {{ callee: {:?}, args: [] }})", reference)
+            format!("Ok(Call {{ callee: {:?}, args: [], shared: {{}} }})", reference)
         );
     }
 
@@ -189,7 +182,7 @@ mod test {
         assert_eq!(
             format!("{:?}", ctx.get::<Call>(reference)),
             format!(
-                "Ok(Call {{ callee: {:?}, args: [(\"arg_0\", {:?})] }})",
+                "Ok(Call {{ callee: {:?}, args: [(\"arg_0\", {:?})], shared: {{}} }})",
                 hello, world
             )
         );
@@ -200,8 +193,8 @@ mod test {
         let mut ctx: Ecs = Ecs::new();
 
         let plus = ctx.add(Symbol::new("plus"));
-        let a = ctx.add(32i64);
-        let b = ctx.add(12i64);
+        let a = ctx.add(I64Value::from(32i64));
+        let b = ctx.add(I64Value::from(12i64));
         let reference = ctx.add(Call::new(
             plus,
             vec![("arg_0".to_string(), a), ("arg_1".to_string(), b)],
@@ -210,7 +203,7 @@ mod test {
         assert_eq!(
             format!("{:?}", ctx.get::<Call>(reference)),
             format!(
-                "Ok(Call {{ callee: {:?}, args: [(\"arg_0\", {:?}), (\"arg_1\", {:?})] }})",
+                "Ok(Call {{ callee: {:?}, args: [(\"arg_0\", {:?}), (\"arg_1\", {:?})], shared: {{}} }})",
                 plus, a, b
             )
         );
