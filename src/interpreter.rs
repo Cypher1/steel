@@ -299,8 +299,8 @@ where
         return Ok(());
     }
     let res = if let Ok(v) = context.get_i64(id) {
-        trace!("get constant i64 {}", &v.value);
-        Value::I64(v.value)
+        trace!("get constant i64 {}", v);
+        Value::I64(*v)
     } else if let Ok(s) = context.get_symbol(id) {
         trace!("get symbol {:?}", &s.name);
         state

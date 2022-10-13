@@ -1,24 +1,22 @@
 #[derive(Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
 pub struct OptimizerData<P> {
     pub equivalent_to: Vec<P>,
+    pub is_known_operation: Option<String>,
+    pub is_known_value: Option<i64>,
 }
 impl<P> Default for OptimizerData<P> {
     fn default() -> Self {
         Self {
             equivalent_to: Default::default(),
+            is_known_operation: Default::default(),
+            is_known_value: Default::default(),
         }
     }
 }
 
-#[derive(PartialEq, Eq, Ord, PartialOrd, Hash)]
+#[derive(Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
 pub struct Shared<P> {
-    optimizer_data: OptimizerData<P>,
-}
-
-impl<P> std::fmt::Debug for Shared<P> {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{{}}")
-    }
+    pub optimizer_data: OptimizerData<P>,
 }
 
 impl<P> Default for Shared<P> {
@@ -30,27 +28,24 @@ impl<P> Default for Shared<P> {
 }
 
 #[derive(Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
-pub struct Symbol<P> {
+pub struct Symbol {
     // TODO: Intern strings
     // TODO: Locations
     pub name: String,
     pub is_operator: bool,
-    pub shared: Shared<P>,
 }
 
-impl<P> Symbol<P> {
+impl Symbol {
     pub fn new(name: &str) -> Self {
         Self {
             name: name.to_string(),
             is_operator: false,
-            shared: Shared::default(),
         }
     }
     pub fn operator(name: &str) -> Self {
         Self {
             name: name.to_string(),
             is_operator: true,
-            shared: Shared::default(),
         }
     }
 }
@@ -59,7 +54,6 @@ impl<P> Symbol<P> {
 pub struct Call<P> {
     pub callee: P,
     pub args: Vec<(String, P)>,
-    pub shared: Shared<P>,
 }
 
 impl<P> Call<P> {
@@ -67,31 +61,6 @@ impl<P> Call<P> {
         Self {
             callee,
             args,
-            shared: Shared::default(),
-        }
-    }
-}
-
-#[derive(Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
-pub struct I64Value<P> {
-    pub value: i64,
-    pub shared: Shared<P>,
-}
-
-impl<P> I64Value<P> {
-    pub fn new(value: i64) -> Self {
-        Self {
-            value,
-            shared: Shared::default(),
-        }
-    }
-}
-
-impl<P> From<i64> for I64Value<P> {
-    fn from(value: i64) -> Self {
-        Self {
-            value,
-            shared: Default::default(),
         }
     }
 }

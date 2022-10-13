@@ -20,7 +20,7 @@ fn pretty_inner<C: CompilerContext + ?Sized>(context: &C, id: C::ID) -> String {
 
 pub fn pretty_impl<C: CompilerContext + ?Sized>(context: &C, id: C::ID) -> (String, bool, bool) {
     if let Ok(v) = context.get_i64(id) {
-        return (format!("{}", v.value), v.value < 0, false);
+        return (format!("{}", v), *v < 0, false);
     }
     if let Ok(s) = context.get_symbol(id) {
         return (s.name.to_string(), false, s.is_operator);

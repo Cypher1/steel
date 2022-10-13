@@ -21,7 +21,7 @@ use AstError::*;
 
 #[derive(Debug, Default)]
 pub struct Ast {
-    members: Arena<Node>,
+    members: Arena<(Node, Shared<ID>)>,
 }
 
 impl Ast {
@@ -32,9 +32,10 @@ impl Ast {
 
 impl CompilerContext for Ast
 where
-    Self: NodeStore<ID, I64Value<ID>, AstError>,
-    Self: NodeStore<ID, Symbol<ID>, AstError>,
+    Self: NodeStore<ID, i64, AstError>,
+    Self: NodeStore<ID, Symbol, AstError>,
     Self: NodeStore<ID, Call<ID>, AstError>,
+    Self: NodeStore<ID, Shared<ID>, AstError>,
 {
     type ID = ID;
     type E = AstError;
@@ -53,29 +54,42 @@ where
 
     fn for_each(
         &mut self,
-        symbol_fn: ForEachNode<Self, Symbol<Self::ID>>,
+        symbol_fn: ForEachNode<Self, Symbol>,
         call_fn: ForEachNode<Self, Call<Self::ID>>,
-        i64_fn: ForEachNode<Self, I64Value<Self::ID>>,
-    ) {
+        i64_fn: ForEachNode<Self, i64>,
+    ) -> Result<(), Self::E> {
         for (id, node) in (&mut self.members).into_iter().enumerate() {
-            match node {
-                Node::Symbol(node) => symbol_fn(id, node),
-                Node::Call(node) => call_fn(id, node),
-                Node::I64(node) => i64_fn(id, node),
+            match &mut node.0 {
+                Node::Symbol(symbol) => symbol_fn(id, symbol, &mut node.1),
+                Node::Call(call) => call_fn(id, call, &mut node.1),
+                Node::I64(value) => i64_fn(id, value, &mut node.1),
             }
         }
+        Ok(())
     }
 }
 
 impl NodeStore<ID, Node, ArenaError> for Ast {
     fn add(&mut self, value: Node) -> ID {
-        self.members.add(value)
+        self.members.add((value, Shared::default()))
     }
     fn get(&self, id: ID) -> Result<&Node, ArenaError> {
-        self.members.get(id)
+        Ok(&self.members.get(id)?.0)
     }
     fn get_mut(&mut self, id: ID) -> Result<&mut Node, ArenaError> {
-        self.members.get_mut(id)
+        Ok(&mut self.members.get_mut(id)?.0)
+    }
+}
+
+impl NodeStore<ID, Shared<ID>, AstError> for Ast {
+    fn add(&mut self, _value: Shared<ID>) -> ID {
+        panic!("Don't add shared data on it's own")
+    }
+    fn get(&self, id: ID) -> Result<&Shared<ID>, AstError> {
+        Ok(&self.members.get(id)?.1)
+    }
+    fn get_mut(&mut self, id: ID) -> Result<&mut Shared<ID>, AstError> {
+        Ok(&mut self.members.get_mut(id)?.1)
     }
 }
 
@@ -112,9 +126,9 @@ macro_rules! wrap_node {
     };
 }
 
-wrap_node!(Symbol<ID>, Symbol);
+wrap_node!(Symbol, Symbol);
 wrap_node!(Call<ID>, Call);
-wrap_node!(I64Value<ID>, I64);
+wrap_node!(i64, I64);
 
 #[cfg(test)]
 mod test {

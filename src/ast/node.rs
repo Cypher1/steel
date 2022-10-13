@@ -3,9 +3,9 @@ use crate::nodes::*;
 
 #[derive(Debug)]
 pub enum Node {
-    Symbol(Symbol<ID>),
+    Symbol(Symbol),
     Call(Call<ID>),
-    I64(I64Value<ID>),
+    I64(i64),
 }
 
 #[cfg(test)]
@@ -80,8 +80,8 @@ mod test {
         let mut ctx: Arena<Node> = Arena::new();
 
         let plus = ctx.add(Symbol::new("plus"));
-        let a = ctx.add(I64Value::from(32i64));
-        let b = ctx.add(I64Value::from(12i64));
+        let a = ctx.add(32i64);
+        let b = ctx.add(12i64);
         let reference = ctx.add(Call::new(
             plus,
             vec![("arg_0".to_string(), a), ("arg_1".to_string(), b)],

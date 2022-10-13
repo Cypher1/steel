@@ -34,10 +34,11 @@ pub enum GetProgram<'a, ID> {
 use GetProgram::*;
 
 #[derive(Debug)]
+#[non_exhaustive]
 pub struct Tasks<'a, ID> {
     program: GetProgram<'a, ID>,
     print: bool,
-    optimize: bool,
+    optimize: optimizer::Optimizations,
     print_optimized: bool,
     eval: bool,
 }
@@ -47,7 +48,7 @@ impl<'a, ID> Default for Tasks<'a, ID> {
         Self {
             program: Nothing,
             print: false,
-            optimize: false,
+            optimize: optimizer::Optimizations::none(),
             print_optimized: false,
             eval: false,
         }
@@ -69,7 +70,7 @@ impl<'a, ID> Tasks<'a, ID> {
     }
     pub fn and_optimize(self) -> Self {
         Self {
-            optimize: true,
+            optimize: self.optimize.all(),
             ..self
         }
     }
@@ -97,11 +98,17 @@ impl<'a, ID> Tasks<'a, ID> {
     }
 }
 
-pub fn run<T: CompilerContext>(name: &str) {
-    run_inner::<T>(name).expect("unexpected error");
+pub fn run<Ctx: CompilerContext>(name: &str)
+where
+    SteelErr: From<<Ctx as CompilerContext>::E>,
+{
+    run_inner::<Ctx>(name).expect("unexpected error");
 }
 
-fn run_inner<T: CompilerContext>(name: &str) -> Result<(), SteelErr> {
+fn run_inner<Ctx: CompilerContext>(name: &str) -> Result<(), SteelErr>
+where
+    SteelErr: From<<Ctx as CompilerContext>::E>,
+{
     env_logger::init();
     let mut args = std::env::args();
     let _program_path = args.next();
@@ -115,21 +122,27 @@ fn run_inner<T: CompilerContext>(name: &str) -> Result<(), SteelErr> {
             return Ok(());
         }
         debug!("line: {}", line);
-        let store = handle::<T>(Tasks::all(&line))?;
+        let store = handle::<Ctx>(Tasks::all(&line))?;
         debug!("{}: {:?}", name, store);
         println!("{:?}", store);
     }
 }
 
-pub fn handle<S: CompilerContext>(steps: Tasks<S::ID>) -> Result<(Option<S::ID>, i64), SteelErr> {
-    let mut store = S::new();
+pub fn handle<Ctx: CompilerContext>(steps: Tasks<Ctx::ID>) -> Result<(Option<Ctx::ID>, i64), SteelErr>
+where
+    SteelErr: From<<Ctx as CompilerContext>::E>,
+{
+    let mut store = Ctx::new();
     handle_steps(&mut store, steps)
 }
 
-pub fn handle_steps<S: CompilerContext>(
-    store: &mut S,
-    steps: Tasks<S::ID>,
-) -> Result<(Option<S::ID>, i64), SteelErr> {
+pub fn handle_steps<Ctx: CompilerContext>(
+    store: &mut Ctx,
+    steps: Tasks<Ctx::ID>,
+) -> Result<(Option<Ctx::ID>, i64), SteelErr> 
+where
+    SteelErr: From<<Ctx as CompilerContext>::E>,
+{
     let (program_txt, expr) = match steps.program {
         Nothing => return Ok((None, 0)),
         FromStr(program_txt) => {
@@ -142,8 +155,8 @@ pub fn handle_steps<S: CompilerContext>(
     if steps.print {
         eprintln!(" {:?}", store.pretty(expr));
     }
-    let expr = if steps.optimize {
-        store.optimize(expr)
+    let expr = if steps.optimize == optimizer::Optimizations::none() {
+        store.optimize(&steps.optimize, expr)?
     } else {
         expr
     };
@@ -156,9 +169,9 @@ pub fn handle_steps<S: CompilerContext>(
     Ok((Some(expr), 0)) // TODO: Find a better result value
 }
 
-pub fn eval_program<S: CompilerContext>(
-    store: &mut S,
-    expr: S::ID,
+pub fn eval_program<Ctx: CompilerContext>(
+    store: &mut Ctx,
+    expr: Ctx::ID,
     program_txt: &str,
 ) -> Result<i64, SteelErr> {
     let mut state = EvalState::default();

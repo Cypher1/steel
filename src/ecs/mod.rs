@@ -18,14 +18,16 @@ use arena_providers::*;
 #[derive(Debug, Default)]
 pub struct Ecs {
     entities: Arena<Entity>,
-    symbols: Arena<(ID, Symbol<ID>)>,
+    shared: Arena<(ID, Shared<ID>)>,
+    symbols: Arena<(ID, Symbol)>,
     calls: Arena<(ID, Call<ID>)>,
-    i64_values: Arena<(ID, I64Value<ID>)>,
+    i64_values: Arena<(ID, i64)>,
 }
 
-make_arena_provider!(Ecs, Symbol<ID>, symbol, symbols);
+make_arena_provider!(Ecs, Symbol, symbol, symbols);
 make_arena_provider!(Ecs, Call<ID>, call, calls);
-make_arena_provider!(Ecs, I64Value<ID>, i_64, i64_values);
+make_arena_provider!(Ecs, i64, i_64, i64_values);
+make_arena_provider!(Ecs, Shared<ID>, shared, shared);
 
 impl CompilerContext for Ecs {
     type ID = ID;
@@ -52,20 +54,21 @@ impl CompilerContext for Ecs {
 
     fn for_each(
         &mut self,
-        symbol_fn: ForEachNode<Self, Symbol<Self::ID>>,
+        symbol_fn: ForEachNode<Self, Symbol>,
         call_fn: ForEachNode<Self, Call<Self::ID>>,
-        i64_fn: ForEachNode<Self, I64Value<Self::ID>>,
-    ) {
+        i64_fn: ForEachNode<Self, i64>,
+    ) -> Result<(), Self::E> {
         // TODO: Parallel?
         for (id, i64_value) in &mut self.i64_values {
-            i64_fn(*id, i64_value);
+            i64_fn(*id, i64_value, &mut self.shared.get_mut(*id)?.1);
         }
         for (id, symbol) in &mut self.symbols {
-            symbol_fn(*id, symbol);
+            symbol_fn(*id, symbol, &mut self.shared.get_mut(*id)?.1);
         }
         for (id, call) in &mut self.calls {
-            call_fn(*id, call);
+            call_fn(*id, call, &mut self.shared.get_mut(*id)?.1);
         }
+        Ok(())
     }
 }
 
@@ -115,7 +118,6 @@ impl Ecs {
 mod test {
     use super::*;
     type Call = super::Call<ID>;
-    type Symbol = super::Symbol<ID>;
 
     #[test]
     fn can_construct_node() -> Result<(), EcsError> {
@@ -126,7 +128,7 @@ mod test {
         let sym: &Symbol = ctx.get(hello)?;
         assert_eq!(
             format!("{:?}", sym),
-            "Symbol { name: \"hello\", is_operator: false, shared: {} }"
+            "Symbol { name: \"hello\", is_operator: false }"
         );
         Ok(())
     }
@@ -151,11 +153,11 @@ mod test {
 
         assert_eq!(
             format!("{:?}", ctx.get::<Symbol>(hello)),
-            "Ok(Symbol { name: \"hello\", is_operator: false, shared: {} })"
+            "Ok(Symbol { name: \"hello\", is_operator: false })"
         );
         assert_eq!(
             format!("{:?}", ctx.get::<Symbol>(world)),
-            "Ok(Symbol { name: \"world\", is_operator: false, shared: {} })"
+            "Ok(Symbol { name: \"world\", is_operator: false })"
         );
     }
 
@@ -168,7 +170,7 @@ mod test {
         assert_eq!(
             format!("{:?}", ctx.get::<Call>(reference)),
             format!(
-                "Ok(Call {{ callee: {:?}, args: [], shared: {{}} }})",
+                "Ok(Call {{ callee: {:?}, args: [] }})",
                 reference
             )
         );
