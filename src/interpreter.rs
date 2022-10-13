@@ -153,6 +153,7 @@ impl<ID> EvalState<ID> {
             .ok_or(SteelErr::ReliedOnOutOfBoundsMemory(index))
     }
 
+    #[allow(unused)] // TODO: Implement freeing of memory
     fn drop_mem(&mut self, mem: usize) {
         trace!("forgetting {:?} args", mem);
         let final_length = self.mem_stack.len().saturating_sub(mem);
