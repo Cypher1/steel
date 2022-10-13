@@ -64,7 +64,11 @@ pub struct Call<P> {
 
 impl<P> Call<P> {
     pub fn new(callee: P, args: Vec<(String, P)>) -> Self {
-        Self { callee, args, shared: Shared::default() }
+        Self {
+            callee,
+            args,
+            shared: Shared::default(),
+        }
     }
 }
 
@@ -76,7 +80,10 @@ pub struct I64Value<P> {
 
 impl<P> I64Value<P> {
     pub fn new(value: i64) -> Self {
-        Self { value, shared: Shared::default() }
+        Self {
+            value,
+            shared: Shared::default(),
+        }
     }
 }
 

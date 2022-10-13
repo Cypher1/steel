@@ -1,6 +1,6 @@
 use crate::compiler_context::{CompilerContext, NodeStore};
 use crate::error::SteelErr;
-use crate::nodes::{Call, Symbol, I64Value};
+use crate::nodes::{Call, I64Value, Symbol};
 use nom::{
     branch::alt,
     bytes::complete::{tag as raw_tag, take_while, take_while1, take_while_m_n},

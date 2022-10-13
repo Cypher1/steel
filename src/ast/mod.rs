@@ -72,10 +72,10 @@ impl NodeStore<ID, Node, ArenaError> for Ast {
         self.members.add(value)
     }
     fn get(&self, id: ID) -> Result<&Node, ArenaError> {
-        Ok(self.members.get(id)?)
+        self.members.get(id)
     }
     fn get_mut(&mut self, id: ID) -> Result<&mut Node, ArenaError> {
-        Ok(self.members.get_mut(id)?)
+        self.members.get_mut(id)
     }
 }
 
