@@ -252,7 +252,7 @@ mod test {
 
     #[test]
     fn can_handle_small_random_programs_ast() {
-        test_random_programs::<ast::Ast>("ast", 100, 100);
+        test_random_programs::<ast::Ast>("ast", 50, 100);
     }
 
     #[ignore]
@@ -289,7 +289,7 @@ mod test {
 
     #[test]
     fn can_handle_small_random_programs_ecs() {
-        test_random_programs::<ecs::Ecs>("ecs", 100, 100);
+        test_random_programs::<ecs::Ecs>("ecs", 50, 100);
     }
 
     #[ignore]
