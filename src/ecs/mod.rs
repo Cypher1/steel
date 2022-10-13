@@ -169,10 +169,7 @@ mod test {
 
         assert_eq!(
             format!("{:?}", ctx.get::<Call>(reference)),
-            format!(
-                "Ok(Call {{ callee: {:?}, args: [] }})",
-                reference
-            )
+            format!("Ok(Call {{ callee: {:?}, args: [] }})", reference)
         );
     }
 

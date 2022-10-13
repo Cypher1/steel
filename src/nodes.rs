@@ -58,10 +58,7 @@ pub struct Call<P> {
 
 impl<P> Call<P> {
     pub fn new(callee: P, args: Vec<(String, P)>) -> Self {
-        Self {
-            callee,
-            args,
-        }
+        Self { callee, args }
     }
 }
 

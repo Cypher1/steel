@@ -128,7 +128,9 @@ where
     }
 }
 
-pub fn handle<Ctx: CompilerContext>(steps: Tasks<Ctx::ID>) -> Result<(Option<Ctx::ID>, i64), SteelErr>
+pub fn handle<Ctx: CompilerContext>(
+    steps: Tasks<Ctx::ID>,
+) -> Result<(Option<Ctx::ID>, i64), SteelErr>
 where
     SteelErr: From<<Ctx as CompilerContext>::E>,
 {
@@ -139,7 +141,7 @@ where
 pub fn handle_steps<Ctx: CompilerContext>(
     store: &mut Ctx,
     steps: Tasks<Ctx::ID>,
-) -> Result<(Option<Ctx::ID>, i64), SteelErr> 
+) -> Result<(Option<Ctx::ID>, i64), SteelErr>
 where
     SteelErr: From<<Ctx as CompilerContext>::E>,
 {

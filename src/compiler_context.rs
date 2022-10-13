@@ -1,4 +1,4 @@
-use crate::nodes::{Call, Symbol, Shared};
+use crate::nodes::{Call, Shared, Symbol};
 
 pub trait NodeStore<ID, T, E> {
     fn add(&mut self, value: T) -> ID;
@@ -6,7 +6,8 @@ pub trait NodeStore<ID, T, E> {
     fn get_mut(&mut self, id: ID) -> Result<&mut T, E>;
 }
 
-pub type ForEachNode<'a, C, T> = &'a dyn Fn(<C as CompilerContext>::ID, &mut T, &mut Shared<<C as CompilerContext>::ID>);
+pub type ForEachNode<'a, C, T> =
+    &'a dyn Fn(<C as CompilerContext>::ID, &mut T, &mut Shared<<C as CompilerContext>::ID>);
 
 pub trait CompilerContext:
     NodeStore<Self::ID, Call<Self::ID>, Self::E>
@@ -54,7 +55,11 @@ pub trait CompilerContext:
         use crate::pretty_printer::pretty;
         pretty(self, id)
     }
-    fn optimize(&mut self, optimizations: &crate::optimizer::Optimizations, id: Self::ID) -> Result<Self::ID, Self::E> {
+    fn optimize(
+        &mut self,
+        optimizations: &crate::optimizer::Optimizations,
+        id: Self::ID,
+    ) -> Result<Self::ID, Self::E> {
         use crate::optimizer::optimize;
         optimize(self, optimizations, id)
     }
