@@ -60,7 +60,11 @@ where
         optimizer_data_fn: ForEachNode<Self, OptimizerData<Self::ID>>,
     ) {
         for (id, node) in (&mut self.members).into_iter().enumerate() {
-
+            match node {
+                Symbol(node) => symbol_fn(id, &mut node),
+                Call(node) => call_fn(id, &mut node),
+                I64(node) => i64_fn(id, &mut node),
+            }
         }
     }
 }
