@@ -1,5 +1,7 @@
 use crate::compiler_context::CompilerContext;
 use std::sync::atomic::{AtomicBool, Ordering::Relaxed};
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 
 #[derive(Default, Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
 #[non_exhaustive]
@@ -26,30 +28,86 @@ impl Optimizations {
 
 fn constant_folding<C: CompilerContext + ?Sized>(
     context: &mut C,
-    _optimizations: &Optimizations,
     root: C::ID,
-) -> Result<(bool, C::ID), C::E> {
+    fixed_point: &AtomicBool,
+) -> Result<C::ID, C::E> {
+    let known_values: Arc<Mutex<HashMap<C::ID, i64>>> = Arc::new(Mutex::new(HashMap::new()));
+    let replace: Arc<Mutex<Vec<(C::ID, i64)>>> = Arc::new(Mutex::new(Vec::new()));
+    let known_names: Arc<Mutex<HashMap<C::ID, String>>> = Arc::new(Mutex::new(HashMap::new()));
     context.for_each(
-        &|_id, symbol, shared| match &*symbol.name {
-            "+" | "-" | "*" | "/" => {
-                shared.optimizer_data.is_known_operation = Some(symbol.name.to_string());
+        &|id, symbol, shared| {
+            if shared.known_value_found {
+                return;
             }
-            _ => {}
+            shared.known_value_found = true;
+            eprintln!("CONSTANT FOLDING FOR {:?}", &symbol);
+            match &*symbol.name {
+                "+" | "-" | "*" | "/" => {
+                    // Just pretend that remapping operators is not possible...
+                    let mut known_names = known_names.lock().unwrap();
+                    known_names.insert(id, symbol.name.to_string());
+                    fixed_point.store(false, Relaxed);
+                }
+                _ => {}
+            }
         },
-        &|_id, call, shared| {
-            let _name = if let Some(name) = &shared.optimizer_data.is_known_operation {
+        &|id, call, shared| {
+            if shared.known_value_found {
+                eprintln!("CONSTANT FOLDING **DONE** FOR {:?}", call);
+                return;
+            }
+            eprintln!("CONSTANT FOLDING FOR {:?}", call);
+            let known_names = known_names.lock().unwrap();
+            let name = if let Some(name) = known_names.get(&call.callee) {
                 name
             } else {
-                return;
+                return; // noop now
             };
-            for _arg in &call.args {}
+            eprintln!("CONSTANT FOLDING FOR {:?}, {}", call, name);
+            let mut left: i64 = 0;
+            let mut right: i64 = 0;
+            for (arg_name, arg) in &call.args {
+                let known_values = known_values.lock().unwrap();
+                if let Some(value) = known_values.get(arg) {
+                    if arg_name == "arg_0" {
+                        left = *value;
+                    } else if arg_name == "arg_1" {
+                        right = *value;
+                    }
+                } else {
+                    return;
+                }
+            }
+            let result = match &**name {
+                "+" => left.wrapping_add(right),
+                "-" => left.wrapping_sub(right),
+                "*" => left.wrapping_mul(right),
+                "/" => left.wrapping_div(right),
+                _ => { todo!("HANDLE CONSTANT FOLDING FOR {}", name); },
+            };
+            eprintln!("CONSTANT FOLDING FOR {} with {:?} {:?} gives {:?}", name, left, right, result);
+            shared.known_value_found = true;
+            let mut replace = replace.lock().unwrap();
+            replace.push((id, result));
+            fixed_point.store(false, Relaxed);
             // i64_value.shared.optimizer_data.value = Some(i64_value.value);
         },
-        &|_id, i64_value, shared| {
-            shared.optimizer_data.is_known_value = Some(*i64_value);
+        &|id, i64_value, shared| {
+            if shared.known_value_found {
+                return;
+            }
+            eprintln!("CONSTANT FOLDING FOR {}", i64_value);
+            shared.known_value_found = true;
+            let mut known_values = known_values.lock().unwrap();
+            known_values.insert(id, *i64_value);
+            fixed_point.store(false, Relaxed);
         },
     )?;
-    Ok((false, root))
+    let replace = replace.lock().unwrap();
+    for (id, value) in replace.iter() {
+        context.replace(id, value); // This is the bit that does the updates in place...
+    }
+    Ok(root)
 }
 
 pub fn optimize<C: CompilerContext + ?Sized>(
@@ -60,11 +118,7 @@ pub fn optimize<C: CompilerContext + ?Sized>(
     loop {
         let fixed_point = AtomicBool::new(true);
         if optimizations.constant_folding {
-            let (changed, new_root) = constant_folding(context, optimizations, root)?;
-            if changed {
-                fixed_point.store(false, Relaxed);
-                root = new_root;
-            }
+            root = constant_folding(context, root, &fixed_point)?;
         }
         if fixed_point.load(Relaxed) {
             break;

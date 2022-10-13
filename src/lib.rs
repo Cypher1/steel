@@ -122,7 +122,9 @@ where
             return Ok(());
         }
         debug!("line: {}", line);
-        let store = handle::<Ctx>(Tasks::all(&line))?;
+        let tasks = Tasks::all(&line);
+        debug!("{:?}", tasks);
+        let store = handle::<Ctx>(tasks);
         debug!("{}: {:?}", name, store);
         println!("{:?}", store);
     }
@@ -157,7 +159,7 @@ where
     if steps.print {
         eprintln!(" {:?}", store.pretty(expr));
     }
-    let expr = if steps.optimize == optimizer::Optimizations::none() {
+    let expr = if steps.optimize != optimizer::Optimizations::none() {
         store.optimize(&steps.optimize, expr)?
     } else {
         expr

@@ -1,5 +1,5 @@
-use super::component::{ComponentID, EcsError, Entity};
-use super::providers::Provider;
+use super::component::Entity;
+use super::providers::{EcsError, ComponentID, Provider};
 use crate::arena::{Arena, ID};
 
 // In future there may be other kinds of Providers.
@@ -52,6 +52,7 @@ macro_rules! make_arena_provider {
                         id,
                         ty: PhantomData,
                     }),
+                    shared: Shared::default(),
                     ..Entity::default()
                 }
             }
@@ -62,7 +63,7 @@ macro_rules! make_arena_provider {
                 (&mut self.entities, &mut self.$accessor)
             }
             fn get_impl(&self, id: ID) -> Result<&$type, EcsError> {
-                let ent = *self.entities.get(id)?;
+                let ent = &*self.entities.get(id)?;
                 if let Some(component_id) = ent.$kind {
                     Ok(self.get_component(component_id)?)
                 } else {
@@ -70,7 +71,7 @@ macro_rules! make_arena_provider {
                 }
             }
             fn get_mut_impl(&mut self, id: ID) -> Result<&mut $type, EcsError> {
-                let ent = *self.entities.get(id)?;
+                let ent = &*self.entities.get(id)?;
                 if let Some(component_id) = ent.$kind {
                     Ok(self.get_component_mut(component_id)?)
                 } else {

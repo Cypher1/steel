@@ -1,33 +1,31 @@
-#[derive(Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
 pub struct OptimizerData<P> {
     pub equivalent_to: Vec<P>,
-    pub is_known_operation: Option<String>,
-    pub is_known_value: Option<i64>,
 }
 impl<P> Default for OptimizerData<P> {
     fn default() -> Self {
         Self {
             equivalent_to: Default::default(),
-            is_known_operation: Default::default(),
-            is_known_value: Default::default(),
         }
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
 pub struct Shared<P> {
     pub optimizer_data: OptimizerData<P>,
+    pub known_value_found: bool,
 }
 
 impl<P> Default for Shared<P> {
     fn default() -> Self {
         Self {
             optimizer_data: Default::default(),
+            known_value_found: false,
         }
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
 pub struct Symbol {
     // TODO: Intern strings
     // TODO: Locations
@@ -50,7 +48,7 @@ impl Symbol {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
 pub struct Call<P> {
     pub callee: P,
     pub args: Vec<(String, P)>,

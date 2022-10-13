@@ -1,6 +1,7 @@
 use crate::nodes::{Call, Shared, Symbol};
 
 pub trait NodeStore<ID, T, E> {
+    fn replace(&mut self, id: ID, value: T) -> Result<(), E>;
     fn add(&mut self, value: T) -> ID;
     fn get(&self, id: ID) -> Result<&T, E>;
     fn get_mut(&mut self, id: ID) -> Result<&mut T, E>;
@@ -15,15 +16,15 @@ pub trait CompilerContext:
     + NodeStore<Self::ID, i64, Self::E>
     + NodeStore<Self::ID, Shared<Self::ID>, Self::E>
 {
-    type ID: Copy + std::fmt::Debug;
-    type E: Into<crate::error::SteelErr>;
+    type ID: Eq + std::hash::Hash + Copy + std::fmt::Debug;
+    type E: Into<crate::error::SteelErr> + std::fmt::Debug;
 
     fn new() -> Self;
-    fn get_shared(&self, id: Self::ID) -> Result<&Shared<Self::ID>, Self::E> {
-        self.get(id)
+    fn get_shared(&self, id: Self::ID) -> &Shared<Self::ID> {
+        self.get(id).unwrap_or_else(|e| panic!("Missing shared on {:?}: {:?}", id, e))
     }
-    fn get_shared_mut(&mut self, id: Self::ID) -> Result<&mut Shared<Self::ID>, Self::E> {
-        self.get_mut(id)
+    fn get_shared_mut(&mut self, id: Self::ID) -> &mut Shared<Self::ID> {
+        self.get_mut(id).unwrap_or_else(|e| panic!("Missing shared on {:?}: {:?}", id, e))
     }
     fn get_symbol(&self, id: Self::ID) -> Result<&Symbol, Self::E> {
         self.get(id)

@@ -70,6 +70,10 @@ where
 }
 
 impl NodeStore<ID, Node, ArenaError> for Ast {
+    fn replace(&mut self, id: ID, value: Node) -> Result<(), ArenaError> {
+        self.members.get_mut(id)?.0 = value;
+        Ok(())
+    }
     fn add(&mut self, value: Node) -> ID {
         self.members.add((value, Shared::default()))
     }
@@ -82,6 +86,9 @@ impl NodeStore<ID, Node, ArenaError> for Ast {
 }
 
 impl NodeStore<ID, Shared<ID>, AstError> for Ast {
+    fn replace(&mut self, _id: ID, _value: Shared<ID>) -> Result<(), AstError> {
+        panic!("Don't replace shared data on it's own")
+    }
     fn add(&mut self, _value: Shared<ID>) -> ID {
         panic!("Don't add shared data on it's own")
     }
@@ -101,6 +108,10 @@ macro_rules! wrap_node {
             }
         }
         impl NodeStore<ID, $ty, AstError> for Ast {
+            fn replace(&mut self, id: ID, value: $ty) -> Result<(), AstError> {
+                self.replace(id, std::convert::Into::<Node>::into(value))?;
+                Ok(())
+            }
             fn add(&mut self, value: $ty) -> ID {
                 self.add(std::convert::Into::<Node>::into(value))
             }

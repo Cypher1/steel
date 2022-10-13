@@ -8,7 +8,7 @@ use component::*;
 mod providers;
 use providers::*;
 
-pub use component::EcsError;
+pub use providers::EcsError;
 
 // In future there may be other kinds of Providers.
 #[macro_use]
@@ -18,7 +18,6 @@ use arena_providers::*;
 #[derive(Debug, Default)]
 pub struct Ecs {
     entities: Arena<Entity>,
-    shared: Arena<(ID, Shared<ID>)>,
     symbols: Arena<(ID, Symbol)>,
     calls: Arena<(ID, Call<ID>)>,
     i64_values: Arena<(ID, i64)>,
@@ -27,7 +26,6 @@ pub struct Ecs {
 make_arena_provider!(Ecs, Symbol, symbol, symbols);
 make_arena_provider!(Ecs, Call<ID>, call, calls);
 make_arena_provider!(Ecs, i64, i_64, i64_values);
-make_arena_provider!(Ecs, Shared<ID>, shared, shared);
 
 impl CompilerContext for Ecs {
     type ID = ID;
@@ -60,22 +58,43 @@ impl CompilerContext for Ecs {
     ) -> Result<(), Self::E> {
         // TODO: Parallel?
         for (id, i64_value) in &mut self.i64_values {
-            i64_fn(*id, i64_value, &mut self.shared.get_mut(*id)?.1);
+            i64_fn(*id, i64_value, &mut self.entities.get_mut(*id)?.shared);
         }
         for (id, symbol) in &mut self.symbols {
-            symbol_fn(*id, symbol, &mut self.shared.get_mut(*id)?.1);
+            symbol_fn(*id, symbol, &mut self.entities.get_mut(*id)?.shared);
         }
         for (id, call) in &mut self.calls {
-            call_fn(*id, call, &mut self.shared.get_mut(*id)?.1);
+            call_fn(*id, call, &mut self.entities.get_mut(*id)?.shared);
         }
         Ok(())
     }
 }
 
+impl NodeStore<ID, Shared<ID>, EcsError> for Ecs {
+    fn replace(&mut self, id: ID, _value: Shared<ID>) -> Result<(), EcsError> {
+        panic!("Don't replace shared data on it's own")
+    }
+    fn add(&mut self, _value: Shared<ID>) -> ID {
+        panic!("Don't add shared data on it's own")
+    }
+
+    fn get(&self, id: ID) -> Result<&Shared<ID>, EcsError> {
+        Ok(&self.entities.get(id)?.shared)
+    }
+
+    fn get_mut(&mut self, id: ID) -> Result<&mut Shared<ID>, EcsError> {
+        Ok(&mut self.entities.get_mut(id)?.shared)
+    }
+}
 impl<T> NodeStore<ID, T, EcsError> for Ecs
 where
     Self: Provider<T>,
 {
+    fn replace(&mut self, id: ID, value: T) -> Result<(), EcsError> {
+        self.replace_component(id, value)?;
+        Ok(())
+    }
+
     fn add(&mut self, value: T) -> ID {
         self.add_component(value)
     }
