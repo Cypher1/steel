@@ -142,7 +142,7 @@ mod test {
 
         assert_eq!(
             format!("{:?}", ctx.get_symbol(hello)),
-            "Ok(Symbol { name: \"hello\", is_operator: false, shared: {} })"
+            "Ok(Symbol { name: \"hello\", is_operator: false })"
         );
     }
 
@@ -155,11 +155,11 @@ mod test {
 
         assert_eq!(
             format!("{:?}", ctx.get_symbol(hello)),
-            "Ok(Symbol { name: \"hello\", is_operator: false, shared: {} })"
+            "Ok(Symbol { name: \"hello\", is_operator: false })"
         );
         assert_eq!(
             format!("{:?}", ctx.get_symbol(world)),
-            "Ok(Symbol { name: \"world\", is_operator: false, shared: {} })"
+            "Ok(Symbol { name: \"world\", is_operator: false })"
         );
     }
 
@@ -185,7 +185,7 @@ mod test {
 
         assert_eq!(
             format!("{:?}", ctx.get_call(reference)),
-            format!("Ok(Call {{ callee: {:?}, args: [], shared: {{}} }})", reference)
+            format!("Ok(Call {{ callee: {:?}, args: [] }})", reference)
         );
     }
     */
@@ -201,7 +201,7 @@ mod test {
         assert_eq!(
             format!("{:?}", ctx.get_call(reference)),
             format!(
-                "Ok(Call {{ callee: {:?}, args: [(\"arg_0\", {:?})], shared: {{}} }})",
+                "Ok(Call {{ callee: {:?}, args: [(\"arg_0\", {:?})] }})",
                 hello, world
             )
         );
@@ -213,8 +213,8 @@ mod test {
         let mut ctx: Ast = Ast::new();
 
         let plus = ctx.add(Symbol::new("plus"));
-        let a = ctx.add(I64Value::from(32i64));
-        let b = ctx.add(I64Value::from(12i64));
+        let a = ctx.add(32i64);
+        let b = ctx.add(12i64);
         let reference = ctx.add(Call::new(
             plus,
             vec![("arg_0".to_string(), a), ("arg_1".to_string(), b)],
@@ -223,7 +223,7 @@ mod test {
         assert_eq!(
             format!("{:?}", ctx.get_call(reference)),
             format!(
-                "Ok(Call {{ callee: {:?}, args: [(\"arg_0\", {:?}), (\"arg_1\", {:?})], shared: {{}} }})",
+                "Ok(Call {{ callee: {:?}, args: [(\"arg_0\", {:?}), (\"arg_1\", {:?})] }})",
                 plus, a, b
             )
         );
