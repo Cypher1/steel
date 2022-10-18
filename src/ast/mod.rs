@@ -85,6 +85,11 @@ impl NodeStore<Index, Node, ArenaError> for Ast {
 }
 
 impl NodeStore<Index, Shared<Index>, AstError> for Ast {
+    fn overwrite(&mut self, id: Index, mut value: Shared<Index>) -> Result<Shared<Index>, AstError> {
+        let item = self.members.get_mut(id)?;
+        std::mem::swap(&mut item.1, &mut value);
+        Ok(value)
+    }
     fn remove(&mut self, id: Index) -> Result<Shared<Index>, AstError> {
         Ok(self.members.remove(id)?.1)
     }

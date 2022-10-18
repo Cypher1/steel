@@ -5,6 +5,9 @@ pub trait NodeStore<ID, T, E> {
     fn get(&self, id: ID) -> Result<&T, E>;
     fn get_mut(&mut self, id: ID) -> Result<&mut T, E>;
     fn remove(&mut self, id: ID) -> Result<T, E>;
+    fn overwrite(&mut self, _id: ID, _value: T) -> Result<T, E> {
+        todo!("Not supported yet");
+    }
 }
 
 pub type ForEachNode<'a, C, T> =
@@ -55,7 +58,7 @@ pub trait CompilerContext:
         <Self as NodeStore<Self::ID, Shared<Self::ID>, Self::E>>::remove(self, id)?;
 
         // TODO: Construct new, don't just get_mut...
-        (*<Self as NodeStore<Self::ID, T, Self::E>>::get_mut(self, id)?) = value;
+        <Self as NodeStore<Self::ID, T, Self::E>>::overwrite(self, id, value)?;
         Ok(())
     }
 
