@@ -1,4 +1,4 @@
-use crate::arena::{Arena, ID};
+use crate::arena::{Arena, Index};
 use crate::compiler_context::{CompilerContext, ForEachNode, NodeStore};
 use crate::nodes::*;
 use std::marker::PhantomData;
@@ -18,17 +18,17 @@ use arena_providers::*;
 #[derive(Debug, Default)]
 pub struct Ecs {
     entities: Arena<Entity>,
-    symbols: Arena<(ID, Symbol)>,
-    calls: Arena<(ID, Call<ID>)>,
-    i64_values: Arena<(ID, i64)>,
+    symbols: Arena<(EntityId, Symbol)>,
+    calls: Arena<(EntityId, Call<EntityId>)>,
+    i64_values: Arena<(EntityId, i64)>,
 }
 
 make_arena_provider!(Ecs, Symbol, symbol, symbols);
-make_arena_provider!(Ecs, Call<ID>, call, calls);
+make_arena_provider!(Ecs, Call<EntityId>, call, calls);
 make_arena_provider!(Ecs, i64, i_64, i64_values);
 
 impl CompilerContext for Ecs {
-    type ID = ID;
+    type ID = EntityId;
     type E = EcsError;
     fn new() -> Self {
         Self::new()
@@ -58,53 +58,62 @@ impl CompilerContext for Ecs {
     ) -> Result<(), Self::E> {
         // TODO: Parallel?
         for (id, i64_value) in &mut self.i64_values {
-            i64_fn(*id, i64_value, &mut self.entities.get_mut(*id)?.shared);
+            // Note: We can't use the helper methods here because the compiler can't reason
+            // about the self.i64_values and self.entities being separable when hidden behind
+            // the function calls.
+            i64_fn(*id, i64_value, &mut self.entities.get_mut(id.id)?.shared);
         }
         for (id, symbol) in &mut self.symbols {
-            symbol_fn(*id, symbol, &mut self.entities.get_mut(*id)?.shared);
+            // Note: We can't use the helper methods here because the compiler can't reason
+            // about the self.symbols and self.entities being separable when hidden behind
+            // the function calls.
+            symbol_fn(*id, symbol, &mut self.entities.get_mut(id.id)?.shared);
         }
         for (id, call) in &mut self.calls {
-            call_fn(*id, call, &mut self.entities.get_mut(*id)?.shared);
+            // Note: We can't use the helper methods here because the compiler can't reason
+            // about the self.calls and self.entities being separable when hidden behind
+            // the function calls.
+            call_fn(*id, call, &mut self.entities.get_mut(id.id)?.shared);
         }
         Ok(())
     }
 }
 
-impl NodeStore<ID, Shared<ID>, EcsError> for Ecs {
-    fn replace(&mut self, _id: ID, _value: Shared<ID>) -> Result<(), EcsError> {
+impl NodeStore<EntityId, Shared<EntityId>, EcsError> for Ecs {
+    fn replace(&mut self, _id: EntityId, _value: Shared<EntityId>) -> Result<(), EcsError> {
         panic!("Don't replace shared data on it's own")
     }
-    fn add(&mut self, _value: Shared<ID>) -> ID {
+    fn add(&mut self, _value: Shared<EntityId>) -> EntityId {
         panic!("Don't add shared data on it's own")
     }
 
-    fn get(&self, id: ID) -> Result<&Shared<ID>, EcsError> {
-        Ok(&self.entities.get(id)?.shared)
+    fn get(&self, id: EntityId) -> Result<&Shared<EntityId>, EcsError> {
+        Ok(&self.entities.get(id.id)?.shared)
     }
 
-    fn get_mut(&mut self, id: ID) -> Result<&mut Shared<ID>, EcsError> {
-        Ok(&mut self.entities.get_mut(id)?.shared)
+    fn get_mut(&mut self, id: EntityId) -> Result<&mut Shared<EntityId>, EcsError> {
+        Ok(&mut self.entities.get_mut(id.id)?.shared)
     }
 }
-impl<T> NodeStore<ID, T, EcsError> for Ecs
+impl<T> NodeStore<EntityId, T, EcsError> for Ecs
 where
     Self: Provider<T>,
 {
-    fn replace(&mut self, id: ID, value: T) -> Result<(), EcsError> {
-        self.remove_component(id)?;
+    fn replace(&mut self, id: EntityId, value: T) -> Result<(), EcsError> {
+        // TODO: self.remove_component(id)?;
         (*self.get_mut(id)?) = value;
         Ok(())
     }
 
-    fn add(&mut self, value: T) -> ID {
+    fn add(&mut self, value: T) -> EntityId {
         self.add_component(value)
     }
 
-    fn get(&self, id: ID) -> Result<&T, EcsError> {
+    fn get(&self, id: EntityId) -> Result<&T, EcsError> {
         <Ecs as Provider<T>>::get_component_for_entity(self, id)
     }
     #[allow(unused)]
-    fn get_mut(&mut self, id: ID) -> Result<&mut T, EcsError>
+    fn get_mut(&mut self, id: EntityId) -> Result<&mut T, EcsError>
     where
         Self: Provider<T>,
     {
@@ -118,26 +127,26 @@ impl Ecs {
     }
 
     #[cfg(test)]
-    fn add<T>(&mut self, value: T) -> ID
+    fn add<T>(&mut self, value: T) -> EntityId
     where
-        Self: NodeStore<ID, T, EcsError>,
+        Self: NodeStore<EntityId, T, EcsError>,
     {
-        <Self as NodeStore<ID, T, EcsError>>::add(self, value)
+        <Self as NodeStore<EntityId, T, EcsError>>::add(self, value)
     }
 
     #[cfg(test)]
-    fn get<T>(&self, id: ID) -> Result<&T, EcsError>
+    fn get<T>(&self, id: EntityId) -> Result<&T, EcsError>
     where
-        Self: NodeStore<ID, T, EcsError>,
+        Self: NodeStore<EntityId, T, EcsError>,
     {
-        <Self as NodeStore<ID, T, EcsError>>::get(self, id)
+        <Self as NodeStore<EntityId, T, EcsError>>::get(self, id)
     }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
-    type Call = super::Call<ID>;
+    type Call = super::Call<EntityId>;
 
     #[test]
     fn can_construct_node() -> Result<(), EcsError> {

@@ -1,4 +1,4 @@
-use crate::arena::{Arena, ArenaError, ID};
+use crate::arena::{Arena, ArenaError, Index};
 use crate::compiler_context::{CompilerContext, ForEachNode, NodeStore};
 use crate::nodes::*;
 
@@ -7,7 +7,7 @@ use node::*;
 
 #[derive(Debug)]
 pub enum AstError {
-    NodeOfWrongKindError(ID, &'static str),
+    NodeOfWrongKindError(Index, &'static str),
     InternalError(ArenaError),
 }
 
@@ -21,7 +21,7 @@ use AstError::*;
 
 #[derive(Debug, Default)]
 pub struct Ast {
-    members: Arena<(Node, Shared<ID>)>,
+    members: Arena<(Node, Shared<Index>)>,
 }
 
 impl Ast {
@@ -32,12 +32,12 @@ impl Ast {
 
 impl CompilerContext for Ast
 where
-    Self: NodeStore<ID, i64, AstError>,
-    Self: NodeStore<ID, Symbol, AstError>,
-    Self: NodeStore<ID, Call<ID>, AstError>,
-    Self: NodeStore<ID, Shared<ID>, AstError>,
+    Self: NodeStore<Index, i64, AstError>,
+    Self: NodeStore<Index, Symbol, AstError>,
+    Self: NodeStore<Index, Call<Index>, AstError>,
+    Self: NodeStore<Index, Shared<Index>, AstError>,
 {
-    type ID = ID;
+    type ID = Index;
     type E = AstError;
 
     fn new() -> Self {
@@ -69,33 +69,33 @@ where
     }
 }
 
-impl NodeStore<ID, Node, ArenaError> for Ast {
-    fn replace(&mut self, id: ID, value: Node) -> Result<(), ArenaError> {
+impl NodeStore<Index, Node, ArenaError> for Ast {
+    fn replace(&mut self, id: Index, value: Node) -> Result<(), ArenaError> {
         self.members.get_mut(id)?.0 = value;
         Ok(())
     }
-    fn add(&mut self, value: Node) -> ID {
+    fn add(&mut self, value: Node) -> Index {
         self.members.add((value, Shared::default()))
     }
-    fn get(&self, id: ID) -> Result<&Node, ArenaError> {
+    fn get(&self, id: Index) -> Result<&Node, ArenaError> {
         Ok(&self.members.get(id)?.0)
     }
-    fn get_mut(&mut self, id: ID) -> Result<&mut Node, ArenaError> {
+    fn get_mut(&mut self, id: Index) -> Result<&mut Node, ArenaError> {
         Ok(&mut self.members.get_mut(id)?.0)
     }
 }
 
-impl NodeStore<ID, Shared<ID>, AstError> for Ast {
-    fn replace(&mut self, _id: ID, _value: Shared<ID>) -> Result<(), AstError> {
+impl NodeStore<Index, Shared<Index>, AstError> for Ast {
+    fn replace(&mut self, _id: Index, _value: Shared<Index>) -> Result<(), AstError> {
         panic!("Don't replace shared data on it's own")
     }
-    fn add(&mut self, _value: Shared<ID>) -> ID {
+    fn add(&mut self, _value: Shared<Index>) -> Index {
         panic!("Don't add shared data on it's own")
     }
-    fn get(&self, id: ID) -> Result<&Shared<ID>, AstError> {
+    fn get(&self, id: Index) -> Result<&Shared<Index>, AstError> {
         Ok(&self.members.get(id)?.1)
     }
-    fn get_mut(&mut self, id: ID) -> Result<&mut Shared<ID>, AstError> {
+    fn get_mut(&mut self, id: Index) -> Result<&mut Shared<Index>, AstError> {
         Ok(&mut self.members.get_mut(id)?.1)
     }
 }
@@ -107,26 +107,26 @@ macro_rules! wrap_node {
                 Node::$variant(it)
             }
         }
-        impl NodeStore<ID, $ty, AstError> for Ast {
-            fn replace(&mut self, id: ID, value: $ty) -> Result<(), AstError> {
+        impl NodeStore<Index, $ty, AstError> for Ast {
+            fn replace(&mut self, id: Index, value: $ty) -> Result<(), AstError> {
                 self.replace(id, std::convert::Into::<Node>::into(value))?;
                 Ok(())
             }
-            fn add(&mut self, value: $ty) -> ID {
+            fn add(&mut self, value: $ty) -> Index {
                 self.add(std::convert::Into::<Node>::into(value))
             }
-            fn get(&self, id: ID) -> Result<&$ty, AstError> {
+            fn get(&self, id: Index) -> Result<&$ty, AstError> {
                 if let Node::$variant(ref value) =
-                    <Self as NodeStore<ID, Node, ArenaError>>::get(self, id)?
+                    <Self as NodeStore<Index, Node, ArenaError>>::get(self, id)?
                 {
                     Ok(value)
                 } else {
                     Err(NodeOfWrongKindError(id, stringify!($variant)))
                 }
             }
-            fn get_mut(&mut self, id: ID) -> Result<&mut $ty, AstError> {
+            fn get_mut(&mut self, id: Index) -> Result<&mut $ty, AstError> {
                 if let Node::$variant(ref mut value) =
-                    <Self as NodeStore<ID, Node, ArenaError>>::get_mut(self, id)?
+                    <Self as NodeStore<Index, Node, ArenaError>>::get_mut(self, id)?
                 {
                     Ok(value)
                 } else {
@@ -138,7 +138,7 @@ macro_rules! wrap_node {
 }
 
 wrap_node!(Symbol, Symbol);
-wrap_node!(Call<ID>, Call);
+wrap_node!(Call<Index>, Call);
 wrap_node!(i64, I64);
 
 #[cfg(test)]

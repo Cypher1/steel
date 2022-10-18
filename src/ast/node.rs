@@ -1,10 +1,10 @@
-use crate::arena::ID;
+use crate::arena::Index;
 use crate::nodes::*;
 
 #[derive(Debug)]
 pub enum Node {
     Symbol(Symbol),
-    Call(Call<ID>),
+    Call(Call<Index>),
     I64(i64),
 }
 

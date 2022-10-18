@@ -1,6 +1,6 @@
 // TODO: Use https://docs.rs/crate/generational-arena/0.2.8
 
-pub type ID = usize;
+pub type Index = usize;
 
 #[derive(Debug)]
 pub struct Arena<T> {
@@ -9,8 +9,8 @@ pub struct Arena<T> {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ArenaError {
-    IndexEmpty(ID),
-    IndexOutOfBounds(ID, ID),
+    IndexEmpty(Index),
+    IndexOutOfBounds(Index, Index),
 }
 use ArenaError::*;
 
@@ -30,7 +30,7 @@ use Item::*;
 
 pub struct ArenaIterator<'a, T> {
     arena: &'a Arena<T>,
-    index: ID,
+    index: Index,
 }
 
 impl<'a, T> Iterator for ArenaIterator<'a, T> {
@@ -62,7 +62,7 @@ impl<'a, T> IntoIterator for &'a Arena<T> {
 
 pub struct ArenaIteratorMut<'a, T> {
     arena: &'a mut Arena<T>,
-    index: ID,
+    index: Index,
 }
 
 impl<'a, T> Iterator for ArenaIteratorMut<'a, T> {
@@ -112,16 +112,16 @@ impl<T> Arena<T> {
         self.members.capacity() * std::mem::size_of::<T>()
     }
 
-    pub fn add_with_id<S: Into<T>, F: FnOnce(ID) -> S>(&mut self, value: F) -> ID {
+    pub fn add_with_id<S: Into<T>, F: FnOnce(Index) -> S>(&mut self, value: F) -> Index {
         let id = self.members.len();
         self.members.push(Entry(value(id).into()));
         id
     }
 
-    pub fn add<S: Into<T>>(&mut self, value: S) -> ID {
+    pub fn add<S: Into<T>>(&mut self, value: S) -> Index {
         self.add_with_id(|_id| value)
     }
-    pub fn get(&self, id: ID) -> Result<&T, ArenaError> {
+    pub fn get(&self, id: Index) -> Result<&T, ArenaError> {
         if id >= self.members.len() {
             return Err(IndexOutOfBounds(id, self.members.len()));
         }
@@ -131,7 +131,7 @@ impl<T> Arena<T> {
         Err(IndexEmpty(id))
     }
 
-    pub fn get_mut(&mut self, id: ID) -> Result<&mut T, ArenaError> {
+    pub fn get_mut(&mut self, id: Index) -> Result<&mut T, ArenaError> {
         if id >= self.members.len() {
             return Err(IndexOutOfBounds(id, self.members.len()));
         }
@@ -141,7 +141,7 @@ impl<T> Arena<T> {
         Err(IndexEmpty(id))
     }
 
-    pub fn remove(&mut self, id: ID) -> Result<T, ArenaError> {
+    pub fn remove(&mut self, id: Index) -> Result<T, ArenaError> {
         if id >= self.members.len() {
             return Err(IndexOutOfBounds(id, self.members.len()));
         }

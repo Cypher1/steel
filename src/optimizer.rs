@@ -105,6 +105,7 @@ fn constant_folding<C: CompilerContext + ?Sized>(
     )?;
     let replace = replace.lock().unwrap();
     for (id, value) in replace.iter() {
+        eprintln!("Replacing ent.{:?} with {:?}", id, value);
         context.replace(*id, *value)?; // This is the bit that does the updates in place...
     }
     Ok(root)
