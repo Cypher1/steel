@@ -2,6 +2,7 @@ use crate::compiler_context::CompilerContext;
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicBool, Ordering::Relaxed};
 use std::sync::{Arc, Mutex};
+use log::trace;
 
 #[derive(Default, Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
 #[non_exhaustive]
@@ -42,7 +43,7 @@ fn constant_folding<C: CompilerContext + ?Sized>(
                 return;
             }
             shared.known_value_found = true;
-            eprintln!("CONSTANT FOLDING FOR {:?}", &symbol);
+            trace!("CONSTANT FOLDING FOR {:?}", &symbol);
             match &*symbol.name {
                 "+" | "-" | "*" | "/" => {
                     // Just pretend that remapping operators is not possible...
@@ -55,17 +56,17 @@ fn constant_folding<C: CompilerContext + ?Sized>(
         },
         &|id, call, shared| {
             if shared.known_value_found {
-                eprintln!("CONSTANT FOLDING **DONE** FOR {:?}", call);
+                trace!("CONSTANT FOLDING **DONE** FOR {:?}", call);
                 return;
             }
-            eprintln!("CONSTANT FOLDING FOR {:?}", call);
+            trace!("CONSTANT FOLDING FOR {:?}", call);
             let known_names = known_names.lock().unwrap();
             let name = if let Some(name) = known_names.get(&call.callee) {
                 name
             } else {
                 return; // noop now
             };
-            eprintln!("CONSTANT FOLDING FOR {:?}, {}", call, name);
+            trace!("CONSTANT FOLDING FOR {:?}, {}", call, name);
             let mut left: i64 = 0;
             let mut right: i64 = 0;
             for (arg_name, arg) in &call.args {
@@ -89,7 +90,7 @@ fn constant_folding<C: CompilerContext + ?Sized>(
                     todo!("HANDLE CONSTANT FOLDING FOR {}", name);
                 }
             };
-            eprintln!(
+            trace!(
                 "CONSTANT FOLDING FOR {} with {:?} {:?} gives {:?}",
                 name, left, right, result
             );
@@ -106,7 +107,7 @@ fn constant_folding<C: CompilerContext + ?Sized>(
             if shared.known_value_found {
                 return;
             }
-            eprintln!("CONSTANT FOLDING FOR {}", i64_value);
+            trace!("CONSTANT FOLDING FOR {}", i64_value);
             shared.known_value_found = true;
             let mut known_values = known_values.lock().unwrap();
             known_values.insert(id, *i64_value);
@@ -115,7 +116,7 @@ fn constant_folding<C: CompilerContext + ?Sized>(
     )?;
     let replace = replace.lock().unwrap();
     for (id, value) in replace.iter() {
-        eprintln!(
+        trace!(
             "Replacing ent.{:?} (i.e. {}) with {:?}",
             id,
             context.pretty(*id),
