@@ -157,7 +157,7 @@ where
     };
     debug!("expr: {:?}", store.pretty(expr));
     if steps.print {
-        eprintln!(" {:?}", store.pretty(expr));
+        eprintln!("{}", store.pretty(expr));
     }
     let expr = if steps.optimize != optimizer::Optimizations::none() {
         store.optimize(&steps.optimize, expr)?
@@ -165,7 +165,7 @@ where
         expr
     };
     if steps.print_optimized {
-        eprintln!(" {:?}", store.pretty(expr));
+        eprintln!("{}", store.pretty(expr));
     }
     if steps.eval {
         return Ok((Some(expr), eval_program(store, expr, &program_txt)?));
