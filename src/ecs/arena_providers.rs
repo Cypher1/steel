@@ -22,6 +22,9 @@ impl<T, S: ArenaProvider<T>> Provider<T> for S {
             Self::make_entity(node)
         })
     }
+    fn remove_component(&mut self, id: ID) -> Result<T, EcsError> {
+        Ok(self.arena_mut().1.remove(id)?.1)
+    }
     fn get_component(&self, id: Self::ID) -> Result<&T, EcsError> {
         Ok(&self.arena().1.get(id.id)?.1)
     }

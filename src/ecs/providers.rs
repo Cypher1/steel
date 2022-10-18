@@ -34,8 +34,7 @@ impl<T> Clone for ComponentID<T> {
 pub trait Provider<T> {
     type ID;
     fn add_with_id<F: FnOnce(ID) -> T>(&mut self, value: F) -> ID; // Entity ID.
-    // fn replace_component(&mut self, id: ID, value: T) -> Result<(), EcsError>;
-    // fn remove_component(&mut self, id: ID);
+    fn remove_component(&mut self, id: ID) -> Result<T, EcsError>;
     fn add_component(&mut self, value: T) -> ID {
         self.add_with_id(|_id| value)
     }

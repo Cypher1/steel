@@ -71,7 +71,7 @@ impl CompilerContext for Ecs {
 }
 
 impl NodeStore<ID, Shared<ID>, EcsError> for Ecs {
-    fn replace(&mut self, id: ID, _value: Shared<ID>) -> Result<(), EcsError> {
+    fn replace(&mut self, _id: ID, _value: Shared<ID>) -> Result<(), EcsError> {
         panic!("Don't replace shared data on it's own")
     }
     fn add(&mut self, _value: Shared<ID>) -> ID {
@@ -91,7 +91,8 @@ where
     Self: Provider<T>,
 {
     fn replace(&mut self, id: ID, value: T) -> Result<(), EcsError> {
-        self.replace_component(id, value)?;
+        self.remove_component(id)?;
+        (*self.get_mut(id)?) = value;
         Ok(())
     }
 
