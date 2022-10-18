@@ -1,7 +1,6 @@
-use crate::arena::{Arena, Index};
+use crate::arena::Arena;
 use crate::compiler_context::{CompilerContext, ForEachNode, NodeStore};
 use crate::nodes::*;
-use std::marker::PhantomData;
 
 mod component;
 use component::*;
@@ -80,9 +79,6 @@ impl CompilerContext for Ecs {
 }
 
 impl NodeStore<EntityId, Shared<EntityId>, EcsError> for Ecs {
-    fn replace(&mut self, _id: EntityId, _value: Shared<EntityId>) -> Result<(), EcsError> {
-        panic!("Don't replace shared data on it's own")
-    }
     fn add(&mut self, _value: Shared<EntityId>) -> EntityId {
         panic!("Don't add shared data on it's own")
     }
@@ -94,17 +90,15 @@ impl NodeStore<EntityId, Shared<EntityId>, EcsError> for Ecs {
     fn get_mut(&mut self, id: EntityId) -> Result<&mut Shared<EntityId>, EcsError> {
         Ok(&mut self.entities.get_mut(id.id)?.shared)
     }
+
+    fn remove(&mut self, id: EntityId) -> Result<Shared<EntityId>, EcsError> {
+        Ok(self.entities.remove(id.id)?.shared)
+    }
 }
 impl<T> NodeStore<EntityId, T, EcsError> for Ecs
 where
     Self: Provider<T>,
 {
-    fn replace(&mut self, id: EntityId, value: T) -> Result<(), EcsError> {
-        // TODO: self.remove_component(id)?;
-        (*self.get_mut(id)?) = value;
-        Ok(())
-    }
-
     fn add(&mut self, value: T) -> EntityId {
         self.add_component(value)
     }
@@ -118,6 +112,10 @@ where
         Self: Provider<T>,
     {
         <Ecs as Provider<T>>::get_component_for_entity_mut(self, id)
+    }
+
+    fn remove(&mut self, id: EntityId) -> Result<T, EcsError> {
+        <Ecs as Provider<T>>::remove_component_for_entity(self, id)
     }
 }
 

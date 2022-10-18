@@ -70,9 +70,8 @@ where
 }
 
 impl NodeStore<Index, Node, ArenaError> for Ast {
-    fn replace(&mut self, id: Index, value: Node) -> Result<(), ArenaError> {
-        self.members.get_mut(id)?.0 = value;
-        Ok(())
+    fn remove(&mut self, id: Index) -> Result<Node, ArenaError> {
+        Ok(self.members.remove(id)?.0)
     }
     fn add(&mut self, value: Node) -> Index {
         self.members.add((value, Shared::default()))
@@ -86,8 +85,8 @@ impl NodeStore<Index, Node, ArenaError> for Ast {
 }
 
 impl NodeStore<Index, Shared<Index>, AstError> for Ast {
-    fn replace(&mut self, _id: Index, _value: Shared<Index>) -> Result<(), AstError> {
-        panic!("Don't replace shared data on it's own")
+    fn remove(&mut self, id: Index) -> Result<Shared<Index>, AstError> {
+        Ok(self.members.remove(id)?.1)
     }
     fn add(&mut self, _value: Shared<Index>) -> Index {
         panic!("Don't add shared data on it's own")
@@ -108,9 +107,12 @@ macro_rules! wrap_node {
             }
         }
         impl NodeStore<Index, $ty, AstError> for Ast {
-            fn replace(&mut self, id: Index, value: $ty) -> Result<(), AstError> {
-                self.replace(id, std::convert::Into::<Node>::into(value))?;
-                Ok(())
+            fn remove(&mut self, id: Index) -> Result<$ty, AstError> {
+                if let Node::$variant(value) = <Self as NodeStore<Index, Node, ArenaError>>::remove(self, id)? {
+                    Ok(value)
+                } else {
+                    Err(NodeOfWrongKindError(id, stringify!($variant)))
+                }
             }
             fn add(&mut self, value: $ty) -> Index {
                 self.add(std::convert::Into::<Node>::into(value))

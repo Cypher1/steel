@@ -1,10 +1,10 @@
 use crate::nodes::{Call, Shared, Symbol};
 
 pub trait NodeStore<ID, T, E> {
-    fn replace(&mut self, id: ID, value: T) -> Result<(), E>;
     fn add(&mut self, value: T) -> ID;
     fn get(&self, id: ID) -> Result<&T, E>;
     fn get_mut(&mut self, id: ID) -> Result<&mut T, E>;
+    fn remove(&mut self, id: ID) -> Result<T, E>;
 }
 
 pub type ForEachNode<'a, C, T> =
@@ -44,6 +44,21 @@ pub trait CompilerContext:
     fn get_i64_mut(&mut self, id: Self::ID) -> Result<&mut i64, Self::E> {
         self.get_mut(id)
     }
+    fn replace<T>(&mut self, id: Self::ID, value: T) -> Result<(), Self::E>
+    where
+        Self: NodeStore<Self::ID, T, Self::E> 
+    {
+        // For each component type...
+        <Self as NodeStore<Self::ID, Call<Self::ID>, Self::E>>::remove(self, id)?;
+        <Self as NodeStore<Self::ID, Symbol, Self::E>>::remove(self, id)?;
+        <Self as NodeStore<Self::ID, i64, Self::E>>::remove(self, id)?;
+        <Self as NodeStore<Self::ID, Shared<Self::ID>, Self::E>>::remove(self, id)?;
+
+        // TODO: Construct new, don't just get_mut...
+        (*<Self as NodeStore<Self::ID, T, Self::E>>::get_mut(self, id)?) = value;
+        Ok(())
+    }
+
     fn for_each(
         &mut self,
         symbol_fn: ForEachNode<Self, Symbol>,
