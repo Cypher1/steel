@@ -91,8 +91,8 @@ impl NodeStore<EntityId, Shared<EntityId>, EcsError> for Ecs {
         Ok(&mut self.entities.get_mut(id.id)?.shared)
     }
 
-    fn remove(&mut self, id: EntityId) -> Result<Shared<EntityId>, EcsError> {
-        Ok(self.entities.remove(id.id)?.shared)
+    fn remove(&mut self, id: EntityId) -> Result<Option<Shared<EntityId>>, EcsError> {
+        Ok(self.entities.remove(id.id)?.map(|op| op.shared))
     }
 }
 impl<T> NodeStore<EntityId, T, EcsError> for Ecs
@@ -101,6 +101,15 @@ where
 {
     fn add(&mut self, value: T) -> EntityId {
         self.add_component(value)
+    }
+
+    fn overwrite(&mut self, id: EntityId, value: T) -> Result<Option<T>, EcsError> {
+        //if let Ok(item) = self.get_mut(id) {
+            //std::mem::swap(item, &mut value);
+            //return Ok(Some(value));
+        //}
+        self.overwrite_entity(id, |_id| value)?;
+        Ok(None) // The value didn't exist
     }
 
     fn get(&self, id: EntityId) -> Result<&T, EcsError> {
@@ -114,8 +123,8 @@ where
         <Ecs as Provider<T>>::get_component_for_entity_mut(self, id)
     }
 
-    fn remove(&mut self, id: EntityId) -> Result<T, EcsError> {
-        <Ecs as Provider<T>>::remove_component_for_entity(self, id)
+    fn remove(&mut self, id: EntityId) -> Result<Option<T>, EcsError> {
+        Ok(Some(<Ecs as Provider<T>>::remove_component_for_entity(self, id)?))
     }
 }
 

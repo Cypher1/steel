@@ -4,9 +4,14 @@ pub trait NodeStore<ID, T, E> {
     fn add(&mut self, value: T) -> ID;
     fn get(&self, id: ID) -> Result<&T, E>;
     fn get_mut(&mut self, id: ID) -> Result<&mut T, E>;
-    fn remove(&mut self, id: ID) -> Result<T, E>;
-    fn overwrite(&mut self, _id: ID, _value: T) -> Result<T, E> {
-        todo!("Not supported yet");
+    fn remove(&mut self, id: ID) -> Result<Option<T>, E>;
+    fn remove_any(&mut self, id: ID) {
+        let _ = self.remove(id);
+    }
+    fn overwrite(&mut self, id: ID, mut value: T) -> Result<Option<T>, E> {
+        let item = self.get_mut(id)?;
+        std::mem::swap(item, &mut value);
+        return Ok(Some(value));
     }
 }
 
@@ -52,13 +57,13 @@ pub trait CompilerContext:
         Self: NodeStore<Self::ID, T, Self::E> 
     {
         // For each component type...
-        <Self as NodeStore<Self::ID, Call<Self::ID>, Self::E>>::remove(self, id)?;
-        <Self as NodeStore<Self::ID, Symbol, Self::E>>::remove(self, id)?;
-        <Self as NodeStore<Self::ID, i64, Self::E>>::remove(self, id)?;
-        <Self as NodeStore<Self::ID, Shared<Self::ID>, Self::E>>::remove(self, id)?;
+        <Self as NodeStore<Self::ID, Call<Self::ID>, Self::E>>::remove_any(self, id);
+        <Self as NodeStore<Self::ID, Symbol, Self::E>>::remove_any(self, id);
+        <Self as NodeStore<Self::ID, i64, Self::E>>::remove_any(self, id);
+        <Self as NodeStore<Self::ID, Shared<Self::ID>, Self::E>>::remove_any(self, id);
 
         // TODO: Construct new, don't just get_mut...
-        <Self as NodeStore<Self::ID, T, Self::E>>::overwrite(self, id, value)?;
+        <Self as NodeStore<Self::ID, T, Self::E>>::overwrite(self, id, value).expect("FAILED!?");
         Ok(())
     }
 

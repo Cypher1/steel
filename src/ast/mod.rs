@@ -70,8 +70,13 @@ where
 }
 
 impl NodeStore<Index, Node, ArenaError> for Ast {
-    fn remove(&mut self, id: Index) -> Result<Node, ArenaError> {
-        Ok(self.members.remove(id)?.0)
+    fn overwrite(&mut self, id: Index, value: Node) -> Result<Option<Node>, ArenaError> {
+        self.members.set(id, (value, Shared::default()))?;
+        Ok(None)
+    }
+
+    fn remove(&mut self, id: Index) -> Result<Option<Node>, ArenaError> {
+        Ok(self.members.remove(id)?.map(|op| op.0))
     }
     fn add(&mut self, value: Node) -> Index {
         self.members.add((value, Shared::default()))
@@ -85,13 +90,8 @@ impl NodeStore<Index, Node, ArenaError> for Ast {
 }
 
 impl NodeStore<Index, Shared<Index>, AstError> for Ast {
-    fn overwrite(&mut self, id: Index, mut value: Shared<Index>) -> Result<Shared<Index>, AstError> {
-        let item = self.members.get_mut(id)?;
-        std::mem::swap(&mut item.1, &mut value);
-        Ok(value)
-    }
-    fn remove(&mut self, id: Index) -> Result<Shared<Index>, AstError> {
-        Ok(self.members.remove(id)?.1)
+    fn remove(&mut self, id: Index) -> Result<Option<Shared<Index>>, AstError> {
+        Ok(self.members.remove(id)?.map(|op| op.1))
     }
     fn add(&mut self, _value: Shared<Index>) -> Index {
         panic!("Don't add shared data on it's own")
@@ -112,9 +112,18 @@ macro_rules! wrap_node {
             }
         }
         impl NodeStore<Index, $ty, AstError> for Ast {
-            fn remove(&mut self, id: Index) -> Result<$ty, AstError> {
-                if let Node::$variant(value) = <Self as NodeStore<Index, Node, ArenaError>>::remove(self, id)? {
-                    Ok(value)
+            fn overwrite(&mut self, id: Index, value: $ty) -> Result<Option<$ty>, AstError> {
+                let value = std::convert::Into::<Node>::into(value);
+                self.overwrite(id, value)?;
+                Ok(None)
+            }
+
+            fn remove(&mut self, id: Index) -> Result<Option<$ty>, AstError> {
+                let result = <Self as NodeStore<Index, Node, ArenaError>>::remove(self, id)?;
+                if let Some(Node::$variant(value)) = result {
+                    Ok(Some(value))
+                } else if result.is_none() {
+                    Ok(None)
                 } else {
                     Err(NodeOfWrongKindError(id, stringify!($variant)))
                 }

@@ -9,7 +9,7 @@ pub struct Arena<T> {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ArenaError {
-    IndexEmpty(Index),
+    IndexEmpty(String, Index),
     IndexOutOfBounds(Index, Index),
 }
 use ArenaError::*;
@@ -121,6 +121,15 @@ impl<T> Arena<T> {
     pub fn add<S: Into<T>>(&mut self, value: S) -> Index {
         self.add_with_id(|_id| value)
     }
+
+    pub fn set(&mut self, id: Index, value: T) -> Result<(), ArenaError> {
+        if id >= self.members.len() {
+            return Err(IndexOutOfBounds(id, self.members.len()));
+        }
+        self.members[id] = Entry(value);
+        Ok(())
+    }
+
     pub fn get(&self, id: Index) -> Result<&T, ArenaError> {
         if id >= self.members.len() {
             return Err(IndexOutOfBounds(id, self.members.len()));
@@ -128,7 +137,7 @@ impl<T> Arena<T> {
         if let Entry(value) = &self.members[id] {
             return Ok(value);
         }
-        Err(IndexEmpty(id))
+        Err(IndexEmpty(std::any::type_name::<T>().to_string(), id))
     }
 
     pub fn get_mut(&mut self, id: Index) -> Result<&mut T, ArenaError> {
@@ -138,19 +147,20 @@ impl<T> Arena<T> {
         if let Entry(value) = &mut self.members[id] {
             return Ok(value);
         }
-        Err(IndexEmpty(id))
+        Err(IndexEmpty(std::any::type_name::<T>().to_string(), id))
     }
 
-    pub fn remove(&mut self, id: Index) -> Result<T, ArenaError> {
+    pub fn remove(&mut self, id: Index) -> Result<Option<T>, ArenaError> {
         if id >= self.members.len() {
             return Err(IndexOutOfBounds(id, self.members.len()));
         }
         let mut value = Tombstone;
         std::mem::swap(&mut self.members[id], &mut value);
         if let Entry(value) = value {
-            return Ok(value);
+            Ok(Some(value))
+        } else {
+            Ok(None)
         }
-        Err(IndexEmpty(id))
     }
 }
 
@@ -179,7 +189,7 @@ mod test {
 
         let value = a.remove(id_to_remove);
         assert_eq!(a.into_iter().cloned().collect::<Vec<i32>>(), vec![1, 3]);
-        assert_eq!(value, Ok(2));
+        assert_eq!(value, Ok(Some(2)));
     }
 
     #[test]
