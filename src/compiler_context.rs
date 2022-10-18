@@ -11,7 +11,7 @@ pub trait NodeStore<ID, T, E> {
     fn overwrite(&mut self, id: ID, mut value: T) -> Result<Option<T>, E> {
         let item = self.get_mut(id)?;
         std::mem::swap(item, &mut value);
-        return Ok(Some(value));
+        Ok(Some(value))
     }
 }
 
@@ -29,10 +29,12 @@ pub trait CompilerContext:
 
     fn new() -> Self;
     fn get_shared(&self, id: Self::ID) -> &Shared<Self::ID> {
-        self.get(id).unwrap_or_else(|e| panic!("Missing shared on {:?}: {:?}", id, e))
+        self.get(id)
+            .unwrap_or_else(|e| panic!("Missing shared on {:?}: {:?}", id, e))
     }
     fn get_shared_mut(&mut self, id: Self::ID) -> &mut Shared<Self::ID> {
-        self.get_mut(id).unwrap_or_else(|e| panic!("Missing shared on {:?}: {:?}", id, e))
+        self.get_mut(id)
+            .unwrap_or_else(|e| panic!("Missing shared on {:?}: {:?}", id, e))
     }
     fn get_symbol(&self, id: Self::ID) -> Result<&Symbol, Self::E> {
         self.get(id)
@@ -54,7 +56,7 @@ pub trait CompilerContext:
     }
     fn replace<T>(&mut self, id: Self::ID, value: T) -> Result<(), Self::E>
     where
-        Self: NodeStore<Self::ID, T, Self::E> 
+        Self: NodeStore<Self::ID, T, Self::E>,
     {
         // For each component type...
         <Self as NodeStore<Self::ID, Call<Self::ID>, Self::E>>::remove_any(self, id);

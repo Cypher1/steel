@@ -1,5 +1,5 @@
-use crate::nodes::*;
 use super::providers::{ComponentId, EntityId};
+use crate::nodes::*;
 
 #[derive(Default, Debug, Clone, Hash, PartialEq, Eq)]
 pub struct Entity {

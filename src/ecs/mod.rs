@@ -105,8 +105,8 @@ where
 
     fn overwrite(&mut self, id: EntityId, value: T) -> Result<Option<T>, EcsError> {
         //if let Ok(item) = self.get_mut(id) {
-            //std::mem::swap(item, &mut value);
-            //return Ok(Some(value));
+        //std::mem::swap(item, &mut value);
+        //return Ok(Some(value));
         //}
         self.overwrite_entity(id, |_id| value)?;
         Ok(None) // The value didn't exist
@@ -124,7 +124,9 @@ where
     }
 
     fn remove(&mut self, id: EntityId) -> Result<Option<T>, EcsError> {
-        Ok(Some(<Ecs as Provider<T>>::remove_component_for_entity(self, id)?))
+        Ok(Some(<Ecs as Provider<T>>::remove_component_for_entity(
+            self, id,
+        )?))
     }
 }
 

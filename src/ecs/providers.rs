@@ -1,6 +1,6 @@
+use super::Entity;
 use crate::arena::{ArenaError, Index};
 use std::marker::PhantomData;
-use super::Entity;
 
 impl From<ArenaError> for EcsError {
     fn from(it: ArenaError) -> Self {
@@ -51,7 +51,11 @@ pub type EntityId = ComponentId<Entity>;
 pub trait Provider<T> {
     type ID;
     fn add_with_id<F: FnOnce(EntityId) -> T>(&mut self, value: F) -> EntityId;
-    fn overwrite_entity<F: FnOnce(EntityId) -> T>(&mut self, id: EntityId, value: F) -> Result<(), EcsError>;
+    fn overwrite_entity<F: FnOnce(EntityId) -> T>(
+        &mut self,
+        id: EntityId,
+        value: F,
+    ) -> Result<(), EcsError>;
     fn add_component(&mut self, value: T) -> EntityId {
         self.add_with_id(|_id| value)
     }

@@ -1,6 +1,6 @@
 use crate::compiler_context::CompilerContext;
-use std::sync::atomic::{AtomicBool, Ordering::Relaxed};
 use std::collections::HashMap;
+use std::sync::atomic::{AtomicBool, Ordering::Relaxed};
 use std::sync::{Arc, Mutex};
 
 #[derive(Default, Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
@@ -8,6 +8,8 @@ use std::sync::{Arc, Mutex};
 pub struct Optimizations {
     constant_folding: bool,
 }
+
+type SharedMem<T> = Arc<Mutex<T>>;
 
 impl Optimizations {
     pub fn none() -> Self {
@@ -31,9 +33,9 @@ fn constant_folding<C: CompilerContext + ?Sized>(
     root: C::ID,
     fixed_point: &AtomicBool,
 ) -> Result<C::ID, C::E> {
-    let known_values: Arc<Mutex<HashMap<C::ID, i64>>> = Arc::new(Mutex::new(HashMap::new()));
-    let replace: Arc<Mutex<Vec<(C::ID, i64)>>> = Arc::new(Mutex::new(Vec::new()));
-    let known_names: Arc<Mutex<HashMap<C::ID, String>>> = Arc::new(Mutex::new(HashMap::new()));
+    let known_values: SharedMem<HashMap<C::ID, i64>> = Arc::new(Mutex::new(HashMap::new()));
+    let replace: SharedMem<Vec<(C::ID, i64)>> = Arc::new(Mutex::new(Vec::new()));
+    let known_names: SharedMem<HashMap<C::ID, String>> = Arc::new(Mutex::new(HashMap::new()));
     context.for_each(
         &|id, symbol, shared| {
             if shared.known_value_found {
@@ -83,9 +85,14 @@ fn constant_folding<C: CompilerContext + ?Sized>(
                 "-" => left.wrapping_sub(right),
                 "*" => left.wrapping_mul(right),
                 "/" => left.wrapping_div(right),
-                _ => { todo!("HANDLE CONSTANT FOLDING FOR {}", name); },
+                _ => {
+                    todo!("HANDLE CONSTANT FOLDING FOR {}", name);
+                }
             };
-            eprintln!("CONSTANT FOLDING FOR {} with {:?} {:?} gives {:?}", name, left, right, result);
+            eprintln!(
+                "CONSTANT FOLDING FOR {} with {:?} {:?} gives {:?}",
+                name, left, right, result
+            );
             shared.known_value_found = true;
             let mut replace = replace.lock().unwrap();
             replace.push((id, result));
@@ -105,7 +112,12 @@ fn constant_folding<C: CompilerContext + ?Sized>(
     )?;
     let replace = replace.lock().unwrap();
     for (id, value) in replace.iter() {
-        eprintln!("Replacing ent.{:?} (i.e. {}) with {:?}", id, context.pretty(*id), value);
+        eprintln!(
+            "Replacing ent.{:?} (i.e. {}) with {:?}",
+            id,
+            context.pretty(*id),
+            value
+        );
         context.replace(*id, *value)?; // This is the bit that does the updates in place...
     }
     Ok(root)

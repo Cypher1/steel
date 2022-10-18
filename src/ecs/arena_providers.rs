@@ -1,5 +1,5 @@
 use super::component::Entity;
-use super::providers::{EntityId, EcsError, ComponentId, Provider};
+use super::providers::{ComponentId, EcsError, EntityId, Provider};
 use crate::arena::Arena;
 
 // In future there may be other kinds of Providers.
@@ -16,7 +16,11 @@ pub trait ArenaProvider<T> {
 
 impl<T, S: ArenaProvider<T>> Provider<T> for S {
     type ID = ComponentId<T>;
-    fn overwrite_entity<F: FnOnce(EntityId) -> T>(&mut self, id: EntityId, value: F) -> Result<(), EcsError> {
+    fn overwrite_entity<F: FnOnce(EntityId) -> T>(
+        &mut self,
+        id: EntityId,
+        value: F,
+    ) -> Result<(), EcsError> {
         let (entities, arena) = self.arena_mut();
         let node: ComponentId<T> = ComponentId::new(arena.add((id, value(id)))); // ent id and ent component id.
         entities.set(id.id, Self::make_entity(node))?;
@@ -80,7 +84,10 @@ macro_rules! make_arena_provider {
                 if let Some(component_id) = ent.$kind {
                     Ok(self.get_component(component_id)?)
                 } else {
-                    Err(EcsError::ComponentNotFound(std::any::type_name::<$type>().to_string(), id))
+                    Err(EcsError::ComponentNotFound(
+                        std::any::type_name::<$type>().to_string(),
+                        id,
+                    ))
                 }
             }
             fn get_mut_impl(&mut self, id: EntityId) -> Result<&mut $type, EcsError> {
@@ -88,7 +95,10 @@ macro_rules! make_arena_provider {
                 if let Some(component_id) = ent.$kind {
                     Ok(self.get_component_mut(component_id)?)
                 } else {
-                    Err(EcsError::ComponentNotFound(std::any::type_name::<$type>().to_string(), id))
+                    Err(EcsError::ComponentNotFound(
+                        std::any::type_name::<$type>().to_string(),
+                        id,
+                    ))
                 }
             }
             fn remove_impl(&mut self, id: EntityId) -> Result<$type, EcsError> {
@@ -96,7 +106,10 @@ macro_rules! make_arena_provider {
                 if let Some(component_id) = ent.$kind {
                     Ok(self.remove_component(component_id)?)
                 } else {
-                    Err(EcsError::ComponentNotFound(std::any::type_name::<$type>().to_string(), id))
+                    Err(EcsError::ComponentNotFound(
+                        std::any::type_name::<$type>().to_string(),
+                        id,
+                    ))
                 }
             }
         }
