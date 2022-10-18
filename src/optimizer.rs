@@ -94,6 +94,9 @@ fn constant_folding<C: CompilerContext + ?Sized>(
                 name, left, right, result
             );
             shared.known_value_found = true;
+            let mut known_values = known_values.lock().unwrap();
+            known_values.insert(id, result);
+
             let mut replace = replace.lock().unwrap();
             replace.push((id, result));
             fixed_point.store(false, Relaxed);
