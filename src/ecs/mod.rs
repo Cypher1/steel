@@ -176,7 +176,7 @@ mod test {
         let call: Result<&Call, EcsError> = ctx.get(hello);
         assert_eq!(
             format!("{:?}", call),
-            format!("Err(ComponentNotFound({:?}))", hello)
+            format!("Err(ComponentNotFound(\"steel::nodes::Call<steel::ecs::providers::ComponentId<steel::ecs::component::Entity>>\", {:?}))", hello)
         );
     }
 
