@@ -99,8 +99,10 @@ impl<'a, T> IntoIterator for &'a mut Arena<T> {
 
 impl<T> Arena<T> {
     pub fn new() -> Self {
+        let mut members = Vec::new();
+        members.reserve(1000);
         Self {
-            members: Vec::new(),
+            members,
         }
     }
 
