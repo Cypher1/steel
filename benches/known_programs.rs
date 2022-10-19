@@ -6,7 +6,7 @@ fn criterion_benchmark_with<T: CompilerContext>(name: &'static str, c: &mut Crit
 where
     SteelErr: From<<T as CompilerContext>::E>,
 {
-    c.bench_function(&format!("{} 123", name), |b| {
+    c.bench_function(&format!("{} known program 123", name), |b| {
         b.iter(|| handle::<T>(black_box(Tasks::parse("123").and_eval())).unwrap())
     });
 }
