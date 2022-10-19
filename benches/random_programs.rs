@@ -29,6 +29,48 @@ fn benchmark_parse<T: CompilerContext>(
     );
 }
 
+fn benchmark_optimize<T: CompilerContext>(
+    name: &'static str,
+    program: &str,
+    spec: &Spec,
+    c: &mut Criterion,
+) where
+    SteelErr: From<<T as CompilerContext>::E>,
+{
+    c.bench_function(
+        &format!("{} optimize random program {}", name, render_size(spec)),
+        |b| {
+            debug!("testing {} with {}\n{}", name, render_size(spec), program);
+            let mut store = T::new();
+            let (id, _res) = handle_steps::<T>(&mut store, Tasks::parse(program))
+                .expect("Should parse program without error");
+            let id = id.expect("Should have parsed a program");
+            b.iter(|| handle_steps::<T>(&mut store, black_box(Tasks::pre_parsed(id).and_optimize())))
+        },
+    );
+}
+
+fn benchmark_eval_pre_optimized<T: CompilerContext>(
+    name: &'static str,
+    program: &str,
+    spec: &Spec,
+    c: &mut Criterion,
+) where
+    SteelErr: From<<T as CompilerContext>::E>,
+{
+    c.bench_function(
+        &format!("{} eval pre-optimized random program {}", name, render_size(spec)),
+        |b| {
+            debug!("testing {} with {}\n{}", name, render_size(spec), program);
+            let mut store = T::new();
+            let (id, _res) = handle_steps::<T>(&mut store, Tasks::parse(program).and_optimize())
+                .expect("Should parse program without error");
+            let id = id.expect("Should have parsed a program");
+            b.iter(|| handle_steps::<T>(&mut store, black_box(Tasks::pre_parsed(id).and_eval())))
+        },
+    );
+}
+
 fn benchmark_eval<T: CompilerContext>(
     name: &'static str,
     program: &str,
@@ -76,7 +118,9 @@ where
     SteelErr: From<<T as CompilerContext>::E>,
 {
     benchmark_parse::<T>(name, program, spec, c);
+    benchmark_optimize::<T>(name, program, spec, c);
     benchmark_eval::<T>(name, program, spec, c);
+    benchmark_eval_pre_optimized::<T>(name, program, spec, c);
     benchmark_parse_and_eval_tasks::<T>(name, program, spec, c);
 }
 
