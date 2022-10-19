@@ -24,12 +24,20 @@ tabulated="$(echo "$data" | sed "s/ \(.s\) / \1\t/g")"
 
 grouped=""
 seen=""
+kinds=""
+cols="test"
 
 IFS=$'\n'
 for row in $tabulated; do
   name="$(echo "$row" | cut -f 1)"
   kind="$(echo "$name" | grep -E -o "^[^ ]*")"
   name="$(echo "$name" | sed "s/^$kind //")"
+  if [[ $kinds =~ $kind ]]; then
+    :
+  else
+    kinds="$kinds\n$kind"
+    cols="$cols\t$kind min\t$kind avg\t$kind max"
+  fi
   if echo "$seen" | grep -E -q -o "^$name"; then
     continue
   fi
@@ -43,10 +51,10 @@ for row in $tabulated; do
       continue
     fi
     match_data="$(echo "$match_row" | sed "s/^[^\t]*\t//")"
-    row="$row\t$match_kind\t$match_data"
+    row="$row\t$match_data"
   done
   grouped="$grouped\n$row"
 done
 
-echo -ne "test\tkind\tmin\tavg\tmax\tkind\tmin\tavg\tmax"
+echo -ne "$cols"
 echo -ne "$grouped" | sort
