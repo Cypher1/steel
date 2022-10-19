@@ -31,7 +31,7 @@ impl<ID> std::fmt::Debug for Impl<ID> {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub enum Value<ID> {
     Uninit,
     I64(i64), // a raw i64 value.
@@ -39,6 +39,15 @@ pub enum Value<ID> {
     Extern(Impl<ID>), // reference to an extern...
 }
 
+impl<ID> std::fmt::Debug for Value<ID> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
+        match self {
+            Value::Uninit => write!(f, "???"),
+            Value::I64(v) => write!(f, "{}_i64", v),
+            Value::Extern(imp) => write!(f, "extern#{}", imp.name),
+        }
+    }
+}
 
 pub type MemIndex<ID> = TypedIndex<Value<ID>>;
 
@@ -70,7 +79,7 @@ fn state_to_string<C: CompilerContext>(
             format!("{:?}{} -> {}", ptr, owning, context.pretty(ptr))
         }
         MemPtr(index) => {
-            format!("closure_{:?}{} -> {:?}", index, owning, state.get_mem(index))
+            format!("{:?}{} -> {:?}", index, owning, state.get_mem(index))
         }
     }
 }

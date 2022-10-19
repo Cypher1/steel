@@ -183,7 +183,7 @@ pub fn eval_program<Ctx: CompilerContext>(
     let result_index = state.setup_eval(StaticPtr(expr), Vec::new());
     eval(store, &mut state)?;
     let res = state.mem_stack.get(result_index.id);
-    debug!("eval: {:?} {:?}", state, res);
+    debug!("eval: {:#?} {:#?}", state, res);
     match res {
         Some(Value::I64(res)) => Ok(*res),
         Some(Value::Extern(_func)) => {
