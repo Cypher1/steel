@@ -38,7 +38,7 @@ for row in $tabulated; do
     kinds="$kinds\n$kind"
     cols="$cols\t$kind min\t$kind avg\t$kind max"
   fi
-  if echo "$seen" | grep -E -q -o "^$name"; then
+  if echo -e "$seen" | grep -q "^$name$" ; then
     continue
   fi
   seen="$seen\n$name"
