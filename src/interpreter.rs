@@ -1,8 +1,9 @@
 use crate::compiler_context::CompilerContext;
 use crate::error::SteelErr;
-use log::{error, trace};
+use log::{error, debug, trace};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
+use crate::typed_index::TypedIndex;
 
 type Imp<ID> = Arc<Mutex<dyn FnMut(&mut EvalState<ID>) -> Result<Value<ID>, SteelErr>>>;
 
@@ -38,17 +39,20 @@ pub enum Value<ID> {
     Extern(Impl<ID>), // reference to an extern...
 }
 
+
+pub type MemIndex<ID> = TypedIndex<Value<ID>>;
+
 #[derive(Debug)]
 pub enum FnPtr<ID> {
     StaticPtr(ID),
-    MemPtr(usize), // Memory address
+    MemPtr(MemIndex<ID>),
 }
 pub use FnPtr::*;
 
 pub struct StackFrame<ID> {
     fn_ptr: FnPtr<ID>,
-    return_address: usize,
-    bindings: Vec<(String, usize)>,
+    return_address: MemIndex<ID>,
+    bindings: Vec<(String, MemIndex<ID>)>,
 }
 
 fn state_to_string<C: CompilerContext>(
@@ -56,17 +60,17 @@ fn state_to_string<C: CompilerContext>(
     state: &EvalState<C::ID>,
     target: &StackFrame<C::ID>,
 ) -> String {
-    let owning = if !target.bindings.is_empty() {
-        format!("(owning {:?})", target.bindings)
+    let owning = ""; /*if !target.bindings.is_empty() {
+        format!(" (owning {:?})", target.bindings)
     } else {
         "".to_string()
-    };
+    };*/
     match target.fn_ptr {
         StaticPtr(ptr) => {
-            format!("code {:?}{} -> {}", ptr, owning, context.pretty(ptr))
+            format!("{:?}{} -> {}", ptr, owning, context.pretty(ptr))
         }
         MemPtr(index) => {
-            format!("value {:?}{} -> {:?}", index, owning, state.get_mem(index))
+            format!("closure_{:?}{} -> {:?}", index, owning, state.get_mem(index))
         }
     }
 }
@@ -85,7 +89,7 @@ impl<ID: std::fmt::Debug> std::fmt::Debug for StackFrame<ID> {
 pub struct EvalState<ID> {
     pub function_stack: Vec<StackFrame<ID>>, // name -> memory address to store result.
     // Record all the bindings (i.e. name->index in memory stack).
-    pub bindings: HashMap<String, Vec<usize>>, // name -> memory address to load result.
+    pub bindings: HashMap<String, Vec<MemIndex<ID>>>, // name -> memory address to load result.
     pub mem_stack: Vec<Value<ID>>,             // results.
 }
 
@@ -136,37 +140,37 @@ impl<ID: Clone + std::fmt::Debug> Default for EvalState<ID> {
     }
 }
 impl<ID> EvalState<ID> {
-    fn set_mem(&mut self, index: usize, value: Value<ID>) {
-        self.mem_stack[index] = value;
+    fn set_mem(&mut self, index: MemIndex<ID>, value: Value<ID>) {
+        self.mem_stack[index.id] = value;
     }
 
-    fn try_get_mem(&self, index: usize) -> Result<Option<&Value<ID>>, SteelErr> {
-        let r = self.mem_stack.get(index);
+    fn try_get_mem(&self, index: MemIndex<ID>) -> Result<Option<&Value<ID>>, SteelErr> {
+        let r = self.mem_stack.get(index.id);
         if let Some(Value::Uninit) = r {
-            return Err(SteelErr::ReliedOnUninitializedMemory(index));
+            return Err(SteelErr::ReliedOnUninitializedMemory(index.id));
         }
         Ok(r)
     }
 
-    fn get_mem(&self, index: usize) -> Result<&Value<ID>, SteelErr> {
+    fn get_mem(&self, index: MemIndex<ID>) -> Result<&Value<ID>, SteelErr> {
         self.try_get_mem(index)?
-            .ok_or(SteelErr::ReliedOnOutOfBoundsMemory(index))
+            .ok_or(SteelErr::ReliedOnOutOfBoundsMemory(index.id))
     }
 
     #[allow(unused)] // TODO: Implement freeing of memory
-    fn drop_mem(&mut self, mem: usize) {
-        trace!("forgetting {:?} args", mem);
-        let final_length = self.mem_stack.len().saturating_sub(mem);
+    fn drop_mem(&mut self, mem: MemIndex<ID>) {
+        debug!("forgetting {:?} args", mem);
+        let final_length = self.mem_stack.len().saturating_sub(mem.id);
         self.mem_stack.truncate(final_length);
     }
 
-    fn alloc(&mut self, value: Value<ID>) -> usize {
+    fn alloc(&mut self, value: Value<ID>) -> MemIndex<ID> {
         let index = self.mem_stack.len();
         self.mem_stack.push(value);
-        index
+        MemIndex::new(index)
     }
 
-    pub fn bind_name(&mut self, name: &str, index: usize) {
+    pub fn bind_name(&mut self, name: &str, index: MemIndex<ID>) {
         let entries = self
             .bindings
             .entry(name.to_string())
@@ -177,8 +181,8 @@ impl<ID> EvalState<ID> {
     pub fn setup_eval_to(
         &mut self,
         fn_ptr: FnPtr<ID>,
-        return_address: usize,
-        bindings: Vec<(String, usize)>,
+        return_address: MemIndex<ID>,
+        bindings: Vec<(String, MemIndex<ID>)>,
     ) {
         self.function_stack.push(StackFrame {
             fn_ptr,
@@ -190,9 +194,9 @@ impl<ID> EvalState<ID> {
     pub fn setup_closure(
         &mut self,
         code: ID,
-        return_address: usize,
-        mut bindings: Vec<(String, usize)>,
-    ) -> usize {
+        return_address: MemIndex<ID>,
+        mut bindings: Vec<(String, MemIndex<ID>)>,
+    ) -> MemIndex<ID> {
         let callee_index = self.alloc(Value::Uninit); // explicitly store 'uninitialized' marker.
                                                       // then run the closure
         bindings.push(("self".to_string(), callee_index));
@@ -202,7 +206,7 @@ impl<ID> EvalState<ID> {
         return_address
     }
 
-    pub fn setup_eval(&mut self, target: FnPtr<ID>, bindings: Vec<(String, usize)>) -> usize {
+    pub fn setup_eval(&mut self, target: FnPtr<ID>, bindings: Vec<(String, MemIndex<ID>)>) -> MemIndex<ID> {
         let return_address = self.alloc(Value::Uninit); // explicitly store 'uninitialized' marker.
         self.setup_eval_to(target, return_address, bindings);
         return_address
@@ -225,7 +229,7 @@ where
     <C as CompilerContext>::E: Into<SteelErr>,
 {
     while let Some(target) = state.function_stack.pop() {
-        trace!("Evaluating {}", state_to_string(context, state, &target));
+        debug!("evaluating: {}", state_to_string(context, state, &target));
         step(context, state, target)?;
     }
     Ok(())
@@ -282,18 +286,12 @@ where
         let mut args = vec![];
         let mut todos = vec![];
         for (name, arg) in c.args.iter().rev() {
-            trace!("    arg {:?} -> {}", &name, context.pretty(*arg));
             let index = state.alloc(Value::Uninit);
             args.push((name.to_string(), index));
             // TODO: Consider loading known values in without 'call'.
             todos.push((arg, index));
         }
         state.setup_closure(c.callee, *return_address, args);
-        trace!(
-            "  inner {:?} -> {}",
-            &return_address,
-            context.pretty(c.callee)
-        );
         for (arg, index) in todos {
             state.setup_eval_to(FnPtr::StaticPtr(*arg), index, Vec::new());
         }

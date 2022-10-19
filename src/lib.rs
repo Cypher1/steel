@@ -11,6 +11,7 @@ pub mod nodes;
 mod optimizer;
 mod parser;
 mod pretty_printer;
+pub mod typed_index;
 
 #[cfg(test)]
 #[macro_use]
@@ -181,7 +182,7 @@ pub fn eval_program<Ctx: CompilerContext>(
     let mut state = EvalState::default();
     let result_index = state.setup_eval(StaticPtr(expr), Vec::new());
     eval(store, &mut state)?;
-    let res = state.mem_stack.get(result_index);
+    let res = state.mem_stack.get(result_index.id);
     debug!("eval: {:?} {:?}", state, res);
     match res {
         Some(Value::I64(res)) => Ok(*res),

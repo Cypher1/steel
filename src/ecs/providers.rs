@@ -1,6 +1,8 @@
 use super::Entity;
-use crate::arena::{ArenaError, Index};
-use std::marker::PhantomData;
+use crate::arena::ArenaError;
+use crate::typed_index::TypedIndex;
+
+pub type ComponentId<T> = TypedIndex<T>;
 
 impl From<ArenaError> for EcsError {
     fn from(it: ArenaError) -> Self {
@@ -14,37 +16,6 @@ pub enum EcsError {
     ComponentNotFound(String, EntityId),
 }
 use EcsError::*;
-
-#[derive(PartialEq, Eq, Hash)]
-pub struct ComponentId<T> {
-    pub id: Index,
-    pub ty: PhantomData<T>,
-}
-
-impl<T> std::fmt::Debug for ComponentId<T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{} {}", std::any::type_name::<T>(), self.id)
-    }
-}
-
-impl<T> ComponentId<T> {
-    pub fn new(id: Index) -> Self {
-        Self {
-            id,
-            ty: PhantomData::default(),
-        }
-    }
-}
-
-impl<T> Copy for ComponentId<T> {}
-impl<T> Clone for ComponentId<T> {
-    fn clone(&self) -> Self {
-        Self {
-            id: self.id,
-            ty: self.ty,
-        }
-    }
-}
 
 pub type EntityId = ComponentId<Entity>;
 
