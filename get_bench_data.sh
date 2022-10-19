@@ -9,17 +9,17 @@ data="$(
   sed "s/: Analyzing//"  | \
   sed "s/^.*time:.*\[/[/"
 )"
-# Replace mark up with tabs
+# Replace mark up with commas
 data="$(
   echo "$data" | \
   tr '\n' '~' | \
-  sed "s/~\[/\t/g" | \
+  sed "s/~\[/,/g" | \
   sed "s/\]~/\n/g" | \
-  tr '~' '\t' | \
+  tr '~' ',' | \
   sed "s/\]//")"
 
 # Split up the timing values
-tabulated="$(echo "$data" | sed "s/ \(.s\) / \1\t/g")"
+tabulated="$(echo "$data" | sed "s/ \(.s\) / \1,/g")"
 # echo -en "$tabulated"
 
 grouped=""
@@ -36,7 +36,7 @@ for row in $tabulated; do
     :
   else
     kinds="$kinds\n$kind"
-    cols="$cols\t$kind min\t$kind avg\t$kind max"
+    cols="$cols,$kind min,$kind avg,$kind max"
   fi
   if echo -e "$seen" | grep -q "^$name$" ; then
     continue
@@ -50,8 +50,8 @@ for row in $tabulated; do
     if [[ $match_name != $name ]]; then
       continue
     fi
-    match_data="$(echo "$match_row" | sed "s/^[^\t]*\t//")"
-    row="$row\t$match_data"
+    match_data="$(echo "$match_row" | sed "s/^[^,]*,//")"
+    row="$row,$match_data"
   done
   grouped="$grouped\n$row"
 done

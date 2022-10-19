@@ -1,14 +1,27 @@
-test                                ast min    ast avg    ast max    ecs min    ecs avg    ecs max
-123                                 921.63 ns  957.28 ns  997.75 ns  1.1393 µs  1.1410 µs  1.1428 µs
-eval random program 1000            58.315 µs  60.647 µs  62.855 µs  55.710 µs  56.054 µs  56.468 µs
-eval random program 100             11.243 µs  11.662 µs  12.093 µs  13.121 µs  13.563 µs  14.041 µs
-eval random program 10              1.1768 µs  1.1949 µs  1.2144 µs  1.1731 µs  1.2072 µs  1.2451 µs
-eval random program 1               679.94 ns  703.54 ns  728.99 ns  620.09 ns  624.24 ns  629.34 ns
-parse and eval random program 1000  115.56 µs  120.03 µs  124.90 µs  105.19 µs  105.58 µs  106.02 µs
-parse and eval random program 100   20.698 µs  21.008 µs  21.344 µs  23.290 µs  24.145 µs  25.033 µs
-parse and eval random program 10    1.8727 µs  1.8963 µs  1.9261 µs  2.1576 µs  2.2204 µs  2.2879 µs
-parse and eval random program 1     984.75 ns  991.45 ns  999.14 ns  1.2094 µs  1.2131 µs  1.2171 µs
-parse random program 1000           71.797 µs  74.505 µs  77.147 µs  70.641 µs  71.841 µs  73.413 µs
-parse random program 100            12.351 µs  12.653 µs  12.999 µs  12.457 µs  12.526 µs  12.606 µs
-parse random program 10             714.20 ns  729.24 ns  744.94 ns  998.45 ns  1.0436 µs  1.0985 µs
-parse random program 1              312.56 ns  316.14 ns  319.91 ns  476.51 ns  481.58 ns  487.06 ns
+test,ast min,ast avg,ast max,ecs min,ecs avg,ecs max
+123,1.1393 µs,1.1410 µs,1.1428 µs,1.1393 µs,1.1410 µs,1.1428 µs
+123,921.63 ns,957.28 ns,997.75 ns,921.63 ns,957.28 ns,997.75 ns
+eval random program 1000,55.710 µs,56.054 µs,56.468 µs,55.710 µs,56.054 µs,56.468 µs
+eval random program 1000,58.315 µs,60.647 µs,62.855 µs,58.315 µs,60.647 µs,62.855 µs
+eval random program 100,11.243 µs,11.662 µs,12.093 µs,11.243 µs,11.662 µs,12.093 µs
+eval random program 100,13.121 µs,13.563 µs,14.041 µs,13.121 µs,13.563 µs,14.041 µs
+eval random program 10,1.1731 µs,1.2072 µs,1.2451 µs,1.1731 µs,1.2072 µs,1.2451 µs
+eval random program 10,1.1768 µs,1.1949 µs,1.2144 µs,1.1768 µs,1.1949 µs,1.2144 µs
+eval random program 1,620.09 ns,624.24 ns,629.34 ns,620.09 ns,624.24 ns,629.34 ns
+eval random program 1,679.94 ns,703.54 ns,728.99 ns,679.94 ns,703.54 ns,728.99 ns
+parse and eval random program 1000,105.19 µs,105.58 µs,106.02 µs,105.19 µs,105.58 µs,106.02 µs
+parse and eval random program 1000,115.56 µs,120.03 µs,124.90 µs,115.56 µs,120.03 µs,124.90 µs
+parse and eval random program 100,20.698 µs,21.008 µs,21.344 µs,20.698 µs,21.008 µs,21.344 µs
+parse and eval random program 100,23.290 µs,24.145 µs,25.033 µs,23.290 µs,24.145 µs,25.033 µs
+parse and eval random program 10,1.8727 µs,1.8963 µs,1.9261 µs,1.8727 µs,1.8963 µs,1.9261 µs
+parse and eval random program 10,2.1576 µs,2.2204 µs,2.2879 µs,2.1576 µs,2.2204 µs,2.2879 µs
+parse and eval random program 1,1.2094 µs,1.2131 µs,1.2171 µs,1.2094 µs,1.2131 µs,1.2171 µs
+parse and eval random program 1,984.75 ns,991.45 ns,999.14 ns,984.75 ns,991.45 ns,999.14 ns
+parse random program 1000,70.641 µs,71.841 µs,73.413 µs,70.641 µs,71.841 µs,73.413 µs
+parse random program 1000,71.797 µs,74.505 µs,77.147 µs,71.797 µs,74.505 µs,77.147 µs
+parse random program 100,12.351 µs,12.653 µs,12.999 µs,12.351 µs,12.653 µs,12.999 µs
+parse random program 100,12.457 µs,12.526 µs,12.606 µs,12.457 µs,12.526 µs,12.606 µs
+parse random program 10,714.20 ns,729.24 ns,744.94 ns,714.20 ns,729.24 ns,744.94 ns
+parse random program 10,998.45 ns,1.0436 µs,1.0985 µs,998.45 ns,1.0436 µs,1.0985 µs
+parse random program 1,312.56 ns,316.14 ns,319.91 ns,312.56 ns,316.14 ns,319.91 ns
+parse random program 1,476.51 ns,481.58 ns,487.06 ns,476.51 ns,481.58 ns,487.06 ns
