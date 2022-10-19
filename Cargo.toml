@@ -29,3 +29,10 @@ harness = false
 [[bench]]
 name = "known_programs"
 harness = false
+
+[profile.release]
+lto = "fat"
+panic = "abort"
+
+[profile.bench]
+lto = "fat"
