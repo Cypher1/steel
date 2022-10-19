@@ -66,27 +66,27 @@ running 0 tests
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
 Gnuplot not found, using plotters backend
-Benchmarking ast 123
-Benchmarking ast 123: Warming up for 3.0000 s
-Benchmarking ast 123: Collecting 100 samples in estimated 5.0004 s (5.8M iterations)
-Benchmarking ast 123: Analyzing
-ast 123                 time:   [921.63 ns 957.28 ns 997.75 ns]
-                        change: [-21.571% -18.049% -14.533%] (p = 0.00 < 0.05)
+Benchmarking ast known program 123
+Benchmarking ast known program 123: Warming up for 3.0000 s
+Benchmarking ast known program 123: Collecting 100 samples in estimated 5.0011 s (5.7M iterations)
+Benchmarking ast known program 123: Analyzing
+ast known program 123   time:   [889.55 ns 891.75 ns 894.30 ns]
+                        change: [-6.5462% -5.9989% -5.4341%] (p = 0.00 < 0.05)
                         Performance has improved.
-Found 8 outliers among 100 measurements (8.00%)
-  1 (1.00%) high mild
-  7 (7.00%) high severe
+Found 14 outliers among 100 measurements (14.00%)
+  4 (4.00%) low mild
+  6 (6.00%) high mild
+  4 (4.00%) high severe
 
-Benchmarking ecs 123
-Benchmarking ecs 123: Warming up for 3.0000 s
-Benchmarking ecs 123: Collecting 100 samples in estimated 5.0019 s (4.3M iterations)
-Benchmarking ecs 123: Analyzing
-ecs 123                 time:   [1.1393 µs 1.1410 µs 1.1428 µs]
-                        change: [-7.5849% -6.8529% -6.1988%] (p = 0.00 < 0.05)
-                        Performance has improved.
-Found 5 outliers among 100 measurements (5.00%)
-  4 (4.00%) high mild
-  1 (1.00%) high severe
+Benchmarking ecs known program 123
+Benchmarking ecs known program 123: Warming up for 3.0000 s
+Benchmarking ecs known program 123: Collecting 100 samples in estimated 5.0056 s (4.2M iterations)
+Benchmarking ecs known program 123: Analyzing
+ecs known program 123   time:   [1.1703 µs 1.1724 µs 1.1748 µs]
+                        change: [-0.8259% -0.2029% +0.3117%] (p = 0.52 > 0.05)
+                        No change in performance detected.
+Found 2 outliers among 100 measurements (2.00%)
+  2 (2.00%) high mild
 
 Gnuplot not found, using plotters backend
 Benchmarking ast parse random program 1
@@ -94,258 +94,479 @@ Benchmarking ast parse random program 1: Warming up for 3.0000 s
 Benchmarking ast parse random program 1: Collecting 100 samples in estimated 5.0003 s (17M iterations)
 Benchmarking ast parse random program 1: Analyzing
 ast parse random program 1
-                        time:   [312.56 ns 316.14 ns 319.91 ns]
-                        change: [-48.764% -47.183% -45.962%] (p = 0.00 < 0.05)
+                        time:   [291.17 ns 292.00 ns 293.04 ns]
+                        change: [-10.314% -9.7455% -9.1939%] (p = 0.00 < 0.05)
                         Performance has improved.
+Found 7 outliers among 100 measurements (7.00%)
+  5 (5.00%) high mild
+  2 (2.00%) high severe
+
+Benchmarking ast optimize random program 1
+Benchmarking ast optimize random program 1: Warming up for 3.0000 s
+Benchmarking ast optimize random program 1: Collecting 100 samples in estimated 5.0002 s (45M iterations)
+Benchmarking ast optimize random program 1: Analyzing
+ast optimize random program 1
+                        time:   [109.29 ns 109.66 ns 110.08 ns]
+                        change: [-0.1831% +0.7018% +1.5108%] (p = 0.11 > 0.05)
+                        No change in performance detected.
 Found 1 outliers among 100 measurements (1.00%)
   1 (1.00%) high mild
 
 Benchmarking ast eval random program 1
 Benchmarking ast eval random program 1: Warming up for 3.0000 s
-Benchmarking ast eval random program 1: Collecting 100 samples in estimated 5.0023 s (7.4M iterations)
+Benchmarking ast eval random program 1: Collecting 100 samples in estimated 5.0029 s (7.8M iterations)
 Benchmarking ast eval random program 1: Analyzing
 ast eval random program 1
-                        time:   [679.94 ns 703.54 ns 728.99 ns]
-                        change: [-59.410% -58.242% -56.952%] (p = 0.00 < 0.05)
+                        time:   [618.88 ns 622.97 ns 629.21 ns]
+                        change: [-3.1834% -2.1864% -1.1541%] (p = 0.00 < 0.05)
                         Performance has improved.
-Found 20 outliers among 100 measurements (20.00%)
-  14 (14.00%) high mild
-  6 (6.00%) high severe
+Found 4 outliers among 100 measurements (4.00%)
+  2 (2.00%) high mild
+  2 (2.00%) high severe
+
+Benchmarking ast eval pre-optimized random program 1
+Benchmarking ast eval pre-optimized random program 1: Warming up for 3.0000 s
+Benchmarking ast eval pre-optimized random program 1: Collecting 100 samples in estimated 5.0021 s (7.9M iterations)
+Benchmarking ast eval pre-optimized random program 1: Analyzing
+ast eval pre-optimized random program 1
+                        time:   [610.18 ns 611.60 ns 613.15 ns]
+                        change: [-10.228% -9.8301% -9.4087%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 10 outliers among 100 measurements (10.00%)
+  9 (9.00%) high mild
+  1 (1.00%) high severe
 
 Benchmarking ast parse and eval random program 1
 Benchmarking ast parse and eval random program 1: Warming up for 3.0000 s
-Benchmarking ast parse and eval random program 1: Collecting 100 samples in estimated 5.0038 s (4.7M iterations)
+Benchmarking ast parse and eval random program 1: Collecting 100 samples in estimated 5.0006 s (4.7M iterations)
 Benchmarking ast parse and eval random program 1: Analyzing
 ast parse and eval random program 1
-                        time:   [984.75 ns 991.45 ns 999.14 ns]
-                        change: [-56.188% -55.954% -55.692%] (p = 0.00 < 0.05)
+                        time:   [994.25 ns 1.0010 µs 1.0112 µs]
+                        change: [-15.493% -13.730% -11.995%] (p = 0.00 < 0.05)
                         Performance has improved.
-Found 12 outliers among 100 measurements (12.00%)
-  5 (5.00%) high mild
-  7 (7.00%) high severe
+Found 3 outliers among 100 measurements (3.00%)
+  1 (1.00%) high mild
+  2 (2.00%) high severe
 
 Benchmarking ecs parse random program 1
 Benchmarking ecs parse random program 1: Warming up for 3.0000 s
-Benchmarking ecs parse random program 1: Collecting 100 samples in estimated 5.0004 s (10M iterations)
+Benchmarking ecs parse random program 1: Collecting 100 samples in estimated 5.0013 s (10M iterations)
 Benchmarking ecs parse random program 1: Analyzing
 ecs parse random program 1
-                        time:   [476.51 ns 481.58 ns 487.06 ns]
-                        change: [-35.956% -35.307% -34.695%] (p = 0.00 < 0.05)
+                        time:   [466.63 ns 468.07 ns 469.56 ns]
+                        change: [-18.446% -17.189% -15.937%] (p = 0.00 < 0.05)
                         Performance has improved.
+Found 5 outliers among 100 measurements (5.00%)
+  2 (2.00%) low mild
+  2 (2.00%) high mild
+  1 (1.00%) high severe
+
+Benchmarking ecs optimize random program 1
+Benchmarking ecs optimize random program 1: Warming up for 3.0000 s
+Benchmarking ecs optimize random program 1: Collecting 100 samples in estimated 5.0000 s (44M iterations)
+Benchmarking ecs optimize random program 1: Analyzing
+ecs optimize random program 1
+                        time:   [108.46 ns 108.80 ns 109.17 ns]
+                        change: [-8.6101% -7.3476% -6.1232%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 3 outliers among 100 measurements (3.00%)
+  2 (2.00%) high mild
+  1 (1.00%) high severe
 
 Benchmarking ecs eval random program 1
 Benchmarking ecs eval random program 1: Warming up for 3.0000 s
-Benchmarking ecs eval random program 1: Collecting 100 samples in estimated 5.0011 s (7.5M iterations)
+Benchmarking ecs eval random program 1: Collecting 100 samples in estimated 5.0007 s (7.9M iterations)
 Benchmarking ecs eval random program 1: Analyzing
 ecs eval random program 1
-                        time:   [620.09 ns 624.24 ns 629.34 ns]
-                        change: [-62.240% -61.895% -61.567%] (p = 0.00 < 0.05)
-                        Performance has improved.
-Found 11 outliers among 100 measurements (11.00%)
-  3 (3.00%) high mild
-  8 (8.00%) high severe
-
-Benchmarking ecs parse and eval random program 1
-Benchmarking ecs parse and eval random program 1: Warming up for 3.0000 s
-Benchmarking ecs parse and eval random program 1: Collecting 100 samples in estimated 5.0054 s (4.1M iterations)
-Benchmarking ecs parse and eval random program 1: Analyzing
-ecs parse and eval random program 1
-                        time:   [1.2094 µs 1.2131 µs 1.2171 µs]
-                        change: [-55.119% -54.236% -53.564%] (p = 0.00 < 0.05)
-                        Performance has improved.
-Found 2 outliers among 100 measurements (2.00%)
-  1 (1.00%) high mild
-  1 (1.00%) high severe
-
-Benchmarking ast parse random program 10
-Benchmarking ast parse random program 10: Warming up for 3.0000 s
-Benchmarking ast parse random program 10: Collecting 100 samples in estimated 5.0006 s (7.0M iterations)
-Benchmarking ast parse random program 10: Analyzing
-ast parse random program 10
-                        time:   [714.20 ns 729.24 ns 744.94 ns]
-                        change: [+25.498% +27.377% +29.148%] (p = 0.00 < 0.05)
-                        Performance has regressed.
-
-Benchmarking ast eval random program 10
-Benchmarking ast eval random program 10: Warming up for 3.0000 s
-Benchmarking ast eval random program 10: Collecting 100 samples in estimated 5.0038 s (3.4M iterations)
-Benchmarking ast eval random program 10: Analyzing
-ast eval random program 10
-                        time:   [1.1768 µs 1.1949 µs 1.2144 µs]
-                        change: [-27.512% -26.503% -25.545%] (p = 0.00 < 0.05)
-                        Performance has improved.
-Found 1 outliers among 100 measurements (1.00%)
-  1 (1.00%) high mild
-
-Benchmarking ast parse and eval random program 10
-Benchmarking ast parse and eval random program 10: Warming up for 3.0000 s
-Benchmarking ast parse and eval random program 10: Collecting 100 samples in estimated 5.0002 s (2.3M iterations)
-Benchmarking ast parse and eval random program 10: Analyzing
-ast parse and eval random program 10
-                        time:   [1.8727 µs 1.8963 µs 1.9261 µs]
-                        change: [-12.005% -10.440% -9.0475%] (p = 0.00 < 0.05)
-                        Performance has improved.
-
-Benchmarking ecs parse random program 10
-Benchmarking ecs parse random program 10: Warming up for 3.0000 s
-Benchmarking ecs parse random program 10: Collecting 100 samples in estimated 5.0008 s (5.0M iterations)
-Benchmarking ecs parse random program 10: Analyzing
-ecs parse random program 10
-                        time:   [998.45 ns 1.0436 µs 1.0985 µs]
-                        change: [-2.4445% +1.5748% +6.1772%] (p = 0.48 > 0.05)
-                        No change in performance detected.
-Found 1 outliers among 100 measurements (1.00%)
-  1 (1.00%) high severe
-
-Benchmarking ecs eval random program 10
-Benchmarking ecs eval random program 10: Warming up for 3.0000 s
-Benchmarking ecs eval random program 10: Collecting 100 samples in estimated 5.0026 s (4.3M iterations)
-Benchmarking ecs eval random program 10: Analyzing
-ecs eval random program 10
-                        time:   [1.1731 µs 1.2072 µs 1.2451 µs]
-                        change: [-43.150% -41.813% -40.248%] (p = 0.00 < 0.05)
-                        Performance has improved.
-Found 12 outliers among 100 measurements (12.00%)
-  10 (10.00%) high mild
-  2 (2.00%) high severe
-
-Benchmarking ecs parse and eval random program 10
-Benchmarking ecs parse and eval random program 10: Warming up for 3.0000 s
-Benchmarking ecs parse and eval random program 10: Collecting 100 samples in estimated 5.0102 s (2.2M iterations)
-Benchmarking ecs parse and eval random program 10: Analyzing
-ecs parse and eval random program 10
-                        time:   [2.1576 µs 2.2204 µs 2.2879 µs]
-                        change: [-28.079% -26.413% -24.556%] (p = 0.00 < 0.05)
-                        Performance has improved.
-Found 10 outliers among 100 measurements (10.00%)
-  10 (10.00%) high mild
-
-Benchmarking ast parse random program 100
-Benchmarking ast parse random program 100: Warming up for 3.0000 s
-Benchmarking ast parse random program 100: Collecting 100 samples in estimated 5.0282 s (359k iterations)
-Benchmarking ast parse random program 100: Analyzing
-ast parse random program 100
-                        time:   [12.351 µs 12.653 µs 12.999 µs]
-                        change: [+15.742% +18.500% +21.055%] (p = 0.00 < 0.05)
-                        Performance has regressed.
-Found 6 outliers among 100 measurements (6.00%)
-  6 (6.00%) high mild
-
-Benchmarking ast eval random program 100
-Benchmarking ast eval random program 100: Warming up for 3.0000 s
-Benchmarking ast eval random program 100: Collecting 100 samples in estimated 5.0561 s (439k iterations)
-Benchmarking ast eval random program 100: Analyzing
-ast eval random program 100
-                        time:   [11.243 µs 11.662 µs 12.093 µs]
-                        change: [+4.4744% +7.1353% +9.8300%] (p = 0.00 < 0.05)
-                        Performance has regressed.
-Found 12 outliers among 100 measurements (12.00%)
-  1 (1.00%) high mild
-  11 (11.00%) high severe
-
-Benchmarking ast parse and eval random program 100
-Benchmarking ast parse and eval random program 100: Warming up for 3.0000 s
-Benchmarking ast parse and eval random program 100: Collecting 100 samples in estimated 5.0908 s (242k iterations)
-Benchmarking ast parse and eval random program 100: Analyzing
-ast parse and eval random program 100
-                        time:   [20.698 µs 21.008 µs 21.344 µs]
-                        change: [+14.164% +15.310% +16.454%] (p = 0.00 < 0.05)
-                        Performance has regressed.
-Found 6 outliers among 100 measurements (6.00%)
-  3 (3.00%) high mild
-  3 (3.00%) high severe
-
-Benchmarking ecs parse random program 100
-Benchmarking ecs parse random program 100: Warming up for 3.0000 s
-Benchmarking ecs parse random program 100: Collecting 100 samples in estimated 5.0645 s (394k iterations)
-Benchmarking ecs parse random program 100: Analyzing
-ecs parse random program 100
-                        time:   [12.457 µs 12.526 µs 12.606 µs]
-                        change: [+0.0638% +10.584% +20.945%] (p = 0.03 < 0.05)
-                        Change within noise threshold.
-Found 1 outliers among 100 measurements (1.00%)
-  1 (1.00%) high severe
-
-Benchmarking ecs eval random program 100
-Benchmarking ecs eval random program 100: Warming up for 3.0000 s
-Benchmarking ecs eval random program 100: Collecting 100 samples in estimated 5.0642 s (389k iterations)
-Benchmarking ecs eval random program 100: Analyzing
-ecs eval random program 100
-                        time:   [13.121 µs 13.563 µs 14.041 µs]
-                        change: [+7.6782% +12.647% +17.482%] (p = 0.00 < 0.05)
-                        Performance has regressed.
-Found 17 outliers among 100 measurements (17.00%)
-  16 (16.00%) high mild
-  1 (1.00%) high severe
-
-Benchmarking ecs parse and eval random program 100
-Benchmarking ecs parse and eval random program 100: Warming up for 3.0000 s
-Benchmarking ecs parse and eval random program 100: Collecting 100 samples in estimated 5.0843 s (212k iterations)
-Benchmarking ecs parse and eval random program 100: Analyzing
-ecs parse and eval random program 100
-                        time:   [23.290 µs 24.145 µs 25.033 µs]
-                        change: [+35.844% +42.908% +49.870%] (p = 0.00 < 0.05)
-                        Performance has regressed.
-
-Benchmarking ast parse random program 1000
-Benchmarking ast parse random program 1000: Warming up for 3.0000 s
-Benchmarking ast parse random program 1000: Collecting 100 samples in estimated 5.0667 s (61k iterations)
-Benchmarking ast parse random program 1000: Analyzing
-ast parse random program 1000
-                        time:   [71.797 µs 74.505 µs 77.147 µs]
-                        change: [+24.363% +28.262% +32.219%] (p = 0.00 < 0.05)
-                        Performance has regressed.
-
-Benchmarking ast eval random program 1000
-Benchmarking ast eval random program 1000: Warming up for 3.0000 s
-Benchmarking ast eval random program 1000: Collecting 100 samples in estimated 5.2255 s (86k iterations)
-Benchmarking ast eval random program 1000: Analyzing
-ast eval random program 1000
-                        time:   [58.315 µs 60.647 µs 62.855 µs]
-                        change: [+50.008% +54.366% +58.767%] (p = 0.00 < 0.05)
-                        Performance has regressed.
-
-Benchmarking ast parse and eval random program 1000
-Benchmarking ast parse and eval random program 1000: Warming up for 3.0000 s
-Benchmarking ast parse and eval random program 1000: Collecting 100 samples in estimated 5.1967 s (40k iterations)
-Benchmarking ast parse and eval random program 1000: Analyzing
-ast parse and eval random program 1000
-                        time:   [115.56 µs 120.03 µs 124.90 µs]
-                        change: [+2.5578% +5.2170% +7.6996%] (p = 0.00 < 0.05)
-                        Performance has regressed.
-
-Benchmarking ecs parse random program 1000
-Benchmarking ecs parse random program 1000: Warming up for 3.0000 s
-Benchmarking ecs parse random program 1000: Collecting 100 samples in estimated 5.1868 s (50k iterations)
-Benchmarking ecs parse random program 1000: Analyzing
-ecs parse random program 1000
-                        time:   [70.641 µs 71.841 µs 73.413 µs]
-                        change: [+3.3009% +8.0226% +12.857%] (p = 0.00 < 0.05)
-                        Performance has regressed.
-Found 5 outliers among 100 measurements (5.00%)
-  2 (2.00%) high mild
-  3 (3.00%) high severe
-
-Benchmarking ecs eval random program 1000
-Benchmarking ecs eval random program 1000: Warming up for 3.0000 s
-Benchmarking ecs eval random program 1000: Collecting 100 samples in estimated 5.0172 s (86k iterations)
-Benchmarking ecs eval random program 1000: Analyzing
-ecs eval random program 1000
-                        time:   [55.710 µs 56.054 µs 56.468 µs]
-                        change: [-13.398% -12.961% -12.504%] (p = 0.00 < 0.05)
+                        time:   [625.05 ns 627.94 ns 631.10 ns]
+                        change: [-8.4035% -7.6029% -6.8893%] (p = 0.00 < 0.05)
                         Performance has improved.
 Found 4 outliers among 100 measurements (4.00%)
   3 (3.00%) high mild
   1 (1.00%) high severe
 
-Benchmarking ecs parse and eval random program 1000
-Benchmarking ecs parse and eval random program 1000: Warming up for 3.0000 s
-Benchmarking ecs parse and eval random program 1000: Collecting 100 samples in estimated 5.0362 s (45k iterations)
-Benchmarking ecs parse and eval random program 1000: Analyzing
-ecs parse and eval random program 1000
-                        time:   [105.19 µs 105.58 µs 106.02 µs]
-                        change: [-11.926% -11.459% -10.983%] (p = 0.00 < 0.05)
+Benchmarking ecs eval pre-optimized random program 1
+Benchmarking ecs eval pre-optimized random program 1: Warming up for 3.0000 s
+Benchmarking ecs eval pre-optimized random program 1: Collecting 100 samples in estimated 5.0036 s (5.8M iterations)
+Benchmarking ecs eval pre-optimized random program 1: Analyzing
+ecs eval pre-optimized random program 1
+                        time:   [638.77 ns 641.52 ns 644.92 ns]
+                        change: [+0.3382% +4.5416% +10.491%] (p = 0.06 > 0.05)
+                        No change in performance detected.
+Found 7 outliers among 100 measurements (7.00%)
+  2 (2.00%) high mild
+  5 (5.00%) high severe
+
+Benchmarking ecs parse and eval random program 1
+Benchmarking ecs parse and eval random program 1: Warming up for 3.0000 s
+Benchmarking ecs parse and eval random program 1: Collecting 100 samples in estimated 5.0032 s (4.1M iterations)
+Benchmarking ecs parse and eval random program 1: Analyzing
+ecs parse and eval random program 1
+                        time:   [1.1923 µs 1.1976 µs 1.2036 µs]
+                        change: [-4.9695% -4.1816% -3.4578%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 13 outliers among 100 measurements (13.00%)
+  4 (4.00%) low mild
+  4 (4.00%) high mild
+  5 (5.00%) high severe
+
+Benchmarking ast parse random program 10
+Benchmarking ast parse random program 10: Warming up for 3.0000 s
+Benchmarking ast parse random program 10: Collecting 100 samples in estimated 5.0011 s (15M iterations)
+Benchmarking ast parse random program 10: Analyzing
+ast parse random program 10
+                        time:   [326.06 ns 327.60 ns 329.45 ns]
+                        change: [-73.175% -72.935% -72.737%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 9 outliers among 100 measurements (9.00%)
+  7 (7.00%) high mild
+  2 (2.00%) high severe
+
+Benchmarking ast optimize random program 10
+Benchmarking ast optimize random program 10: Warming up for 3.0000 s
+Benchmarking ast optimize random program 10: Collecting 100 samples in estimated 5.0005 s (43M iterations)
+Benchmarking ast optimize random program 10: Analyzing
+ast optimize random program 10
+                        time:   [107.85 ns 108.71 ns 109.79 ns]
+                        change: [-47.261% -46.841% -46.434%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 5 outliers among 100 measurements (5.00%)
+  3 (3.00%) high mild
+  2 (2.00%) high severe
+
+Benchmarking ast eval random program 10
+Benchmarking ast eval random program 10: Warming up for 3.0000 s
+Benchmarking ast eval random program 10: Collecting 100 samples in estimated 5.0027 s (7.2M iterations)
+Benchmarking ast eval random program 10: Analyzing
+ast eval random program 10
+                        time:   [674.05 ns 676.21 ns 678.38 ns]
+                        change: [-67.820% -66.941% -66.033%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 7 outliers among 100 measurements (7.00%)
+  1 (1.00%) low mild
+  5 (5.00%) high mild
+  1 (1.00%) high severe
+
+Benchmarking ast eval pre-optimized random program 10
+Benchmarking ast eval pre-optimized random program 10: Warming up for 3.0000 s
+Benchmarking ast eval pre-optimized random program 10: Collecting 100 samples in estimated 5.0024 s (6.3M iterations)
+Benchmarking ast eval pre-optimized random program 10: Analyzing
+ast eval pre-optimized random program 10
+                        time:   [688.69 ns 692.81 ns 697.59 ns]
+                        change: [-21.715% -21.123% -20.483%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 5 outliers among 100 measurements (5.00%)
+  4 (4.00%) high mild
+  1 (1.00%) high severe
+
+Benchmarking ast parse and eval random program 10
+Benchmarking ast parse and eval random program 10: Warming up for 3.0000 s
+Benchmarking ast parse and eval random program 10: Collecting 100 samples in estimated 5.0002 s (4.5M iterations)
+Benchmarking ast parse and eval random program 10: Analyzing
+ast parse and eval random program 10
+                        time:   [996.71 ns 1.0007 µs 1.0055 µs]
+                        change: [-63.707% -63.423% -63.093%] (p = 0.00 < 0.05)
+                        Performance has improved.
+
+Benchmarking ecs parse random program 10
+Benchmarking ecs parse random program 10: Warming up for 3.0000 s
+Benchmarking ecs parse random program 10: Collecting 100 samples in estimated 5.0008 s (11M iterations)
+Benchmarking ecs parse random program 10: Analyzing
+ecs parse random program 10
+                        time:   [465.45 ns 466.09 ns 466.78 ns]
+                        change: [-69.501% -69.361% -69.171%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 4 outliers among 100 measurements (4.00%)
+  2 (2.00%) high mild
+  2 (2.00%) high severe
+
+Benchmarking ecs optimize random program 10
+Benchmarking ecs optimize random program 10: Warming up for 3.0000 s
+Benchmarking ecs optimize random program 10: Collecting 100 samples in estimated 5.0002 s (47M iterations)
+Benchmarking ecs optimize random program 10: Analyzing
+ecs optimize random program 10
+                        time:   [105.22 ns 105.43 ns 105.68 ns]
+                        change: [-53.610% -53.318% -53.097%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 9 outliers among 100 measurements (9.00%)
+  5 (5.00%) high mild
+  4 (4.00%) high severe
+
+Benchmarking ecs eval random program 10
+Benchmarking ecs eval random program 10: Warming up for 3.0000 s
+Benchmarking ecs eval random program 10: Collecting 100 samples in estimated 5.0032 s (7.5M iterations)
+Benchmarking ecs eval random program 10: Analyzing
+ecs eval random program 10
+                        time:   [671.10 ns 672.99 ns 675.36 ns]
+                        change: [-64.193% -64.041% -63.880%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 8 outliers among 100 measurements (8.00%)
+  6 (6.00%) high mild
+  2 (2.00%) high severe
+
+Benchmarking ecs eval pre-optimized random program 10
+Benchmarking ecs eval pre-optimized random program 10: Warming up for 3.0000 s
+Benchmarking ecs eval pre-optimized random program 10: Collecting 100 samples in estimated 5.0023 s (7.4M iterations)
+Benchmarking ecs eval pre-optimized random program 10: Analyzing
+ecs eval pre-optimized random program 10
+                        time:   [665.04 ns 665.72 ns 666.44 ns]
+                        change: [-26.782% -26.349% -25.736%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 9 outliers among 100 measurements (9.00%)
+  1 (1.00%) low severe
+  1 (1.00%) low mild
+  5 (5.00%) high mild
+  2 (2.00%) high severe
+
+Benchmarking ecs parse and eval random program 10
+Benchmarking ecs parse and eval random program 10: Warming up for 3.0000 s
+Benchmarking ecs parse and eval random program 10: Collecting 100 samples in estimated 5.0023 s (4.2M iterations)
+Benchmarking ecs parse and eval random program 10: Analyzing
+ecs parse and eval random program 10
+                        time:   [1.2414 µs 1.2702 µs 1.3049 µs]
+                        change: [-59.138% -58.056% -56.887%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 15 outliers among 100 measurements (15.00%)
+  8 (8.00%) high mild
+  7 (7.00%) high severe
+
+Benchmarking ast parse random program 100
+Benchmarking ast parse random program 100: Warming up for 3.0000 s
+Benchmarking ast parse random program 100: Collecting 100 samples in estimated 5.0248 s (717k iterations)
+Benchmarking ast parse random program 100: Analyzing
+ast parse random program 100
+                        time:   [6.9281 µs 6.9347 µs 6.9423 µs]
+                        change: [-15.016% -14.304% -13.615%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 7 outliers among 100 measurements (7.00%)
+  4 (4.00%) high mild
+  3 (3.00%) high severe
+
+Benchmarking ast optimize random program 100
+Benchmarking ast optimize random program 100: Warming up for 3.0000 s
+Benchmarking ast optimize random program 100: Collecting 100 samples in estimated 5.0022 s (2.8M iterations)
+Benchmarking ast optimize random program 100: Analyzing
+ast optimize random program 100
+                        time:   [1.7664 µs 1.7685 µs 1.7708 µs]
+                        change: [-33.789% -32.941% -32.313%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 9 outliers among 100 measurements (9.00%)
+  4 (4.00%) high mild
+  5 (5.00%) high severe
+
+Benchmarking ast eval random program 100
+Benchmarking ast eval random program 100: Warming up for 3.0000 s
+Benchmarking ast eval random program 100: Collecting 100 samples in estimated 5.0290 s (672k iterations)
+Benchmarking ast eval random program 100: Analyzing
+ast eval random program 100
+                        time:   [7.2690 µs 7.2792 µs 7.2944 µs]
+                        change: [-13.429% -12.288% -11.259%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 3 outliers among 100 measurements (3.00%)
+  1 (1.00%) high mild
+  2 (2.00%) high severe
+
+Benchmarking ast eval pre-optimized random program 100
+Benchmarking ast eval pre-optimized random program 100: Warming up for 3.0000 s
+Benchmarking ast eval pre-optimized random program 100: Collecting 100 samples in estimated 5.0058 s (1.0M iterations)
+Benchmarking ast eval pre-optimized random program 100: Analyzing
+ast eval pre-optimized random program 100
+                        time:   [4.7902 µs 4.7955 µs 4.8017 µs]
+                        change: [-41.048% -40.087% -39.301%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 11 outliers among 100 measurements (11.00%)
+  2 (2.00%) low mild
+  4 (4.00%) high mild
+  5 (5.00%) high severe
+
+Benchmarking ast parse and eval random program 100
+Benchmarking ast parse and eval random program 100: Warming up for 3.0000 s
+Benchmarking ast parse and eval random program 100: Collecting 100 samples in estimated 5.0099 s (379k iterations)
+Benchmarking ast parse and eval random program 100: Analyzing
+ast parse and eval random program 100
+                        time:   [13.038 µs 13.066 µs 13.103 µs]
+                        change: [-15.510% -13.706% -11.969%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 12 outliers among 100 measurements (12.00%)
+  1 (1.00%) high mild
+  11 (11.00%) high severe
+
+Benchmarking ecs parse random program 100
+Benchmarking ecs parse random program 100: Warming up for 3.0000 s
+Benchmarking ecs parse random program 100: Collecting 100 samples in estimated 5.0356 s (636k iterations)
+Benchmarking ecs parse random program 100: Analyzing
+ecs parse random program 100
+                        time:   [7.7919 µs 7.9385 µs 8.1426 µs]
+                        change: [-5.4480% -4.5458% -3.3810%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 10 outliers among 100 measurements (10.00%)
+  2 (2.00%) high mild
+  8 (8.00%) high severe
+
+Benchmarking ecs optimize random program 100
+Benchmarking ecs optimize random program 100: Warming up for 3.0000 s
+Benchmarking ecs optimize random program 100: Collecting 100 samples in estimated 5.0100 s (2.3M iterations)
+Benchmarking ecs optimize random program 100: Analyzing
+ecs optimize random program 100
+                        time:   [2.1328 µs 2.1707 µs 2.2167 µs]
+                        change: [-28.721% -28.223% -27.604%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 9 outliers among 100 measurements (9.00%)
+  3 (3.00%) high mild
+  6 (6.00%) high severe
+
+Benchmarking ecs eval random program 100
+Benchmarking ecs eval random program 100: Warming up for 3.0000 s
+Benchmarking ecs eval random program 100: Collecting 100 samples in estimated 5.0019 s (621k iterations)
+Benchmarking ecs eval random program 100: Analyzing
+ecs eval random program 100
+                        time:   [7.9289 µs 7.9402 µs 7.9524 µs]
+                        change: [-9.8167% -9.3248% -8.9940%] (p = 0.00 < 0.05)
                         Performance has improved.
 Found 2 outliers among 100 measurements (2.00%)
   2 (2.00%) high mild
+
+Benchmarking ecs eval pre-optimized random program 100
+Benchmarking ecs eval pre-optimized random program 100: Warming up for 3.0000 s
+Benchmarking ecs eval pre-optimized random program 100: Collecting 100 samples in estimated 5.0074 s (919k iterations)
+Benchmarking ecs eval pre-optimized random program 100: Analyzing
+ecs eval pre-optimized random program 100
+                        time:   [5.4223 µs 5.4303 µs 5.4389 µs]
+                        change: [-36.919% -36.511% -36.068%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 4 outliers among 100 measurements (4.00%)
+  4 (4.00%) high severe
+
+Benchmarking ecs parse and eval random program 100
+Benchmarking ecs parse and eval random program 100: Warming up for 3.0000 s
+Benchmarking ecs parse and eval random program 100: Collecting 100 samples in estimated 5.0412 s (384k iterations)
+Benchmarking ecs parse and eval random program 100: Analyzing
+ecs parse and eval random program 100
+                        time:   [13.032 µs 13.054 µs 13.080 µs]
+                        change: [-14.369% -13.590% -12.986%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 13 outliers among 100 measurements (13.00%)
+  4 (4.00%) high mild
+  9 (9.00%) high severe
+
+Benchmarking ast parse random program 1000
+Benchmarking ast parse random program 1000: Warming up for 3.0000 s
+Benchmarking ast parse random program 1000: Collecting 100 samples in estimated 5.0168 s (50k iterations)
+Benchmarking ast parse random program 1000: Analyzing
+ast parse random program 1000
+                        time:   [98.417 µs 98.707 µs 99.066 µs]
+                        change: [-4.3464% -3.2258% -2.1631%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 3 outliers among 100 measurements (3.00%)
+  2 (2.00%) high mild
+  1 (1.00%) high severe
+
+Benchmarking ast optimize random program 1000
+Benchmarking ast optimize random program 1000: Warming up for 3.0000 s
+Benchmarking ast optimize random program 1000: Collecting 100 samples in estimated 5.0113 s (192k iterations)
+Benchmarking ast optimize random program 1000: Analyzing
+ast optimize random program 1000
+                        time:   [25.485 µs 25.841 µs 26.280 µs]
+                        change: [+4.6496% +6.1557% +7.7917%] (p = 0.00 < 0.05)
+                        Performance has regressed.
+Found 6 outliers among 100 measurements (6.00%)
+  4 (4.00%) high mild
+  2 (2.00%) high severe
+
+Benchmarking ast eval random program 1000
+Benchmarking ast eval random program 1000: Warming up for 3.0000 s
+Benchmarking ast eval random program 1000: Collecting 100 samples in estimated 5.1909 s (71k iterations)
+Benchmarking ast eval random program 1000: Analyzing
+ast eval random program 1000
+                        time:   [73.074 µs 73.296 µs 73.564 µs]
+                        change: [-0.2755% +0.1850% +0.6350%] (p = 0.42 > 0.05)
+                        No change in performance detected.
+Found 10 outliers among 100 measurements (10.00%)
+  7 (7.00%) high mild
+  3 (3.00%) high severe
+
+Benchmarking ast eval pre-optimized random program 1000
+Benchmarking ast eval pre-optimized random program 1000: Warming up for 3.0000 s
+Benchmarking ast eval pre-optimized random program 1000: Collecting 100 samples in estimated 5.3294 s (76k iterations)
+Benchmarking ast eval pre-optimized random program 1000: Analyzing
+ast eval pre-optimized random program 1000
+                        time:   [69.720 µs 69.849 µs 69.982 µs]
+                        change: [+3.0775% +4.2392% +5.4616%] (p = 0.00 < 0.05)
+                        Performance has regressed.
+Found 1 outliers among 100 measurements (1.00%)
+  1 (1.00%) high severe
+
+Benchmarking ast parse and eval random program 1000
+Benchmarking ast parse and eval random program 1000: Warming up for 3.0000 s
+Benchmarking ast parse and eval random program 1000: Collecting 100 samples in estimated 5.6028 s (35k iterations)
+Benchmarking ast parse and eval random program 1000: Analyzing
+ast parse and eval random program 1000
+                        time:   [157.41 µs 157.74 µs 158.15 µs]
+                        change: [-3.2691% -2.3153% -1.5743%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 12 outliers among 100 measurements (12.00%)
+  1 (1.00%) low mild
+  2 (2.00%) high mild
+  9 (9.00%) high severe
+
+Benchmarking ecs parse random program 1000
+Benchmarking ecs parse random program 1000: Warming up for 3.0000 s
+Benchmarking ecs parse random program 1000: Collecting 100 samples in estimated 5.4462 s (50k iterations)
+Benchmarking ecs parse random program 1000: Analyzing
+ecs parse random program 1000
+                        time:   [104.63 µs 104.78 µs 105.00 µs]
+                        change: [+3.6279% +4.4544% +5.2214%] (p = 0.00 < 0.05)
+                        Performance has regressed.
+Found 8 outliers among 100 measurements (8.00%)
+  3 (3.00%) high mild
+  5 (5.00%) high severe
+
+Benchmarking ecs optimize random program 1000
+Benchmarking ecs optimize random program 1000: Warming up for 3.0000 s
+Benchmarking ecs optimize random program 1000: Collecting 100 samples in estimated 5.0979 s (172k iterations)
+Benchmarking ecs optimize random program 1000: Analyzing
+ecs optimize random program 1000
+                        time:   [28.988 µs 29.172 µs 29.425 µs]
+                        change: [+4.1916% +5.5958% +6.9001%] (p = 0.00 < 0.05)
+                        Performance has regressed.
+Found 8 outliers among 100 measurements (8.00%)
+  4 (4.00%) high mild
+  4 (4.00%) high severe
+
+Benchmarking ecs eval random program 1000
+Benchmarking ecs eval random program 1000: Warming up for 3.0000 s
+Benchmarking ecs eval random program 1000: Collecting 100 samples in estimated 5.3792 s (66k iterations)
+Benchmarking ecs eval random program 1000: Analyzing
+ecs eval random program 1000
+                        time:   [76.994 µs 77.173 µs 77.381 µs]
+                        change: [-10.467% -9.4117% -8.5772%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 10 outliers among 100 measurements (10.00%)
+  2 (2.00%) low mild
+  2 (2.00%) high mild
+  6 (6.00%) high severe
+
+Benchmarking ecs eval pre-optimized random program 1000
+Benchmarking ecs eval pre-optimized random program 1000: Warming up for 3.0000 s
+Benchmarking ecs eval pre-optimized random program 1000: Collecting 100 samples in estimated 5.1686 s (66k iterations)
+Benchmarking ecs eval pre-optimized random program 1000: Analyzing
+ecs eval pre-optimized random program 1000
+                        time:   [77.950 µs 78.332 µs 78.921 µs]
+                        change: [+12.332% +14.285% +15.963%] (p = 0.00 < 0.05)
+                        Performance has regressed.
+Found 6 outliers among 100 measurements (6.00%)
+  1 (1.00%) high mild
+  5 (5.00%) high severe
+
+Benchmarking ecs parse and eval random program 1000
+Benchmarking ecs parse and eval random program 1000: Warming up for 3.0000 s
+Benchmarking ecs parse and eval random program 1000: Collecting 100 samples in estimated 5.7224 s (35k iterations)
+Benchmarking ecs parse and eval random program 1000: Analyzing
+ecs parse and eval random program 1000
+                        time:   [161.79 µs 163.03 µs 164.68 µs]
+                        change: [-4.8064% -4.1445% -3.1656%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 7 outliers among 100 measurements (7.00%)
+  4 (4.00%) high mild
+  3 (3.00%) high severe
 
