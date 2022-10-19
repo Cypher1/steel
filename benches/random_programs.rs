@@ -1,128 +1,12 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use log::debug;
+use criterion::{criterion_group, criterion_main, Criterion};
 use steel::{
     ast, ecs,
     gen_code::{generate_random_program, Spec},
-    handle, handle_steps, CompilerContext, SteelErr, Tasks,
+    CompilerContext,
 };
 
-fn render_size(spec: &Spec) -> String {
-    spec.size
-        .map(|s| s.to_string())
-        .unwrap_or_else(|| "".to_string())
-}
-
-fn benchmark_parse<T: CompilerContext>(
-    name: &'static str,
-    program: &str,
-    spec: &Spec,
-    c: &mut Criterion,
-) where
-    SteelErr: From<<T as CompilerContext>::E>,
-{
-    c.bench_function(
-        &format!("{} parse random program {}", name, render_size(spec)),
-        |b| {
-            debug!("testing {} with {}\n{}", name, render_size(spec), program);
-            b.iter(|| handle::<T>(black_box(Tasks::parse(program))))
-        },
-    );
-}
-
-fn benchmark_optimize<T: CompilerContext>(
-    name: &'static str,
-    program: &str,
-    spec: &Spec,
-    c: &mut Criterion,
-) where
-    SteelErr: From<<T as CompilerContext>::E>,
-{
-    c.bench_function(
-        &format!("{} optimize random program {}", name, render_size(spec)),
-        |b| {
-            debug!("testing {} with {}\n{}", name, render_size(spec), program);
-            let mut store = T::new();
-            let (id, _res) = handle_steps::<T>(&mut store, Tasks::parse(program))
-                .expect("Should parse program without error");
-            let id = id.expect("Should have parsed a program");
-            b.iter(|| handle_steps::<T>(&mut store, black_box(Tasks::pre_parsed(id).and_optimize())))
-        },
-    );
-}
-
-fn benchmark_eval_pre_optimized<T: CompilerContext>(
-    name: &'static str,
-    program: &str,
-    spec: &Spec,
-    c: &mut Criterion,
-) where
-    SteelErr: From<<T as CompilerContext>::E>,
-{
-    c.bench_function(
-        &format!("{} eval pre-optimized random program {}", name, render_size(spec)),
-        |b| {
-            debug!("testing {} with {}\n{}", name, render_size(spec), program);
-            let mut store = T::new();
-            let (id, _res) = handle_steps::<T>(&mut store, Tasks::parse(program).and_optimize())
-                .expect("Should parse program without error");
-            let id = id.expect("Should have parsed a program");
-            b.iter(|| handle_steps::<T>(&mut store, black_box(Tasks::pre_parsed(id).and_eval())))
-        },
-    );
-}
-
-fn benchmark_eval<T: CompilerContext>(
-    name: &'static str,
-    program: &str,
-    spec: &Spec,
-    c: &mut Criterion,
-) where
-    SteelErr: From<<T as CompilerContext>::E>,
-{
-    c.bench_function(
-        &format!("{} eval random program {}", name, render_size(spec)),
-        |b| {
-            debug!("testing {} with {}\n{}", name, render_size(spec), program);
-            let mut store = T::new();
-            let (id, _res) = handle_steps::<T>(&mut store, Tasks::parse(program))
-                .expect("Should parse program without error");
-            let id = id.expect("Should have parsed a program");
-            b.iter(|| handle_steps::<T>(&mut store, black_box(Tasks::pre_parsed(id).and_eval())))
-        },
-    );
-}
-
-fn benchmark_parse_and_eval_tasks<T: CompilerContext>(
-    name: &'static str,
-    program: &str,
-    spec: &Spec,
-    c: &mut Criterion,
-) where
-    SteelErr: From<<T as CompilerContext>::E>,
-{
-    c.bench_function(
-        &format!(
-            "{} parse and eval random program {}",
-            name,
-            render_size(spec)
-        ),
-        |b| {
-            debug!("testing {} with {}\n{}", name, render_size(spec), program);
-            b.iter(|| handle::<T>(black_box(Tasks::parse(program).and_eval())))
-        },
-    );
-}
-
-fn benchmarks<T: CompilerContext>(name: &'static str, program: &str, spec: &Spec, c: &mut Criterion)
-where
-    SteelErr: From<<T as CompilerContext>::E>,
-{
-    benchmark_parse::<T>(name, program, spec, c);
-    benchmark_optimize::<T>(name, program, spec, c);
-    benchmark_eval::<T>(name, program, spec, c);
-    benchmark_eval_pre_optimized::<T>(name, program, spec, c);
-    benchmark_parse_and_eval_tasks::<T>(name, program, spec, c);
-}
+mod benchmark_types;
+use benchmark_types::*;
 
 fn criterion_benchmark(c: &mut Criterion) {
     let _ = env_logger::builder().is_test(true).try_init();
@@ -133,9 +17,9 @@ fn criterion_benchmark(c: &mut Criterion) {
         let mut store = ast::Ast::new();
         let program = generate_random_program("ast generator", &mut store, &spec, &mut rng);
         let program = store.pretty(program);
-
-        benchmarks::<ast::Ast>("ast", &program, &spec, c);
-        benchmarks::<ecs::Ecs>("ecs", &program, &spec, c);
+        let bench_type = format!("random program {}", render_size(&spec));
+        benchmarks::<ast::Ast>("ast", &bench_type, &program, &spec, c);
+        benchmarks::<ecs::Ecs>("ecs", &bench_type, &program, &spec, c);
     }
 }
 
