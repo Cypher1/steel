@@ -22,26 +22,21 @@ data="$(
 tabulated="$(echo "$data" | sed "s/ \(.s\) / \1,/g")"
 # echo -en "$tabulated"
 
-kinds="$(echo $tabulated | grep -E -o "^[^ ]*" | sort | uniq)"
+kinds="$(echo "$tabulated" | grep -E -o "^[^ ]*" | sort | uniq)"
+names="$(echo "$tabulated" | grep -E -o "^[^,]*" | sed "s/^[^ ]* //" | sort | uniq)"
+
 grouped=""
-seen=""
 IFS=$'\n'
-for line in $tabulated; do
-  line_kind="$(echo "$line" | grep -E -o "^[^ ]*")"
-  name="$(echo "$line" | cut -f 1 | sed "s/^$line_kind //")"
-  if [[ $seen =~ $name ]]; then
-    continue
-  fi
-  seen="$seen\n$line"
+for name in $names; do
   row="$name"
   for kind in $kinds; do
-    comparable="$(echo "$tabulated" | grep -E -o "^$kind $name,")"
+    comparable="$(echo "$tabulated" | grep -E "^$kind $name,")"
     for match_line in $comparable; do
       match_data="$(echo "$match_line" | sed "s/^[^,]*,//")"
       row="$row,$match_data"
     done
-    grouped="$grouped\n$row"
   done
+  grouped="$grouped\n$row"
 done
 
 cols="test"
