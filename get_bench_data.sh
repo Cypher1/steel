@@ -1,18 +1,25 @@
 #!/bin/bash
 
-tabulated="$(
-  grep -E "(Benchmarking.*: Analyzing|time:)" | \
+# Get relevant lines
+data="$(grep -E "(Benchmarking.*: Analyzing|time:)")"
+# Strip line noise
+data="$(
+  echo "$data" | \
   sed "s/Benchmarking //" | \
   sed "s/: Analyzing//"  | \
-  sed "s/^.*time:.*\[/[/" | \
+  sed "s/^.*time:.*\[/[/"
+)"
+# Replace mark up with tabs
+data="$(
+  echo "$data" | \
   tr '\n' '~' | \
   sed "s/~\[/\t/g" | \
   sed "s/\]~/\n/g" | \
   tr '~' '\t' | \
-  sed "s/\]//" | \
-  sed "s/ \(.s\) / \1\t/g"
-  )"
+  sed "s/\]//")"
 
+# Split up the timing values
+tabulated="$(echo "$data" | sed "s/ \(.s\) / \1\t/g")"
 # echo -en "$tabulated"
 
 grouped=""
@@ -41,4 +48,5 @@ for row in $tabulated; do
   grouped="$grouped\n$row"
 done
 
-echo -ne "$grouped"
+echo -ne "test\tkind\tmin\tavg\tmax\tkind\tmin\tavg\tmax"
+echo -ne "$grouped" | sort
