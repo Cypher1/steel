@@ -1,9 +1,9 @@
 use crate::compiler_context::CompilerContext;
 use crate::error::SteelErr;
-use log::{error, debug, trace};
+use crate::typed_index::TypedIndex;
+use log::{debug, error, trace};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
-use crate::typed_index::TypedIndex;
 
 type Imp<ID> = Arc<Mutex<dyn FnMut(&mut EvalState<ID>) -> Result<Value<ID>, SteelErr>>>;
 
@@ -70,10 +70,10 @@ fn state_to_string<C: CompilerContext>(
     target: &StackFrame<C::ID>,
 ) -> String {
     let owning = ""; /*if !target.bindings.is_empty() {
-        format!(" (owning {:?})", target.bindings)
-    } else {
-        "".to_string()
-    };*/
+                         format!(" (owning {:?})", target.bindings)
+                     } else {
+                         "".to_string()
+                     };*/
     match target.fn_ptr {
         StaticPtr(ptr) => {
             format!("{:?}{} -> {}", ptr, owning, context.pretty(ptr))
@@ -99,7 +99,7 @@ pub struct EvalState<ID> {
     pub function_stack: Vec<StackFrame<ID>>, // name -> memory address to store result.
     // Record all the bindings (i.e. name->index in memory stack).
     pub bindings: HashMap<String, Vec<MemIndex<ID>>>, // name -> memory address to load result.
-    pub mem_stack: Vec<Value<ID>>,             // results.
+    pub mem_stack: Vec<Value<ID>>,                    // results.
 }
 
 impl<ID: std::fmt::Debug> EvalState<ID> {
@@ -215,7 +215,11 @@ impl<ID> EvalState<ID> {
         return_address
     }
 
-    pub fn setup_eval(&mut self, target: FnPtr<ID>, bindings: Vec<(String, MemIndex<ID>)>) -> MemIndex<ID> {
+    pub fn setup_eval(
+        &mut self,
+        target: FnPtr<ID>,
+        bindings: Vec<(String, MemIndex<ID>)>,
+    ) -> MemIndex<ID> {
         let return_address = self.alloc(Value::Uninit); // explicitly store 'uninitialized' marker.
         self.setup_eval_to(target, return_address, bindings);
         return_address

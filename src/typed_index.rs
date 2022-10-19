@@ -41,4 +41,3 @@ impl<T> Clone for TypedIndex<T> {
 
 #[cfg(test)]
 mod test {}
-

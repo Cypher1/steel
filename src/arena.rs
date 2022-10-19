@@ -101,9 +101,7 @@ impl<T> Arena<T> {
     pub fn new() -> Self {
         let mut members = Vec::new();
         members.reserve(1000);
-        Self {
-            members,
-        }
+        Self { members }
     }
 
     pub fn active_mem_usage(&self) -> usize {

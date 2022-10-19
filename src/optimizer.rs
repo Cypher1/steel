@@ -1,8 +1,8 @@
 use crate::compiler_context::CompilerContext;
+use log::{debug, trace};
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicBool, Ordering::Relaxed};
 use std::sync::{Arc, Mutex};
-use log::{debug, trace};
 
 #[derive(Default, Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
 #[non_exhaustive]
@@ -93,7 +93,11 @@ fn constant_folding<C: CompilerContext + ?Sized>(
             };
             trace!(
                 "{}: {} with {:?} {:?} gives {:?}",
-                pass, name, left, right, result
+                pass,
+                name,
+                left,
+                right,
+                result
             );
             shared.known_value_found = true;
             let mut known_values = known_values.lock().unwrap();
