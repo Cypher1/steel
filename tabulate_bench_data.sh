@@ -22,39 +22,31 @@ data="$(
 tabulated="$(echo "$data" | sed "s/ \(.s\) / \1,/g")"
 # echo -en "$tabulated"
 
+kinds="$(echo $tabulated | grep -E -o "^[^ ]*" | sort | uniq)"
 grouped=""
 seen=""
-kinds=""
-cols="test"
-
 IFS=$'\n'
-for row in $tabulated; do
-  name="$(echo "$row" | cut -f 1)"
-  kind="$(echo "$name" | grep -E -o "^[^ ]*")"
-  name="$(echo "$name" | sed "s/^$kind //")"
-  if [[ $kinds =~ $kind ]]; then
-    :
-  else
-    kinds="$kinds\n$kind"
-    cols="$cols,$kind min,$kind avg,$kind max"
-  fi
-  if echo -e "$seen" | grep -q "^$name$" ; then
+for line in $tabulated; do
+  line_kind="$(echo "$line" | grep -E -o "^[^ ]*")"
+  name="$(echo "$line" | cut -f 1 | sed "s/^$line_kind //")"
+  if [[ $seen =~ $name ]]; then
     continue
   fi
-  seen="$seen\n$name"
+  seen="$seen\n$line"
   row="$name"
-  for match_row in $tabulated; do
-    match_name="$(echo "$match_row" | cut -f 1)"
-    match_kind="$(echo "$match_name" | grep -E -o "^[^ ]*")"
-    match_name="$(echo "$match_name" | sed "s/^$match_kind //")"
-    if [[ $match_name != $name ]]; then
-      continue
-    fi
-    match_data="$(echo "$match_row" | sed "s/^[^,]*,//")"
-    row="$row,$match_data"
+  for kind in $kinds; do
+    comparable="$(echo "$tabulated" | grep -E -o "^$kind $name,")"
+    for match_line in $comparable; do
+      match_data="$(echo "$match_line" | sed "s/^[^,]*,//")"
+      row="$row,$match_data"
+    done
+    grouped="$grouped\n$row"
   done
-  grouped="$grouped\n$row"
 done
 
+cols="test"
+for kind in $kinds; do
+  cols="$cols,$kind min,$kind avg,$kind max"
+done
 echo -ne "$cols"
 echo -ne "$grouped" | sort
