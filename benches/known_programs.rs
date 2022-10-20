@@ -16,11 +16,11 @@ fn criterion_benchmark(c: &mut Criterion) {
     let mut mul_chain = "1".to_string();
     let mut size = 1;
     let mut last = 1;
-    for i in 0..500 {
+    for i in 0..500000 {
         plus_chain = format!("{}+{}", i+2, plus_chain);
         mul_chain = format!("{}*{}", i+2, mul_chain);
         size += 3; // 1 = op, 1 = value i, 1 = the call.
-        if size >= (10*last) {
+        if size > 1000 && size >= (10*last) {
             last = size;
             let spec = Spec::default().sized(size);
             let bench_type = format!("known program {}: {}", render_size(&spec), "plus chain");
