@@ -19,671 +19,87 @@ running 0 tests
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
 Gnuplot not found, using plotters backend
-Benchmarking ast parse known program constant
-Benchmarking ast parse known program constant: Warming up for 3.0000 s
-Benchmarking ast parse known program constant: Collecting 100 samples in estimated 5.0001 s (17M iterations)
-Benchmarking ast parse known program constant: Analyzing
-ast parse known program constant
-                        time:   [292.93 ns 298.86 ns 310.33 ns]
-                        change: [-3.5400% -2.3562% -0.9085%] (p = 0.00 < 0.05)
-                        Change within noise threshold.
-Found 7 outliers among 100 measurements (7.00%)
-  4 (4.00%) low mild
-  3 (3.00%) high severe
-
 Benchmarking ast optimize known program constant
 Benchmarking ast optimize known program constant: Warming up for 3.0000 s
-Benchmarking ast optimize known program constant: Collecting 100 samples in estimated 5.0002 s (47M iterations)
+Benchmarking ast optimize known program constant: Collecting 100 samples in estimated 5.0002 s (42M iterations)
 Benchmarking ast optimize known program constant: Analyzing
 ast optimize known program constant
-                        time:   [106.08 ns 106.25 ns 106.45 ns]
-Found 12 outliers among 100 measurements (12.00%)
-  7 (7.00%) high mild
-  5 (5.00%) high severe
-
-Benchmarking ast eval known program constant
-Benchmarking ast eval known program constant: Warming up for 3.0000 s
-Benchmarking ast eval known program constant: Collecting 100 samples in estimated 5.0025 s (8.1M iterations)
-Benchmarking ast eval known program constant: Analyzing
-ast eval known program constant
-                        time:   [623.22 ns 629.63 ns 637.83 ns]
-Found 3 outliers among 100 measurements (3.00%)
-  1 (1.00%) high mild
+                        time:   [109.87 ns 110.70 ns 111.62 ns]
+                        change: [+6.3268% +7.7735% +9.4731%] (p = 0.00 < 0.05)
+                        Performance has regressed.
+Found 2 outliers among 100 measurements (2.00%)
   2 (2.00%) high severe
-
-Benchmarking ast eval pre-optimized known program constant
-Benchmarking ast eval pre-optimized known program constant: Warming up for 3.0000 s
-Benchmarking ast eval pre-optimized known program constant: Collecting 100 samples in estimated 5.0018 s (7.5M iterations)
-Benchmarking ast eval pre-optimized known program constant: Analyzing
-ast eval pre-optimized known program constant
-                        time:   [706.69 ns 725.23 ns 746.08 ns]
-Found 24 outliers among 100 measurements (24.00%)
-  1 (1.00%) low severe
-  13 (13.00%) low mild
-  5 (5.00%) high mild
-  5 (5.00%) high severe
-
-Benchmarking ast parse and eval known program constant
-Benchmarking ast parse and eval known program constant: Warming up for 3.0000 s
-Benchmarking ast parse and eval known program constant: Collecting 100 samples in estimated 5.0047 s (4.4M iterations)
-Benchmarking ast parse and eval known program constant: Analyzing
-ast parse and eval known program constant
-                        time:   [1.0318 µs 1.0365 µs 1.0414 µs]
-Found 3 outliers among 100 measurements (3.00%)
-  2 (2.00%) high mild
-  1 (1.00%) high severe
-
-Benchmarking ecs parse known program constant
-Benchmarking ecs parse known program constant: Warming up for 3.0000 s
-Benchmarking ecs parse known program constant: Collecting 100 samples in estimated 5.0002 s (9.2M iterations)
-Benchmarking ecs parse known program constant: Analyzing
-ecs parse known program constant
-                        time:   [448.63 ns 454.17 ns 459.72 ns]
-Found 1 outliers among 100 measurements (1.00%)
-  1 (1.00%) high mild
 
 Benchmarking ecs optimize known program constant
 Benchmarking ecs optimize known program constant: Warming up for 3.0000 s
-Benchmarking ecs optimize known program constant: Collecting 100 samples in estimated 5.0002 s (42M iterations)
+Benchmarking ecs optimize known program constant: Collecting 100 samples in estimated 5.0004 s (42M iterations)
 Benchmarking ecs optimize known program constant: Analyzing
 ecs optimize known program constant
-                        time:   [112.25 ns 113.26 ns 114.31 ns]
-Found 3 outliers among 100 measurements (3.00%)
-  3 (3.00%) high mild
-
-Benchmarking ecs eval known program constant
-Benchmarking ecs eval known program constant: Warming up for 3.0000 s
-Benchmarking ecs eval known program constant: Collecting 100 samples in estimated 5.0013 s (6.4M iterations)
-Benchmarking ecs eval known program constant: Analyzing
-ecs eval known program constant
-                        time:   [659.74 ns 670.02 ns 680.52 ns]
-Found 7 outliers among 100 measurements (7.00%)
-  5 (5.00%) high mild
-  2 (2.00%) high severe
-
-Benchmarking ecs eval pre-optimized known program constant
-Benchmarking ecs eval pre-optimized known program constant: Warming up for 3.0000 s
-Benchmarking ecs eval pre-optimized known program constant: Collecting 100 samples in estimated 5.0003 s (7.5M iterations)
-Benchmarking ecs eval pre-optimized known program constant: Analyzing
-ecs eval pre-optimized known program constant
-                        time:   [704.42 ns 719.69 ns 737.16 ns]
-Found 5 outliers among 100 measurements (5.00%)
-  2 (2.00%) high mild
-  3 (3.00%) high severe
-
-Benchmarking ecs parse and eval known program constant
-Benchmarking ecs parse and eval known program constant: Warming up for 3.0000 s
-Benchmarking ecs parse and eval known program constant: Collecting 100 samples in estimated 5.0001 s (4.1M iterations)
-Benchmarking ecs parse and eval known program constant: Analyzing
-ecs parse and eval known program constant
-                        time:   [1.1651 µs 1.1793 µs 1.1970 µs]
-Found 8 outliers among 100 measurements (8.00%)
-  5 (5.00%) high mild
-  3 (3.00%) high severe
-
-Benchmarking ast parse known program 10: plus chain
-Benchmarking ast parse known program 10: plus chain: Warming up for 3.0000 s
-Benchmarking ast parse known program 10: plus chain: Collecting 100 samples in estimated 5.0075 s (2.9M iterations)
-Benchmarking ast parse known program 10: plus chain: Analyzing
-ast parse known program 10: plus chain
-                        time:   [1.7902 µs 1.8290 µs 1.8679 µs]
-Found 1 outliers among 100 measurements (1.00%)
-  1 (1.00%) high mild
-
-Benchmarking ast optimize known program 10: plus chain
-Benchmarking ast optimize known program 10: plus chain: Warming up for 3.0000 s
-Benchmarking ast optimize known program 10: plus chain: Collecting 100 samples in estimated 5.0001 s (40M iterations)
-Benchmarking ast optimize known program 10: plus chain: Analyzing
-ast optimize known program 10: plus chain
-                        time:   [121.52 ns 123.37 ns 125.62 ns]
-Found 6 outliers among 100 measurements (6.00%)
-  4 (4.00%) high mild
-  2 (2.00%) high severe
-
-Benchmarking ast eval known program 10: plus chain
-Benchmarking ast eval known program 10: plus chain: Warming up for 3.0000 s
-Benchmarking ast eval known program 10: plus chain: Collecting 100 samples in estimated 5.0128 s (1.6M iterations)
-Benchmarking ast eval known program 10: plus chain: Analyzing
-ast eval known program 10: plus chain
-                        time:   [3.0152 µs 3.0598 µs 3.1038 µs]
-Found 6 outliers among 100 measurements (6.00%)
-  6 (6.00%) high severe
-
-Benchmarking ast eval pre-optimized known program 10: plus chain
-Benchmarking ast eval pre-optimized known program 10: plus chain: Warming up for 3.0000 s
-Benchmarking ast eval pre-optimized known program 10: plus chain: Collecting 100 samples in estimated 5.0021 s (7.2M iterations)
-Benchmarking ast eval pre-optimized known program 10: plus chain: Analyzing
-ast eval pre-optimized known program 10: plus chain
-                        time:   [657.23 ns 660.82 ns 664.38 ns]
-Found 2 outliers among 100 measurements (2.00%)
-  2 (2.00%) high mild
-
-Benchmarking ast parse and eval known program 10: plus chain
-Benchmarking ast parse and eval known program 10: plus chain: Warming up for 3.0000 s
-Benchmarking ast parse and eval known program 10: plus chain: Collecting 100 samples in estimated 5.0179 s (1.1M iterations)
-Benchmarking ast parse and eval known program 10: plus chain: Analyzing
-ast parse and eval known program 10: plus chain
-                        time:   [4.2876 µs 4.3513 µs 4.4196 µs]
-
-Benchmarking ecs parse known program 10: plus chain
-Benchmarking ecs parse known program 10: plus chain: Warming up for 3.0000 s
-Benchmarking ecs parse known program 10: plus chain: Collecting 100 samples in estimated 5.0091 s (2.5M iterations)
-Benchmarking ecs parse known program 10: plus chain: Analyzing
-ecs parse known program 10: plus chain
-                        time:   [1.9574 µs 1.9961 µs 2.0380 µs]
-Found 1 outliers among 100 measurements (1.00%)
-  1 (1.00%) high mild
-
-Benchmarking ecs optimize known program 10: plus chain
-Benchmarking ecs optimize known program 10: plus chain: Warming up for 3.0000 s
-Benchmarking ecs optimize known program 10: plus chain: Collecting 100 samples in estimated 5.0006 s (33M iterations)
-Benchmarking ecs optimize known program 10: plus chain: Analyzing
-ecs optimize known program 10: plus chain
-                        time:   [134.90 ns 137.34 ns 140.21 ns]
-Found 5 outliers among 100 measurements (5.00%)
-  1 (1.00%) high mild
-  4 (4.00%) high severe
-
-Benchmarking ecs eval known program 10: plus chain
-Benchmarking ecs eval known program 10: plus chain: Warming up for 3.0000 s
-Benchmarking ecs eval known program 10: plus chain: Collecting 100 samples in estimated 5.0030 s (1.5M iterations)
-Benchmarking ecs eval known program 10: plus chain: Analyzing
-ecs eval known program 10: plus chain
-                        time:   [3.2327 µs 3.2670 µs 3.3043 µs]
-Found 3 outliers among 100 measurements (3.00%)
-  1 (1.00%) high mild
-  2 (2.00%) high severe
-
-Benchmarking ecs eval pre-optimized known program 10: plus chain
-Benchmarking ecs eval pre-optimized known program 10: plus chain: Warming up for 3.0000 s
-Benchmarking ecs eval pre-optimized known program 10: plus chain: Collecting 100 samples in estimated 5.0002 s (6.9M iterations)
-Benchmarking ecs eval pre-optimized known program 10: plus chain: Analyzing
-ecs eval pre-optimized known program 10: plus chain
-                        time:   [704.34 ns 717.39 ns 732.81 ns]
-Found 4 outliers among 100 measurements (4.00%)
-  2 (2.00%) high mild
-  2 (2.00%) high severe
-
-Benchmarking ecs parse and eval known program 10: plus chain
-Benchmarking ecs parse and eval known program 10: plus chain: Warming up for 3.0000 s
-Benchmarking ecs parse and eval known program 10: plus chain: Collecting 100 samples in estimated 5.0104 s (1.0M iterations)
-Benchmarking ecs parse and eval known program 10: plus chain: Analyzing
-ecs parse and eval known program 10: plus chain
-                        time:   [4.6283 µs 4.7085 µs 4.8055 µs]
-Found 7 outliers among 100 measurements (7.00%)
-  3 (3.00%) high mild
-  4 (4.00%) high severe
-
-Benchmarking ast parse known program 10: mul chain
-Benchmarking ast parse known program 10: mul chain: Warming up for 3.0000 s
-Benchmarking ast parse known program 10: mul chain: Collecting 100 samples in estimated 5.0043 s (2.9M iterations)
-Benchmarking ast parse known program 10: mul chain: Analyzing
-ast parse known program 10: mul chain
-                        time:   [1.7005 µs 1.7225 µs 1.7487 µs]
+                        time:   [112.45 ns 113.88 ns 115.72 ns]
+                        change: [+1.4428% +2.7660% +4.0630%] (p = 0.00 < 0.05)
+                        Performance has regressed.
 Found 4 outliers among 100 measurements (4.00%)
   3 (3.00%) high mild
   1 (1.00%) high severe
 
-Benchmarking ast optimize known program 10: mul chain
-Benchmarking ast optimize known program 10: mul chain: Warming up for 3.0000 s
-Benchmarking ast optimize known program 10: mul chain: Collecting 100 samples in estimated 5.0004 s (39M iterations)
-Benchmarking ast optimize known program 10: mul chain: Analyzing
-ast optimize known program 10: mul chain
-                        time:   [125.65 ns 127.40 ns 129.29 ns]
-Found 1 outliers among 100 measurements (1.00%)
-  1 (1.00%) high severe
-
-Benchmarking ast eval known program 10: mul chain
-Benchmarking ast eval known program 10: mul chain: Warming up for 3.0000 s
-Benchmarking ast eval known program 10: mul chain: Collecting 100 samples in estimated 5.0052 s (1.5M iterations)
-Benchmarking ast eval known program 10: mul chain: Analyzing
-ast eval known program 10: mul chain
-                        time:   [3.0212 µs 3.0484 µs 3.0790 µs]
-Found 6 outliers among 100 measurements (6.00%)
-  3 (3.00%) high mild
-  3 (3.00%) high severe
-
-Benchmarking ast eval pre-optimized known program 10: mul chain
-Benchmarking ast eval pre-optimized known program 10: mul chain: Warming up for 3.0000 s
-Benchmarking ast eval pre-optimized known program 10: mul chain: Collecting 100 samples in estimated 5.0015 s (7.2M iterations)
-Benchmarking ast eval pre-optimized known program 10: mul chain: Analyzing
-ast eval pre-optimized known program 10: mul chain
-                        time:   [673.75 ns 680.40 ns 688.50 ns]
-Found 6 outliers among 100 measurements (6.00%)
-  6 (6.00%) high mild
-
-Benchmarking ast parse and eval known program 10: mul chain
-Benchmarking ast parse and eval known program 10: mul chain: Warming up for 3.0000 s
-Benchmarking ast parse and eval known program 10: mul chain: Collecting 100 samples in estimated 5.0120 s (1.1M iterations)
-Benchmarking ast parse and eval known program 10: mul chain: Analyzing
-ast parse and eval known program 10: mul chain
-                        time:   [4.2794 µs 4.3284 µs 4.3922 µs]
-Found 2 outliers among 100 measurements (2.00%)
-  1 (1.00%) high mild
-  1 (1.00%) high severe
-
-Benchmarking ecs parse known program 10: mul chain
-Benchmarking ecs parse known program 10: mul chain: Warming up for 3.0000 s
-Benchmarking ecs parse known program 10: mul chain: Collecting 100 samples in estimated 5.0078 s (2.5M iterations)
-Benchmarking ecs parse known program 10: mul chain: Analyzing
-ecs parse known program 10: mul chain
-                        time:   [1.9669 µs 2.0188 µs 2.0712 µs]
-Found 12 outliers among 100 measurements (12.00%)
-  3 (3.00%) high mild
-  9 (9.00%) high severe
-
-Benchmarking ecs optimize known program 10: mul chain
-Benchmarking ecs optimize known program 10: mul chain: Warming up for 3.0000 s
-Benchmarking ecs optimize known program 10: mul chain: Collecting 100 samples in estimated 5.0004 s (38M iterations)
-Benchmarking ecs optimize known program 10: mul chain: Analyzing
-ecs optimize known program 10: mul chain
-                        time:   [132.48 ns 133.53 ns 134.71 ns]
-Found 6 outliers among 100 measurements (6.00%)
-  1 (1.00%) high mild
-  5 (5.00%) high severe
-
-Benchmarking ecs eval known program 10: mul chain
-Benchmarking ecs eval known program 10: mul chain: Warming up for 3.0000 s
-Benchmarking ecs eval known program 10: mul chain: Collecting 100 samples in estimated 5.0046 s (1.5M iterations)
-Benchmarking ecs eval known program 10: mul chain: Analyzing
-ecs eval known program 10: mul chain
-                        time:   [3.2289 µs 3.2591 µs 3.2924 µs]
-Found 7 outliers among 100 measurements (7.00%)
-  3 (3.00%) high mild
-  4 (4.00%) high severe
-
-Benchmarking ecs eval pre-optimized known program 10: mul chain
-Benchmarking ecs eval pre-optimized known program 10: mul chain: Warming up for 3.0000 s
-Benchmarking ecs eval pre-optimized known program 10: mul chain: Collecting 100 samples in estimated 5.0033 s (7.2M iterations)
-Benchmarking ecs eval pre-optimized known program 10: mul chain: Analyzing
-ecs eval pre-optimized known program 10: mul chain
-                        time:   [688.79 ns 697.88 ns 708.00 ns]
-Found 10 outliers among 100 measurements (10.00%)
-  5 (5.00%) high mild
-  5 (5.00%) high severe
-
-Benchmarking ecs parse and eval known program 10: mul chain
-Benchmarking ecs parse and eval known program 10: mul chain: Warming up for 3.0000 s
-Benchmarking ecs parse and eval known program 10: mul chain: Collecting 100 samples in estimated 5.0076 s (1.1M iterations)
-Benchmarking ecs parse and eval known program 10: mul chain: Analyzing
-ecs parse and eval known program 10: mul chain
-                        time:   [4.5269 µs 4.5729 µs 4.6211 µs]
-Found 3 outliers among 100 measurements (3.00%)
-  1 (1.00%) high mild
-  2 (2.00%) high severe
-
-Benchmarking ast parse known program 100: plus chain
-Benchmarking ast parse known program 100: plus chain: Warming up for 3.0000 s
-Benchmarking ast parse known program 100: plus chain: Collecting 100 samples in estimated 5.0169 s (288k iterations)
-Benchmarking ast parse known program 100: plus chain: Analyzing
-ast parse known program 100: plus chain
-                        time:   [16.385 µs 16.531 µs 16.688 µs]
+Benchmarking ast optimize known program 1534: plus tree
+Benchmarking ast optimize known program 1534: plus tree: Warming up for 3.0000 s
+Benchmarking ast optimize known program 1534: plus tree: Collecting 100 samples in estimated 5.0192 s (1.2M iterations)
+Benchmarking ast optimize known program 1534: plus tree: Analyzing
+ast optimize known program 1534: plus tree
+                        time:   [4.1020 µs 4.1099 µs 4.1192 µs]
 Found 9 outliers among 100 measurements (9.00%)
-  1 (1.00%) high mild
+  4 (4.00%) high mild
+  5 (5.00%) high severe
+
+Benchmarking ecs optimize known program 1534: plus tree
+Benchmarking ecs optimize known program 1534: plus tree: Warming up for 3.0000 s
+Benchmarking ecs optimize known program 1534: plus tree: Collecting 100 samples in estimated 5.0063 s (1.2M iterations)
+Benchmarking ecs optimize known program 1534: plus tree: Analyzing
+ecs optimize known program 1534: plus tree
+                        time:   [4.0675 µs 4.0781 µs 4.0941 µs]
+Found 13 outliers among 100 measurements (13.00%)
+  5 (5.00%) high mild
   8 (8.00%) high severe
 
-Benchmarking ast optimize known program 100: plus chain
-Benchmarking ast optimize known program 100: plus chain: Warming up for 3.0000 s
-Benchmarking ast optimize known program 100: plus chain: Collecting 100 samples in estimated 5.0014 s (14M iterations)
-Benchmarking ast optimize known program 100: plus chain: Analyzing
-ast optimize known program 100: plus chain
-                        time:   [344.79 ns 347.43 ns 350.51 ns]
-Found 3 outliers among 100 measurements (3.00%)
-  1 (1.00%) high mild
-  2 (2.00%) high severe
-
-Benchmarking ast eval known program 100: plus chain
-Benchmarking ast eval known program 100: plus chain: Warming up for 3.0000 s
-Benchmarking ast eval known program 100: plus chain: Collecting 100 samples in estimated 5.1399 s (162k iterations)
-Benchmarking ast eval known program 100: plus chain: Analyzing
-ast eval known program 100: plus chain
-                        time:   [30.711 µs 30.827 µs 30.966 µs]
-Found 1 outliers among 100 measurements (1.00%)
-  1 (1.00%) high severe
-
-Benchmarking ast eval pre-optimized known program 100: plus chain
-Benchmarking ast eval pre-optimized known program 100: plus chain: Warming up for 3.0000 s
-Benchmarking ast eval pre-optimized known program 100: plus chain: Collecting 100 samples in estimated 5.0010 s (7.2M iterations)
-Benchmarking ast eval pre-optimized known program 100: plus chain: Analyzing
-ast eval pre-optimized known program 100: plus chain
-                        time:   [637.02 ns 646.51 ns 659.54 ns]
-Found 3 outliers among 100 measurements (3.00%)
-  2 (2.00%) high mild
-  1 (1.00%) high severe
-
-Benchmarking ast parse and eval known program 100: plus chain
-Benchmarking ast parse and eval known program 100: plus chain: Warming up for 3.0000 s
-Benchmarking ast parse and eval known program 100: plus chain: Collecting 100 samples in estimated 5.0832 s (141k iterations)
-Benchmarking ast parse and eval known program 100: plus chain: Analyzing
-ast parse and eval known program 100: plus chain
-                        time:   [34.543 µs 34.955 µs 35.421 µs]
-Found 3 outliers among 100 measurements (3.00%)
-  2 (2.00%) high mild
-  1 (1.00%) high severe
-
-Benchmarking ecs parse known program 100: plus chain
-Benchmarking ecs parse known program 100: plus chain: Warming up for 3.0000 s
-Benchmarking ecs parse known program 100: plus chain: Collecting 100 samples in estimated 5.0786 s (268k iterations)
-Benchmarking ecs parse known program 100: plus chain: Analyzing
-ecs parse known program 100: plus chain
-                        time:   [17.631 µs 17.861 µs 18.134 µs]
-Found 9 outliers among 100 measurements (9.00%)
-  4 (4.00%) high mild
-  5 (5.00%) high severe
-
-Benchmarking ecs optimize known program 100: plus chain
-Benchmarking ecs optimize known program 100: plus chain: Warming up for 3.0000 s
-Benchmarking ecs optimize known program 100: plus chain: Collecting 100 samples in estimated 5.0007 s (12M iterations)
-Benchmarking ecs optimize known program 100: plus chain: Analyzing
-ecs optimize known program 100: plus chain
-                        time:   [383.07 ns 387.62 ns 393.40 ns]
-Found 8 outliers among 100 measurements (8.00%)
-  6 (6.00%) high mild
-  2 (2.00%) high severe
-
-Benchmarking ecs eval known program 100: plus chain
-Benchmarking ecs eval known program 100: plus chain: Warming up for 3.0000 s
-Benchmarking ecs eval known program 100: plus chain: Collecting 100 samples in estimated 5.0043 s (152k iterations)
-Benchmarking ecs eval known program 100: plus chain: Analyzing
-ecs eval known program 100: plus chain
-                        time:   [33.321 µs 33.735 µs 34.200 µs]
-Found 1 outliers among 100 measurements (1.00%)
-  1 (1.00%) high mild
-
-Benchmarking ecs eval pre-optimized known program 100: plus chain
-Benchmarking ecs eval pre-optimized known program 100: plus chain: Warming up for 3.0000 s
-Benchmarking ecs eval pre-optimized known program 100: plus chain: Collecting 100 samples in estimated 5.0022 s (6.9M iterations)
-Benchmarking ecs eval pre-optimized known program 100: plus chain: Analyzing
-ecs eval pre-optimized known program 100: plus chain
-                        time:   [651.05 ns 656.94 ns 663.76 ns]
-Found 2 outliers among 100 measurements (2.00%)
-  2 (2.00%) high mild
-
-Benchmarking ecs parse and eval known program 100: plus chain
-Benchmarking ecs parse and eval known program 100: plus chain: Warming up for 3.0000 s
-Benchmarking ecs parse and eval known program 100: plus chain: Collecting 100 samples in estimated 5.0248 s (121k iterations)
-Benchmarking ecs parse and eval known program 100: plus chain: Analyzing
-ecs parse and eval known program 100: plus chain
-                        time:   [37.604 µs 38.554 µs 39.597 µs]
-Found 8 outliers among 100 measurements (8.00%)
-  3 (3.00%) high mild
-  5 (5.00%) high severe
-
-Benchmarking ast parse known program 100: mul chain
-Benchmarking ast parse known program 100: mul chain: Warming up for 3.0000 s
-Benchmarking ast parse known program 100: mul chain: Collecting 100 samples in estimated 5.0454 s (298k iterations)
-Benchmarking ast parse known program 100: mul chain: Analyzing
-ast parse known program 100: mul chain
-                        time:   [15.915 µs 16.346 µs 16.943 µs]
-Found 2 outliers among 100 measurements (2.00%)
-  1 (1.00%) high mild
-  1 (1.00%) high severe
-
-Benchmarking ast optimize known program 100: mul chain
-Benchmarking ast optimize known program 100: mul chain: Warming up for 3.0000 s
-Benchmarking ast optimize known program 100: mul chain: Collecting 100 samples in estimated 5.0007 s (13M iterations)
-Benchmarking ast optimize known program 100: mul chain: Analyzing
-ast optimize known program 100: mul chain
-                        time:   [365.26 ns 371.31 ns 378.36 ns]
-Found 6 outliers among 100 measurements (6.00%)
-  3 (3.00%) high mild
-  3 (3.00%) high severe
-
-Benchmarking ast eval known program 100: mul chain
-Benchmarking ast eval known program 100: mul chain: Warming up for 3.0000 s
-Benchmarking ast eval known program 100: mul chain: Collecting 100 samples in estimated 5.0165 s (157k iterations)
-Benchmarking ast eval known program 100: mul chain: Analyzing
-ast eval known program 100: mul chain
-                        time:   [30.252 µs 30.487 µs 30.737 µs]
-
-Benchmarking ast eval pre-optimized known program 100: mul chain
-Benchmarking ast eval pre-optimized known program 100: mul chain: Warming up for 3.0000 s
-Benchmarking ast eval pre-optimized known program 100: mul chain: Collecting 100 samples in estimated 5.0024 s (7.0M iterations)
-Benchmarking ast eval pre-optimized known program 100: mul chain: Analyzing
-ast eval pre-optimized known program 100: mul chain
-                        time:   [630.69 ns 634.89 ns 639.26 ns]
-Found 1 outliers among 100 measurements (1.00%)
-  1 (1.00%) high mild
-
-Benchmarking ast parse and eval known program 100: mul chain
-Benchmarking ast parse and eval known program 100: mul chain: Warming up for 3.0000 s
-Benchmarking ast parse and eval known program 100: mul chain: Collecting 100 samples in estimated 5.0735 s (131k iterations)
-Benchmarking ast parse and eval known program 100: mul chain: Analyzing
-ast parse and eval known program 100: mul chain
-                        time:   [34.941 µs 35.170 µs 35.407 µs]
-
-Benchmarking ecs parse known program 100: mul chain
-Benchmarking ecs parse known program 100: mul chain: Warming up for 3.0000 s
-Benchmarking ecs parse known program 100: mul chain: Collecting 100 samples in estimated 5.0211 s (283k iterations)
-Benchmarking ecs parse known program 100: mul chain: Analyzing
-ecs parse known program 100: mul chain
-                        time:   [17.427 µs 17.658 µs 17.910 µs]
-
-Benchmarking ecs optimize known program 100: mul chain
-Benchmarking ecs optimize known program 100: mul chain: Warming up for 3.0000 s
-Benchmarking ecs optimize known program 100: mul chain: Collecting 100 samples in estimated 5.0003 s (12M iterations)
-Benchmarking ecs optimize known program 100: mul chain: Analyzing
-ecs optimize known program 100: mul chain
-                        time:   [395.92 ns 402.25 ns 409.88 ns]
-Found 5 outliers among 100 measurements (5.00%)
-  4 (4.00%) high mild
-  1 (1.00%) high severe
-
-Benchmarking ecs eval known program 100: mul chain
-Benchmarking ecs eval known program 100: mul chain: Warming up for 3.0000 s
-Benchmarking ecs eval known program 100: mul chain: Collecting 100 samples in estimated 5.0308 s (131k iterations)
-Benchmarking ecs eval known program 100: mul chain: Analyzing
-ecs eval known program 100: mul chain
-                        time:   [33.994 µs 34.679 µs 35.384 µs]
+Benchmarking ast optimize known program 24574: plus tree
+Benchmarking ast optimize known program 24574: plus tree: Warming up for 3.0000 s
+Benchmarking ast optimize known program 24574: plus tree: Collecting 100 samples in estimated 5.0092 s (81k iterations)
+Benchmarking ast optimize known program 24574: plus tree: Analyzing
+ast optimize known program 24574: plus tree
+                        time:   [68.034 µs 70.434 µs 73.729 µs]
 Found 13 outliers among 100 measurements (13.00%)
-  2 (2.00%) low mild
-  9 (9.00%) high mild
-  2 (2.00%) high severe
-
-Benchmarking ecs eval pre-optimized known program 100: mul chain
-Benchmarking ecs eval pre-optimized known program 100: mul chain: Warming up for 3.0000 s
-Benchmarking ecs eval pre-optimized known program 100: mul chain: Collecting 100 samples in estimated 5.0030 s (7.3M iterations)
-Benchmarking ecs eval pre-optimized known program 100: mul chain: Analyzing
-ecs eval pre-optimized known program 100: mul chain
-                        time:   [664.26 ns 672.35 ns 682.06 ns]
-
-Benchmarking ecs parse and eval known program 100: mul chain
-Benchmarking ecs parse and eval known program 100: mul chain: Warming up for 3.0000 s
-Benchmarking ecs parse and eval known program 100: mul chain: Collecting 100 samples in estimated 5.1636 s (131k iterations)
-Benchmarking ecs parse and eval known program 100: mul chain: Analyzing
-ecs parse and eval known program 100: mul chain
-                        time:   [37.738 µs 38.045 µs 38.446 µs]
-Found 5 outliers among 100 measurements (5.00%)
-  1 (1.00%) high mild
-  4 (4.00%) high severe
-
-Benchmarking ast parse known program 1000: plus chain
-Benchmarking ast parse known program 1000: plus chain: Warming up for 3.0000 s
-Benchmarking ast parse known program 1000: plus chain: Collecting 100 samples in estimated 5.3877 s (25k iterations)
-Benchmarking ast parse known program 1000: plus chain: Analyzing
-ast parse known program 1000: plus chain
-                        time:   [197.42 µs 200.45 µs 204.06 µs]
-Found 2 outliers among 100 measurements (2.00%)
-  2 (2.00%) high mild
-
-Benchmarking ast optimize known program 1000: plus chain
-Benchmarking ast optimize known program 1000: plus chain: Warming up for 3.0000 s
-Benchmarking ast optimize known program 1000: plus chain: Collecting 100 samples in estimated 5.0111 s (1.9M iterations)
-Benchmarking ast optimize known program 1000: plus chain: Analyzing
-ast optimize known program 1000: plus chain
-                        time:   [2.4751 µs 2.4919 µs 2.5112 µs]
-Found 4 outliers among 100 measurements (4.00%)
-  3 (3.00%) high mild
-  1 (1.00%) high severe
-
-Benchmarking ast eval known program 1000: plus chain
-Benchmarking ast eval known program 1000: plus chain: Warming up for 3.0000 s
-Benchmarking ast eval known program 1000: plus chain: Collecting 100 samples in estimated 5.3812 s (15k iterations)
-Benchmarking ast eval known program 1000: plus chain: Analyzing
-ast eval known program 1000: plus chain
-                        time:   [350.44 µs 354.85 µs 360.04 µs]
-Found 8 outliers among 100 measurements (8.00%)
-  6 (6.00%) high mild
-  2 (2.00%) high severe
-
-Benchmarking ast eval pre-optimized known program 1000: plus chain
-Benchmarking ast eval pre-optimized known program 1000: plus chain: Warming up for 3.0000 s
-Benchmarking ast eval pre-optimized known program 1000: plus chain: Collecting 100 samples in estimated 5.0028 s (7.3M iterations)
-Benchmarking ast eval pre-optimized known program 1000: plus chain: Analyzing
-ast eval pre-optimized known program 1000: plus chain
-                        time:   [653.55 ns 674.44 ns 701.72 ns]
-Found 5 outliers among 100 measurements (5.00%)
-  2 (2.00%) high mild
-  3 (3.00%) high severe
-
-Benchmarking ast parse and eval known program 1000: plus chain
-Benchmarking ast parse and eval known program 1000: plus chain: Warming up for 3.0000 s
-Benchmarking ast parse and eval known program 1000: plus chain: Collecting 100 samples in estimated 6.1587 s (15k iterations)
-Benchmarking ast parse and eval known program 1000: plus chain: Analyzing
-ast parse and eval known program 1000: plus chain
-                        time:   [381.16 µs 385.35 µs 390.43 µs]
-Found 6 outliers among 100 measurements (6.00%)
-  3 (3.00%) high mild
-  3 (3.00%) high severe
-
-Benchmarking ecs parse known program 1000: plus chain
-Benchmarking ecs parse known program 1000: plus chain: Warming up for 3.0000 s
-Benchmarking ecs parse known program 1000: plus chain: Collecting 100 samples in estimated 5.3524 s (25k iterations)
-Benchmarking ecs parse known program 1000: plus chain: Analyzing
-ecs parse known program 1000: plus chain
-                        time:   [194.50 µs 195.77 µs 197.24 µs]
-Found 4 outliers among 100 measurements (4.00%)
   4 (4.00%) high mild
+  9 (9.00%) high severe
 
-Benchmarking ecs optimize known program 1000: plus chain
-Benchmarking ecs optimize known program 1000: plus chain: Warming up for 3.0000 s
-Benchmarking ecs optimize known program 1000: plus chain: Collecting 100 samples in estimated 5.0127 s (1.6M iterations)
-Benchmarking ecs optimize known program 1000: plus chain: Analyzing
-ecs optimize known program 1000: plus chain
-                        time:   [2.9852 µs 3.0096 µs 3.0336 µs]
-Found 5 outliers among 100 measurements (5.00%)
-  2 (2.00%) high mild
-  3 (3.00%) high severe
-
-Benchmarking ecs eval known program 1000: plus chain
-Benchmarking ecs eval known program 1000: plus chain: Warming up for 3.0000 s
-Benchmarking ecs eval known program 1000: plus chain: Collecting 100 samples in estimated 6.1175 s (15k iterations)
-Benchmarking ecs eval known program 1000: plus chain: Analyzing
-ecs eval known program 1000: plus chain
-                        time:   [377.95 µs 383.57 µs 390.52 µs]
-Found 1 outliers among 100 measurements (1.00%)
-  1 (1.00%) high mild
-
-Benchmarking ecs eval pre-optimized known program 1000: plus chain
-Benchmarking ecs eval pre-optimized known program 1000: plus chain: Warming up for 3.0000 s
-Benchmarking ecs eval pre-optimized known program 1000: plus chain: Collecting 100 samples in estimated 5.0026 s (7.0M iterations)
-Benchmarking ecs eval pre-optimized known program 1000: plus chain: Analyzing
-ecs eval pre-optimized known program 1000: plus chain
-                        time:   [643.90 ns 655.88 ns 670.65 ns]
+Benchmarking ecs optimize known program 24574: plus tree
+Benchmarking ecs optimize known program 24574: plus tree: Warming up for 3.0000 s
+Benchmarking ecs optimize known program 24574: plus tree: Collecting 100 samples in estimated 5.9957 s (25k iterations)
+Benchmarking ecs optimize known program 24574: plus tree: Analyzing
+ecs optimize known program 24574: plus tree
+                        time:   [241.47 µs 252.72 µs 264.36 µs]
 Found 10 outliers among 100 measurements (10.00%)
   3 (3.00%) high mild
   7 (7.00%) high severe
 
-Benchmarking ecs parse and eval known program 1000: plus chain
-Benchmarking ecs parse and eval known program 1000: plus chain: Warming up for 3.0000 s
-Benchmarking ecs parse and eval known program 1000: plus chain: Collecting 100 samples in estimated 6.1965 s (15k iterations)
-Benchmarking ecs parse and eval known program 1000: plus chain: Analyzing
-ecs parse and eval known program 1000: plus chain
-                        time:   [398.83 µs 407.81 µs 419.32 µs]
-Found 12 outliers among 100 measurements (12.00%)
-  8 (8.00%) high mild
-  4 (4.00%) high severe
-
-Benchmarking ast parse known program 1000: mul chain
-Benchmarking ast parse known program 1000: mul chain: Warming up for 3.0000 s
-Benchmarking ast parse known program 1000: mul chain: Collecting 100 samples in estimated 5.1904 s (25k iterations)
-Benchmarking ast parse known program 1000: mul chain: Analyzing
-ast parse known program 1000: mul chain
-                        time:   [186.25 µs 187.95 µs 189.55 µs]
-Found 6 outliers among 100 measurements (6.00%)
-  5 (5.00%) high mild
-  1 (1.00%) high severe
-
-Benchmarking ast optimize known program 1000: mul chain
-Benchmarking ast optimize known program 1000: mul chain: Warming up for 3.0000 s
-Benchmarking ast optimize known program 1000: mul chain: Collecting 100 samples in estimated 5.0106 s (2.0M iterations)
-Benchmarking ast optimize known program 1000: mul chain: Analyzing
-ast optimize known program 1000: mul chain
-                        time:   [2.3753 µs 2.4072 µs 2.4497 µs]
-Found 8 outliers among 100 measurements (8.00%)
+Benchmarking ast optimize known program 393214: plus tree
+Benchmarking ast optimize known program 393214: plus tree: Warming up for 3.0000 s
+Benchmarking ast optimize known program 393214: plus tree: Collecting 100 samples in estimated 5.2556 s (1600 iterations)
+Benchmarking ast optimize known program 393214: plus tree: Analyzing
+ast optimize known program 393214: plus tree
+                        time:   [9.1204 ms 9.3070 ms 9.6247 ms]
+Found 7 outliers among 100 measurements (7.00%)
   4 (4.00%) high mild
-  4 (4.00%) high severe
-
-Benchmarking ast eval known program 1000: mul chain
-Benchmarking ast eval known program 1000: mul chain: Warming up for 3.0000 s
-Benchmarking ast eval known program 1000: mul chain: Collecting 100 samples in estimated 5.6408 s (15k iterations)
-Benchmarking ast eval known program 1000: mul chain: Analyzing
-ast eval known program 1000: mul chain
-                        time:   [349.70 µs 352.25 µs 354.84 µs]
-Found 4 outliers among 100 measurements (4.00%)
-  4 (4.00%) high mild
-
-Benchmarking ast eval pre-optimized known program 1000: mul chain
-Benchmarking ast eval pre-optimized known program 1000: mul chain: Warming up for 3.0000 s
-Benchmarking ast eval pre-optimized known program 1000: mul chain: Collecting 100 samples in estimated 5.0029 s (7.4M iterations)
-Benchmarking ast eval pre-optimized known program 1000: mul chain: Analyzing
-ast eval pre-optimized known program 1000: mul chain
-                        time:   [646.63 ns 657.36 ns 669.58 ns]
-Found 8 outliers among 100 measurements (8.00%)
-  3 (3.00%) high mild
-  5 (5.00%) high severe
-
-Benchmarking ast parse and eval known program 1000: mul chain
-Benchmarking ast parse and eval known program 1000: mul chain: Warming up for 3.0000 s
-Benchmarking ast parse and eval known program 1000: mul chain: Collecting 100 samples in estimated 6.3824 s (15k iterations)
-Benchmarking ast parse and eval known program 1000: mul chain: Analyzing
-ast parse and eval known program 1000: mul chain
-                        time:   [379.78 µs 383.15 µs 387.21 µs]
-Found 5 outliers among 100 measurements (5.00%)
-  2 (2.00%) high mild
   3 (3.00%) high severe
 
-Benchmarking ecs parse known program 1000: mul chain
-Benchmarking ecs parse known program 1000: mul chain: Warming up for 3.0000 s
-Benchmarking ecs parse known program 1000: mul chain: Collecting 100 samples in estimated 5.3392 s (25k iterations)
-Benchmarking ecs parse known program 1000: mul chain: Analyzing
-ecs parse known program 1000: mul chain
-                        time:   [215.05 µs 218.27 µs 221.16 µs]
-
-Benchmarking ecs optimize known program 1000: mul chain
-Benchmarking ecs optimize known program 1000: mul chain: Warming up for 3.0000 s
-Benchmarking ecs optimize known program 1000: mul chain: Collecting 100 samples in estimated 5.0095 s (1.6M iterations)
-Benchmarking ecs optimize known program 1000: mul chain: Analyzing
-ecs optimize known program 1000: mul chain
-                        time:   [3.0460 µs 3.0898 µs 3.1461 µs]
-Found 10 outliers among 100 measurements (10.00%)
-  7 (7.00%) high mild
-  3 (3.00%) high severe
-
-Benchmarking ecs eval known program 1000: mul chain
-Benchmarking ecs eval known program 1000: mul chain: Warming up for 3.0000 s
-Benchmarking ecs eval known program 1000: mul chain: Collecting 100 samples in estimated 5.6697 s (15k iterations)
-Benchmarking ecs eval known program 1000: mul chain: Analyzing
-ecs eval known program 1000: mul chain
-                        time:   [354.16 µs 358.18 µs 362.33 µs]
-Found 9 outliers among 100 measurements (9.00%)
-  5 (5.00%) high mild
-  4 (4.00%) high severe
-
-Benchmarking ecs eval pre-optimized known program 1000: mul chain
-Benchmarking ecs eval pre-optimized known program 1000: mul chain: Warming up for 3.0000 s
-Benchmarking ecs eval pre-optimized known program 1000: mul chain: Collecting 100 samples in estimated 5.0029 s (7.6M iterations)
-Benchmarking ecs eval pre-optimized known program 1000: mul chain: Analyzing
-ecs eval pre-optimized known program 1000: mul chain
-                        time:   [627.10 ns 629.44 ns 631.67 ns]
-Found 5 outliers among 100 measurements (5.00%)
-  5 (5.00%) high mild
-
-Benchmarking ecs parse and eval known program 1000: mul chain
-Benchmarking ecs parse and eval known program 1000: mul chain: Warming up for 3.0000 s
-Benchmarking ecs parse and eval known program 1000: mul chain: Collecting 100 samples in estimated 6.4814 s (15k iterations)
-Benchmarking ecs parse and eval known program 1000: mul chain: Analyzing
-ecs parse and eval known program 1000: mul chain
-                        time:   [402.83 µs 405.58 µs 408.46 µs]
+Benchmarking ecs optimize known program 393214: plus tree
+Benchmarking ecs optimize known program 393214: plus tree: Warming up for 3.0000 s
+Benchmarking ecs optimize known program 393214: plus tree: Collecting 100 samples in estimated 5.9314 s (500 iterations)
+Benchmarking ecs optimize known program 393214: plus tree: Analyzing
+ecs optimize known program 393214: plus tree
+                        time:   [36.065 ms 37.291 ms 38.861 ms]
+Found 3 outliers among 100 measurements (3.00%)
+  1 (1.00%) high mild
+  2 (2.00%) high severe
 
 Gnuplot not found, using plotters backend

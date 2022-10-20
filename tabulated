@@ -1,36 +1,5 @@
 test,ast min,ast avg,ast max,ecs min,ecs avg,ecs max
-eval 1000: mul chain,349.70 µs,352.25 µs,354.84 µs,354.16 µs,358.18 µs,362.33 µs
-eval 1000: plus chain,350.44 µs,354.85 µs,360.04 µs,377.95 µs,383.57 µs,390.52 µs
-eval 100: mul chain,30.252 µs,30.487 µs,30.737 µs,33.994 µs,34.679 µs,35.384 µs
-eval 100: plus chain,30.711 µs,30.827 µs,30.966 µs,33.321 µs,33.735 µs,34.200 µs
-eval 10: mul chain,3.0212 µs,3.0484 µs,3.0790 µs,3.2289 µs,3.2591 µs,3.2924 µs
-eval 10: plus chain,3.0152 µs,3.0598 µs,3.1038 µs,3.2327 µs,3.2670 µs,3.3043 µs
-eval constant,623.22 ns,629.63 ns,637.83 ns,659.74 ns,670.02 ns,680.52 ns
-eval pre-optimized 1000: mul chain,646.63 ns,657.36 ns,669.58 ns,627.10 ns,629.44 ns,631.67 ns
-eval pre-optimized 1000: plus chain,653.55 ns,674.44 ns,701.72 ns,643.90 ns,655.88 ns,670.65 ns
-eval pre-optimized 100: mul chain,630.69 ns,634.89 ns,639.26 ns,664.26 ns,672.35 ns,682.06 ns
-eval pre-optimized 100: plus chain,637.02 ns,646.51 ns,659.54 ns,651.05 ns,656.94 ns,663.76 ns
-eval pre-optimized 10: mul chain,673.75 ns,680.40 ns,688.50 ns,688.79 ns,697.88 ns,708.00 ns
-eval pre-optimized 10: plus chain,657.23 ns,660.82 ns,664.38 ns,704.34 ns,717.39 ns,732.81 ns
-eval pre-optimized constant,706.69 ns,725.23 ns,746.08 ns,704.42 ns,719.69 ns,737.16 ns
-optimize 1000: mul chain,2.3753 µs,2.4072 µs,2.4497 µs,3.0460 µs,3.0898 µs,3.1461 µs
-optimize 1000: plus chain,2.4751 µs,2.4919 µs,2.5112 µs,2.9852 µs,3.0096 µs,3.0336 µs
-optimize 100: mul chain,365.26 ns,371.31 ns,378.36 ns,395.92 ns,402.25 ns,409.88 ns
-optimize 100: plus chain,344.79 ns,347.43 ns,350.51 ns,383.07 ns,387.62 ns,393.40 ns
-optimize 10: mul chain,125.65 ns,127.40 ns,129.29 ns,132.48 ns,133.53 ns,134.71 ns
-optimize 10: plus chain,121.52 ns,123.37 ns,125.62 ns,134.90 ns,137.34 ns,140.21 ns
-optimize constant,106.08 ns,106.25 ns,106.45 ns,112.25 ns,113.26 ns,114.31 ns
-parse and eval 1000: mul chain,379.78 µs,383.15 µs,387.21 µs,402.83 µs,405.58 µs,408.46 µs
-parse and eval 1000: plus chain,381.16 µs,385.35 µs,390.43 µs,398.83 µs,407.81 µs,419.32 µs
-parse and eval 100: mul chain,34.941 µs,35.170 µs,35.407 µs,37.738 µs,38.045 µs,38.446 µs
-parse and eval 100: plus chain,34.543 µs,34.955 µs,35.421 µs,37.604 µs,38.554 µs,39.597 µs
-parse and eval 10: mul chain,4.2794 µs,4.3284 µs,4.3922 µs,4.5269 µs,4.5729 µs,4.6211 µs
-parse and eval 10: plus chain,4.2876 µs,4.3513 µs,4.4196 µs,4.6283 µs,4.7085 µs,4.8055 µs
-parse and eval constant,1.0318 µs,1.0365 µs,1.0414 µs,1.1651 µs,1.1793 µs,1.1970 µs
-parse 1000: mul chain,186.25 µs,187.95 µs,189.55 µs,215.05 µs,218.27 µs,221.16 µs
-parse 1000: plus chain,197.42 µs,200.45 µs,204.06 µs,194.50 µs,195.77 µs,197.24 µs
-parse 100: mul chain,15.915 µs,16.346 µs,16.943 µs,17.427 µs,17.658 µs,17.910 µs
-parse 100: plus chain,16.385 µs,16.531 µs,16.688 µs,17.631 µs,17.861 µs,18.134 µs
-parse 10: mul chain,1.7005 µs,1.7225 µs,1.7487 µs,1.9669 µs,2.0188 µs,2.0712 µs
-parse 10: plus chain,1.7902 µs,1.8290 µs,1.8679 µs,1.9574 µs,1.9961 µs,2.0380 µs
-parse constant,292.93 ns,298.86 ns,310.33 ns,448.63 ns,454.17 ns,459.72 ns
+optimize known program 1534: plus tree,4.1020 µs,4.1099 µs,4.1192 µs,4.0675 µs,4.0781 µs,4.0941 µs
+optimize known program 24574: plus tree,68.034 µs,70.434 µs,73.729 µs,241.47 µs,252.72 µs,264.36 µs
+optimize known program 393214: plus tree,9.1204 ms,9.3070 ms,9.6247 ms,36.065 ms,37.291 ms,38.861 ms
+optimize known program constant,109.87 ns,110.70 ns,111.62 ns,112.45 ns,113.88 ns,115.72 ns
