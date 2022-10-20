@@ -12,21 +12,21 @@ fn criterion_benchmark(c: &mut Criterion) {
         (1, "known program constant".to_string(), "123".to_string()),
     ];
 
-    let mut plus_chain = "1".to_string();
-    let mut mul_chain = "1".to_string();
+    let mut plus_tree = "1".to_string();
+    // let mut mul_tree = "1".to_string();
     let mut size = 1;
     let mut last = 1;
-    for i in 0..500000 {
-        plus_chain = format!("{}+{}", i+2, plus_chain);
-        mul_chain = format!("{}*{}", i+2, mul_chain);
-        size += 3; // 1 = op, 1 = value i, 1 = the call.
+    while size < 1000000 {
+        plus_tree = format!("({})+({})", plus_tree, plus_tree);
+        // mul_tree = format!("({})*({})", mul_tree, mul_tree);
+        size = size*2+2; // 2*size = args, 1= the op, 1 = the call.
         if size > 1000 && size >= (10*last) {
             last = size;
             let spec = Spec::default().sized(size);
-            let bench_type = format!("known program {}: {}", render_size(&spec), "plus chain");
-            programs.push((size, bench_type, plus_chain.clone()));
-            let bench_type = format!("known program {}: {}", render_size(&spec), "mul chain");
-            programs.push((size, bench_type, mul_chain.clone()));
+            let bench_type = format!("known program {}: {}", render_size(&spec), "plus tree");
+            programs.push((size, bench_type, plus_tree.clone()));
+            // let bench_type = format!("known program {}: {}", render_size(&spec), "mul tree");
+            // programs.push((size, bench_type, mul_tree.clone()));
         }
     }
 
