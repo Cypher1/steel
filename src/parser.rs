@@ -300,28 +300,23 @@ mod test {
     fn parse_operator() {
         let mut prec = INIT_PRECENDENCE;
         assert_eq!(
-            operator_raw("||", &mut prec).unwrap(),
-            ("", Symbol::operator("||"))
-        );
-        let mut prec = INIT_PRECENDENCE;
-        assert_eq!(
             operator_raw("+", &mut prec).unwrap(),
-            ("", Symbol::operator("+"))
+            ("", Operator::Add)
         );
         let mut prec = MUL_PRECENDENCE;
         assert_eq!(
             operator_raw("*", &mut prec).unwrap(),
-            ("", Symbol::operator("*"))
+            ("", Operator::Mul)
         );
         let mut prec = PLUS_PRECENDENCE;
         assert_eq!(
             operator_raw("*", &mut prec).unwrap(),
-            ("", Symbol::operator("*"))
+            ("", Operator::Mul)
         );
         let mut prec = INIT_PRECENDENCE;
         assert_eq!(
             operator_raw("*", &mut prec).unwrap(),
-            ("", Symbol::operator("*"))
+            ("", Operator::Mul)
         );
     }
 

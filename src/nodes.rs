@@ -34,11 +34,6 @@ impl Symbol {
             name: name.to_string(),
         }
     }
-    pub fn operator(name: &str) -> Self {
-        Self {
-            name: name.to_string(),
-        }
-    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
