@@ -9,7 +9,7 @@ fn criterion_benchmark(c: &mut Criterion) {
     let _ = env_logger::builder().is_test(true).try_init();
 
     let mut programs: Vec<(usize, String, String)> =
-        vec![(1, "known program constant".to_string(), "123".to_string())];
+        vec![(1, "known program 1 constant".to_string(), "123".to_string())];
 
     let mut plus_tree = "1".to_string();
     // let mut mul_tree = "1".to_string();
