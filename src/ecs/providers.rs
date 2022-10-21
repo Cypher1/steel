@@ -32,7 +32,7 @@ pub trait Provider<T> {
     }
     fn get_component(&self, node: Self::ID) -> Result<&T, EcsError>;
     fn get_component_mut(&mut self, node: Self::ID) -> Result<&mut T, EcsError>;
-    fn remove_component(&mut self, node: Self::ID) -> Result<T, EcsError>;
+    // fn remove_component(&mut self, node: Self::ID) -> Result<T, EcsError>;
     fn remove_component_for_entity(&mut self, id: EntityId) -> Result<T, EcsError>;
     fn get_component_for_entity(&self, id: EntityId) -> Result<&T, EcsError>;
     fn get_component_for_entity_mut(&mut self, id: EntityId) -> Result<&mut T, EcsError>;

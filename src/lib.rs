@@ -1,6 +1,7 @@
 // TODO: Remove when we can run in ECS and AST mode.
 
 mod arena; // Boiler plate: should be a dependency.
+mod tombstoning_arena; // Boiler plate: should be a dependency.
 pub mod ast;
 mod compiler_context;
 pub mod ecs;

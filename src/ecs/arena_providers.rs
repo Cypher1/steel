@@ -48,9 +48,6 @@ impl<T, S: ArenaProvider<T>> Provider<T> for S {
     fn get_component_for_entity_mut(&mut self, id: EntityId) -> Result<&mut T, EcsError> {
         self.get_mut_impl(id)
     }
-    fn remove_component(&mut self, id: Self::ID) -> Result<T, EcsError> {
-        Ok(self.arena_mut().1.remove(id.id)?.unwrap().1)
-    }
     fn remove_component_for_entity(&mut self, id: EntityId) -> Result<T, EcsError> {
         self.remove_impl(id)
     }
@@ -103,7 +100,13 @@ macro_rules! make_arena_provider {
             fn remove_impl(&mut self, id: EntityId) -> Result<$type, EcsError> {
                 let ent = self.entities.get(id.id)?;
                 if let Some(component_id) = ent.$kind {
-                    Ok(self.remove_component(component_id)?)
+                    let (entities, arena) = self.arena_mut();
+                    let (_, old_value) = arena.remove_by_swap(component_id.id)?;
+                    let ref mut moved_component_owner = arena.get_mut(component_id.id)?.0;
+                    // Update the owned component.
+                    entities.get_mut(moved_component_owner.id)?.$kind = Some(component_id);
+                    *moved_component_owner = id; // update the ownership in the component.
+                    Ok(old_value)
                 } else {
                     Err(EcsError::ComponentNotFound(
                         std::any::type_name::<$type>().to_string(),

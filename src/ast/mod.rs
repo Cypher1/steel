@@ -1,4 +1,4 @@
-use crate::arena::{Arena, ArenaError, Index};
+use crate::tombstoning_arena::{Arena, ArenaError, Index};
 use crate::compiler_context::{CompilerContext, ForEachNode, NodeStore};
 use crate::nodes::*;
 

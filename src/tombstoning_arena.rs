@@ -2,9 +2,9 @@
 
 pub type Index = usize;
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct Arena<T> {
-    members: Vec<T>,
+    members: Vec<Item<T>>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -20,6 +20,14 @@ impl<T> Default for Arena<T> {
     }
 }
 
+#[derive(Debug)]
+pub enum Item<T> {
+    Tombstone, // TODO: Add an index to the 'next' live entry (update lazily).
+    Entry(T),
+}
+
+use Item::*;
+
 pub struct ArenaIterator<'a, T> {
     arena: &'a Arena<T>,
     index: Index,
@@ -29,11 +37,12 @@ impl<'a, T> Iterator for ArenaIterator<'a, T> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let len = self.arena.members.len();
-        while self.index < len {
-            let value = &self.arena.members[self.index];
+        while self.index < self.arena.members.len() {
+            if let Entry(value) = &self.arena.members[self.index] {
+                self.index += 1;
+                return Some(value);
+            }
             self.index += 1;
-            return Some(value);
         }
         None
     }
@@ -62,13 +71,15 @@ impl<'a, T> Iterator for ArenaIteratorMut<'a, T> {
     fn next(&mut self) -> Option<Self::Item> {
         let len = self.arena.members.len();
         while self.index < len {
-            let value = &mut self.arena.members[self.index];
-            let ptr: *mut T = value;
-            self.index += 1;
-            unsafe {
-                // This is safe because the iterator cannot outlive the Arena.
-                return Some(&mut *ptr);
+            if let Entry(value) = &mut self.arena.members[self.index] {
+                let ptr: *mut T = value;
+                self.index += 1;
+                unsafe {
+                    // This is safe because the iterator cannot outlive the Arena.
+                    return Some(&mut *ptr);
+                }
             }
+            self.index += 1;
         }
         None
     }
@@ -103,7 +114,7 @@ impl<T> Arena<T> {
 
     pub fn add_with_id<S: Into<T>, F: FnOnce(Index) -> S>(&mut self, value: F) -> Index {
         let id = self.members.len();
-        self.members.push(value(id).into());
+        self.members.push(Entry(value(id).into()));
         id
     }
 
@@ -115,7 +126,7 @@ impl<T> Arena<T> {
         if id >= self.members.len() {
             return Err(IndexOutOfBounds(id, self.members.len()));
         }
-        self.members[id] = value;
+        self.members[id] = Entry(value);
         Ok(())
     }
 
@@ -123,26 +134,33 @@ impl<T> Arena<T> {
         if id >= self.members.len() {
             return Err(IndexOutOfBounds(id, self.members.len()));
         }
-        Ok(&self.members[id])
+        if let Entry(value) = &self.members[id] {
+            return Ok(value);
+        }
+        Err(IndexEmpty(std::any::type_name::<T>().to_string(), id))
     }
 
     pub fn get_mut(&mut self, id: Index) -> Result<&mut T, ArenaError> {
         if id >= self.members.len() {
             return Err(IndexOutOfBounds(id, self.members.len()));
         }
-        Ok(&mut self.members[id])
+        if let Entry(value) = &mut self.members[id] {
+            return Ok(value);
+        }
+        Err(IndexEmpty(std::any::type_name::<T>().to_string(), id))
     }
 
-    pub fn remove_by_swap(&mut self, id: Index) -> Result<T, ArenaError> {
-        let len = self.members.len();
-        if id >= len {
-            return Err(IndexOutOfBounds(id, len));
+    pub fn remove(&mut self, id: Index) -> Result<Option<T>, ArenaError> {
+        if id >= self.members.len() {
+            return Err(IndexOutOfBounds(id, self.members.len()));
         }
-        let mut value = self.members.pop().unwrap(); // There is always at least one member.
-        if id < len-1 { // swap if the id wasn't the last one...
-            std::mem::swap(&mut self.members[id], &mut value);
+        let mut value = Tombstone;
+        std::mem::swap(&mut self.members[id], &mut value);
+        if let Entry(value) = value {
+            Ok(Some(value))
+        } else {
+            Ok(None)
         }
-        Ok(value) // Return the removed item. The 'user' must swap `id` and `len-1`
     }
 }
 
@@ -171,7 +189,7 @@ mod test {
 
         let value = a.remove(id_to_remove);
         assert_eq!(a.into_iter().cloned().collect::<Vec<i32>>(), vec![1, 3]);
-        assert_eq!(value, Ok(2));
+        assert_eq!(value, Ok(Some(2)));
     }
 
     #[test]
