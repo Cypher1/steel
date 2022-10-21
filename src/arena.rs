@@ -169,7 +169,7 @@ mod test {
         let id_to_remove = a.add(2);
         a.add(3);
 
-        let value = a.remove(id_to_remove);
+        let value = a.remove_by_swap(id_to_remove);
         assert_eq!(a.into_iter().cloned().collect::<Vec<i32>>(), vec![1, 3]);
         assert_eq!(value, Ok(2));
     }
