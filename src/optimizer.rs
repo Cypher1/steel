@@ -39,9 +39,10 @@ fn constant_folding<C: CompilerContext + ?Sized>(
     let replace: SharedMem<Vec<(C::ID, i64)>> = Arc::new(Mutex::new(Vec::new()));
     let pass = "Constant folding";
     // Find nodes to replace
-    context.for_each(
-        None,
-        Some(&|id, call, shared| {
+    // ECS will run the Call component, but AST has to traverse all the nodes to check if they
+    // are Calls.
+    context.for_each_call(
+        &|id, call, shared| {
             if shared.known_value_found {
                 trace!("{}: **DONE** {:?}", pass, call);
                 return;
@@ -94,8 +95,7 @@ fn constant_folding<C: CompilerContext + ?Sized>(
             replace.push((id, result));
             fixed_point.store(false, Relaxed);
             // i64_value.shared.optimizer_data.value = Some(i64_value.value);
-        }),
-        None,
+        }
     )?;
     let replace = replace.lock().unwrap();
     for (id, value) in replace.iter() {
@@ -119,6 +119,8 @@ pub fn optimize<C: CompilerContext + ?Sized>(
     let known_names: SharedMem<HashMap<C::ID, String>> = Arc::new(Mutex::new(HashMap::new()));
     // Get all the known symbols and i64 values.
     let pass = "Pre-pass for Constant folding";
+    // ECS will run each component separately but
+    // AST gets a benefit from running them during the same traversal.
     context.for_each(
         Some(&|id, symbol, shared| {
             if shared.known_value_found {
