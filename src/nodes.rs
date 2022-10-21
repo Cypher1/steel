@@ -1,31 +1,4 @@
 #[derive(Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
-pub struct OptimizerData<P> {
-    pub equivalent_to: Vec<P>,
-}
-impl<P> Default for OptimizerData<P> {
-    fn default() -> Self {
-        Self {
-            equivalent_to: Default::default(),
-        }
-    }
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
-pub struct Shared<P> {
-    pub optimizer_data: OptimizerData<P>,
-    pub known_value_found: bool,
-}
-
-impl<P> Default for Shared<P> {
-    fn default() -> Self {
-        Self {
-            optimizer_data: Default::default(),
-            known_value_found: false,
-        }
-    }
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
 pub struct Symbol {
     // TODO: Intern strings
     // TODO: Locations

@@ -69,7 +69,6 @@ macro_rules! make_arena_provider {
             fn make_entity(id: ComponentId<$type>) -> Entity {
                 Entity {
                     $kind: Some(id),
-                    shared: Shared::default(),
                     ..Entity::default()
                 }
             }

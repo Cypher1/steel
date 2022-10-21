@@ -1,4 +1,4 @@
-use crate::nodes::{Call, Shared, Symbol};
+use crate::nodes::{Call, Symbol};
 
 pub trait NodeStore<ID, T, E> {
     fn add(&mut self, value: T) -> ID;
@@ -22,20 +22,11 @@ pub trait CompilerContext:
     NodeStore<Self::ID, Call<Self::ID>, Self::E>
     + NodeStore<Self::ID, Symbol, Self::E>
     + NodeStore<Self::ID, i64, Self::E>
-    + NodeStore<Self::ID, Shared<Self::ID>, Self::E>
 {
     type ID: Eq + std::hash::Hash + Copy + std::fmt::Debug;
     type E: Into<crate::error::SteelErr> + std::fmt::Debug;
 
     fn new() -> Self;
-    fn get_shared(&self, id: Self::ID) -> &Shared<Self::ID> {
-        self.get(id)
-            .unwrap_or_else(|e| panic!("Missing shared on {:?}: {:?}", id, e))
-    }
-    fn get_shared_mut(&mut self, id: Self::ID) -> &mut Shared<Self::ID> {
-        self.get_mut(id)
-            .unwrap_or_else(|e| panic!("Missing shared on {:?}: {:?}", id, e))
-    }
     fn get_symbol(&self, id: Self::ID) -> Result<&Symbol, Self::E> {
         self.get(id)
     }
@@ -62,7 +53,6 @@ pub trait CompilerContext:
         <Self as NodeStore<Self::ID, Call<Self::ID>, Self::E>>::remove_any(self, id);
         <Self as NodeStore<Self::ID, Symbol, Self::E>>::remove_any(self, id);
         <Self as NodeStore<Self::ID, i64, Self::E>>::remove_any(self, id);
-        <Self as NodeStore<Self::ID, Shared<Self::ID>, Self::E>>::remove_any(self, id);
 
         // TODO: Construct new, don't just get_mut...
         <Self as NodeStore<Self::ID, T, Self::E>>::overwrite(self, id, value).expect("FAILED!?");

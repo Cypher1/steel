@@ -21,7 +21,7 @@ use AstError::*;
 
 #[derive(Debug, Default)]
 pub struct Ast {
-    members: Arena<(Node, Shared<Index>)>,
+    members: Arena<Node>,
 }
 
 impl Ast {
@@ -35,7 +35,6 @@ where
     Self: NodeStore<Index, i64, AstError>,
     Self: NodeStore<Index, Symbol, AstError>,
     Self: NodeStore<Index, Call<Index>, AstError>,
-    Self: NodeStore<Index, Shared<Index>, AstError>,
 {
     type ID = Index;
     type E = AstError;
@@ -59,7 +58,7 @@ where
         i64_fn: Option<ForEachNode<Self, i64>>,
     ) -> Result<(), Self::E> {
         for (id, node) in (&mut self.members).into_iter().enumerate() {
-            match &mut node.0 {
+            match node {
                 Node::Symbol(symbol) => {
                     if let Some(symbol_fn) = symbol_fn {
                         symbol_fn(id, symbol)
@@ -83,36 +82,21 @@ where
 
 impl NodeStore<Index, Node, ArenaError> for Ast {
     fn overwrite(&mut self, id: Index, value: Node) -> Result<Option<Node>, ArenaError> {
-        self.members.set(id, (value, Shared::default()))?;
+        self.members.set(id, value)?;
         Ok(None)
     }
 
     fn remove(&mut self, id: Index) -> Result<Option<Node>, ArenaError> {
-        Ok(self.members.remove(id)?.map(|op| op.0))
+        Ok(self.members.remove(id)?.map(|op| op))
     }
     fn add(&mut self, value: Node) -> Index {
-        self.members.add((value, Shared::default()))
+        self.members.add(value)
     }
     fn get(&self, id: Index) -> Result<&Node, ArenaError> {
-        Ok(&self.members.get(id)?.0)
+        self.members.get(id)
     }
     fn get_mut(&mut self, id: Index) -> Result<&mut Node, ArenaError> {
-        Ok(&mut self.members.get_mut(id)?.0)
-    }
-}
-
-impl NodeStore<Index, Shared<Index>, AstError> for Ast {
-    fn remove(&mut self, id: Index) -> Result<Option<Shared<Index>>, AstError> {
-        Ok(self.members.remove(id)?.map(|op| op.1))
-    }
-    fn add(&mut self, _value: Shared<Index>) -> Index {
-        panic!("Don't add shared data on it's own")
-    }
-    fn get(&self, id: Index) -> Result<&Shared<Index>, AstError> {
-        Ok(&self.members.get(id)?.1)
-    }
-    fn get_mut(&mut self, id: Index) -> Result<&mut Shared<Index>, AstError> {
-        Ok(&mut self.members.get_mut(id)?.1)
+        self.members.get_mut(id)
     }
 }
 

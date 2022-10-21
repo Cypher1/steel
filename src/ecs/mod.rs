@@ -84,23 +84,6 @@ impl CompilerContext for Ecs {
     }
 }
 
-impl NodeStore<EntityId, Shared<EntityId>, EcsError> for Ecs {
-    fn add(&mut self, _value: Shared<EntityId>) -> EntityId {
-        panic!("Don't add shared data on it's own")
-    }
-
-    fn get(&self, id: EntityId) -> Result<&Shared<EntityId>, EcsError> {
-        Ok(&self.entities.get(id.id)?.shared)
-    }
-
-    fn get_mut(&mut self, id: EntityId) -> Result<&mut Shared<EntityId>, EcsError> {
-        Ok(&mut self.entities.get_mut(id.id)?.shared)
-    }
-
-    fn remove(&mut self, id: EntityId) -> Result<Option<Shared<EntityId>>, EcsError> {
-        Ok(self.entities.remove(id.id)?.map(|op| op.shared))
-    }
-}
 impl<T> NodeStore<EntityId, T, EcsError> for Ecs
 where
     Self: Provider<T>,
