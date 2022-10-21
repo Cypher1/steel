@@ -41,61 +41,50 @@ fn constant_folding<C: CompilerContext + ?Sized>(
     // Find nodes to replace
     // ECS will run the Call component, but AST has to traverse all the nodes to check if they
     // are Calls.
-    context.for_each_call(&|id, call, shared| {
-        if shared.known_value_found {
-            trace!("{}: **DONE** {:?}", pass, call);
-            return;
-        }
-        trace!("{}: {:?}", pass, call);
+    {
         let known_names = known_names.lock().unwrap();
-        let name = if let Some(name) = known_names.get(&call.callee) {
-            name
-        } else {
-            return; // noop now
-        };
-        trace!("{}: {:?}, {}", pass, call, name);
-        let mut left: i64 = 0;
-        let mut right: i64 = 0;
-        for (arg_name, arg) in &call.args {
-            let known_values = known_values.lock().unwrap();
-            if let Some(value) = known_values.get(arg) {
-                if arg_name == "arg_0" {
-                    left = *value;
-                } else if arg_name == "arg_1" {
-                    right = *value;
-                }
+        let known_values = known_values.lock().unwrap();
+        context.for_each_call(&|id, call, _shared| {
+            trace!("{}: {:?}", pass, call);
+            let name = if let Some(name) = known_names.get(&call.callee) {
+                name
             } else {
-                return;
+                return; // skip now
+            };
+            trace!("{}: {:?}, {}", pass, call, name);
+            let mut left: Option<i64> = None;
+            let mut right: Option<i64> = None;
+            for (arg_name, arg) in &call.args {
+                if arg_name == "arg_0" {
+                    left = known_values.get(arg).cloned();
+                } else if arg_name == "arg_1" {
+                    right = known_values.get(arg).cloned();
+                }
             }
-        }
-        let result = match &**name {
-            "+" => left.wrapping_add(right),
-            "-" => left.wrapping_sub(right),
-            "*" => left.wrapping_mul(right),
-            "/" => left.wrapping_div(right),
-            _ => {
-                todo!("HANDLE {} {}", pass, name);
-            }
-        };
-        trace!(
-            "{}: {} with {:?} {:?} gives {:?}",
-            pass,
-            name,
-            left,
-            right,
-            result
-        );
-        // Update so that we don't have to re-find the updated values
-        shared.known_value_found = true;
-        let mut known_values = known_values.lock().unwrap();
-        known_values.insert(id, result);
-
-        let mut replace = replace.lock().unwrap();
-        replace.push((id, result));
-        fixed_point.store(false, Relaxed);
-        // i64_value.shared.optimizer_data.value = Some(i64_value.value);
-    })?;
+            let result = match (&**name, left, right) {
+                ("+", Some(left), Some(right)) => left.wrapping_add(right),
+                ("-", Some(left), Some(right)) => left.wrapping_sub(right),
+                ("*", Some(left), Some(right)) => left.wrapping_mul(right),
+                ("/", Some(left), Some(right)) => left.wrapping_div(right),
+                _ => return,
+            };
+            trace!(
+                "{}: {} with {:?} {:?} gives {:?}",
+                pass,
+                name,
+                left,
+                right,
+                result
+            );
+            // Update so that we don't have to re-find the updated values
+            let mut replace = replace.lock().unwrap();
+            replace.push((id, result));
+            fixed_point.store(false, Relaxed);
+            // i64_value.shared.optimizer_data.value = Some(i64_value.value);
+        })?;
+    }
     let replace = replace.lock().unwrap();
+    let mut known_values = known_values.lock().unwrap();
     for (id, value) in replace.iter() {
         debug!(
             "Replacing ent.{:?} (i.e. {}) with {:?}",
@@ -103,6 +92,7 @@ fn constant_folding<C: CompilerContext + ?Sized>(
             context.pretty(*id),
             value
         );
+        known_values.insert(*id, *value);
         context.replace(*id, *value)?; // This is the bit that does the updates in place...
     }
     Ok(root)
@@ -120,12 +110,8 @@ pub fn optimize<C: CompilerContext + ?Sized>(
     // ECS will run each component separately but
     // AST gets a benefit from running them during the same traversal.
     context.for_each(
-        Some(&|id, symbol, shared| {
-            if shared.known_value_found {
-                return;
-            }
-            shared.known_value_found = true;
-            trace!("{}: {:?}", pass, &symbol);
+        Some(&|id, symbol, _shared| {
+            // trace!("{}: {:?}", pass, &symbol);
             match &*symbol.name {
                 "+" | "-" | "*" | "/" => {
                     // Just pretend that remapping operators is not possible...
@@ -136,19 +122,16 @@ pub fn optimize<C: CompilerContext + ?Sized>(
             }
         }),
         None,
-        Some(&|id, i64_value, shared| {
-            if shared.known_value_found {
-                return;
-            }
-            trace!("{}: (i64) {}", pass, i64_value);
-            shared.known_value_found = true;
+        Some(&|id, i64_value, _shared| {
+            // trace!("{}: (i64) {}", pass, i64_value);
             let mut known_values = known_values.lock().unwrap();
             known_values.insert(id, *i64_value);
         }),
     )?;
     // Replace nodes
+    let fixed_point = AtomicBool::new(true);
     loop {
-        let fixed_point = AtomicBool::new(true);
+        fixed_point.store(true, Relaxed);
         if optimizations.constant_folding {
             root = constant_folding(context, &known_values, &known_names, root, &fixed_point)?;
         }
