@@ -53,24 +53,24 @@ where
 
     fn for_each(
         &mut self,
-        symbol_fn: Option<ForEachNode<Self, Symbol>>,
-        call_fn: Option<ForEachNode<Self, Call<Self::ID>>>,
-        i64_fn: Option<ForEachNode<Self, i64>>,
+        mut symbol_fn: Option<ForEachNode<Self, Symbol>>,
+        mut call_fn: Option<ForEachNode<Self, Call<Self::ID>>>,
+        mut i64_fn: Option<ForEachNode<Self, i64>>,
     ) -> Result<(), Self::E> {
         for (id, node) in (&mut self.members).into_iter().enumerate() {
             match node {
                 Node::Symbol(symbol) => {
-                    if let Some(symbol_fn) = symbol_fn {
+                    if let Some(symbol_fn) = &mut symbol_fn {
                         symbol_fn(id, symbol)
                     }
                 }
                 Node::Call(call) => {
-                    if let Some(call_fn) = call_fn {
+                    if let Some(call_fn) = &mut call_fn {
                         call_fn(id, call)
                     }
                 }
                 Node::I64(value) => {
-                    if let Some(i64_fn) = i64_fn {
+                    if let Some(i64_fn) = &mut i64_fn {
                         i64_fn(id, value)
                     }
                 }
