@@ -30,7 +30,7 @@ impl<'a, T> Iterator for ArenaIterator<'a, T> {
 
     fn next(&mut self) -> Option<Self::Item> {
         let len = self.arena.members.len();
-        while self.index < len {
+        if self.index < len {
             let value = &self.arena.members[self.index];
             self.index += 1;
             return Some(value);
@@ -61,7 +61,7 @@ impl<'a, T> Iterator for ArenaIteratorMut<'a, T> {
 
     fn next(&mut self) -> Option<Self::Item> {
         let len = self.arena.members.len();
-        while self.index < len {
+        if self.index < len {
             let value = &mut self.arena.members[self.index];
             let ptr: *mut T = value;
             self.index += 1;
