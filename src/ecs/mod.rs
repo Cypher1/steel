@@ -51,28 +51,34 @@ impl CompilerContext for Ecs {
 
     fn for_each(
         &mut self,
-        symbol_fn: ForEachNode<Self, Symbol>,
-        call_fn: ForEachNode<Self, Call<Self::ID>>,
-        i64_fn: ForEachNode<Self, i64>,
+        symbol_fn: Option<ForEachNode<Self, Symbol>>,
+        call_fn: Option<ForEachNode<Self, Call<Self::ID>>>,
+        i64_fn: Option<ForEachNode<Self, i64>>,
     ) -> Result<(), Self::E> {
         // TODO: Parallel?
-        for (id, i64_value) in &mut self.i64_values {
-            // Note: We can't use the helper methods here because the compiler can't reason
-            // about the self.i64_values and self.entities being separable when hidden behind
-            // the function calls.
-            i64_fn(*id, i64_value, &mut self.entities.get_mut(id.id)?.shared);
+        if let Some(i64_fn) = i64_fn {
+            for (id, i64_value) in &mut self.i64_values {
+                // Note: We can't use the helper methods here because the compiler can't reason
+                // about the self.i64_values and self.entities being separable when hidden behind
+                // the function calls.
+                i64_fn(*id, i64_value, &mut self.entities.get_mut(id.id)?.shared);
+            }
         }
-        for (id, symbol) in &mut self.symbols {
-            // Note: We can't use the helper methods here because the compiler can't reason
-            // about the self.symbols and self.entities being separable when hidden behind
-            // the function calls.
-            symbol_fn(*id, symbol, &mut self.entities.get_mut(id.id)?.shared);
+        if let Some(symbol_fn) = symbol_fn {
+            for (id, symbol) in &mut self.symbols {
+                // Note: We can't use the helper methods here because the compiler can't reason
+                // about the self.symbols and self.entities being separable when hidden behind
+                // the function calls.
+                symbol_fn(*id, symbol, &mut self.entities.get_mut(id.id)?.shared);
+            }
         }
-        for (id, call) in &mut self.calls {
-            // Note: We can't use the helper methods here because the compiler can't reason
-            // about the self.calls and self.entities being separable when hidden behind
-            // the function calls.
-            call_fn(*id, call, &mut self.entities.get_mut(id.id)?.shared);
+        if let Some(call_fn) = call_fn {
+            for (id, call) in &mut self.calls {
+                // Note: We can't use the helper methods here because the compiler can't reason
+                // about the self.calls and self.entities being separable when hidden behind
+                // the function calls.
+                call_fn(*id, call, &mut self.entities.get_mut(id.id)?.shared);
+            }
         }
         Ok(())
     }

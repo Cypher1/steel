@@ -71,9 +71,9 @@ pub trait CompilerContext:
 
     fn for_each(
         &mut self,
-        symbol_fn: ForEachNode<Self, Symbol>,
-        call_fn: ForEachNode<Self, Call<Self::ID>>,
-        i64_fn: ForEachNode<Self, i64>,
+        symbol_fn: Option<ForEachNode<Self, Symbol>>,
+        call_fn: Option<ForEachNode<Self, Call<Self::ID>>>,
+        i64_fn: Option<ForEachNode<Self, i64>>,
     ) -> Result<(), Self::E>;
     fn active_mem_usage(&self) -> usize;
     fn mem_usage(&self) -> usize;

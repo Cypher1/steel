@@ -39,7 +39,7 @@ fn constant_folding<C: CompilerContext + ?Sized>(
     let known_names: SharedMem<HashMap<C::ID, String>> = Arc::new(Mutex::new(HashMap::new()));
     let pass = "Constant folding";
     context.for_each(
-        &|id, symbol, shared| {
+        Some(&|id, symbol, shared| {
             if shared.known_value_found {
                 return;
             }
@@ -54,8 +54,8 @@ fn constant_folding<C: CompilerContext + ?Sized>(
                 }
                 _ => {}
             }
-        },
-        &|id, call, shared| {
+        }),
+        Some(&|id, call, shared| {
             if shared.known_value_found {
                 trace!("{}: **DONE** {:?}", pass, call);
                 return;
@@ -107,8 +107,8 @@ fn constant_folding<C: CompilerContext + ?Sized>(
             replace.push((id, result));
             fixed_point.store(false, Relaxed);
             // i64_value.shared.optimizer_data.value = Some(i64_value.value);
-        },
-        &|id, i64_value, shared| {
+        }),
+        Some(&|id, i64_value, shared| {
             if shared.known_value_found {
                 return;
             }
@@ -117,7 +117,7 @@ fn constant_folding<C: CompilerContext + ?Sized>(
             let mut known_values = known_values.lock().unwrap();
             known_values.insert(id, *i64_value);
             fixed_point.store(false, Relaxed);
-        },
+        }),
     )?;
     let replace = replace.lock().unwrap();
     for (id, value) in replace.iter() {
