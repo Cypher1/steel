@@ -71,22 +71,13 @@ pub trait CompilerContext:
 
     // Implement either all the `for_each_XXX`s or `for_each`
     // Call sites will pick whichever should work best for their use case.
-    fn for_each_i64(
-        &mut self,
-        f: ForEachNode<Self, i64>,
-    ) -> Result<(), Self::E> {
+    fn for_each_i64(&mut self, f: ForEachNode<Self, i64>) -> Result<(), Self::E> {
         self.for_each(None, None, Some(f))
     }
-    fn for_each_call(
-        &mut self,
-        f: ForEachNode<Self, Call<Self::ID>>,
-    ) -> Result<(), Self::E> {
+    fn for_each_call(&mut self, f: ForEachNode<Self, Call<Self::ID>>) -> Result<(), Self::E> {
         self.for_each(None, Some(f), None)
     }
-    fn for_each_symbol(
-        &mut self,
-        f: ForEachNode<Self, Symbol>,
-    ) -> Result<(), Self::E> {
+    fn for_each_symbol(&mut self, f: ForEachNode<Self, Symbol>) -> Result<(), Self::E> {
         self.for_each(Some(f), None, None)
     }
 

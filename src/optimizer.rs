@@ -41,62 +41,60 @@ fn constant_folding<C: CompilerContext + ?Sized>(
     // Find nodes to replace
     // ECS will run the Call component, but AST has to traverse all the nodes to check if they
     // are Calls.
-    context.for_each_call(
-        &|id, call, shared| {
-            if shared.known_value_found {
-                trace!("{}: **DONE** {:?}", pass, call);
+    context.for_each_call(&|id, call, shared| {
+        if shared.known_value_found {
+            trace!("{}: **DONE** {:?}", pass, call);
+            return;
+        }
+        trace!("{}: {:?}", pass, call);
+        let known_names = known_names.lock().unwrap();
+        let name = if let Some(name) = known_names.get(&call.callee) {
+            name
+        } else {
+            return; // noop now
+        };
+        trace!("{}: {:?}, {}", pass, call, name);
+        let mut left: i64 = 0;
+        let mut right: i64 = 0;
+        for (arg_name, arg) in &call.args {
+            let known_values = known_values.lock().unwrap();
+            if let Some(value) = known_values.get(arg) {
+                if arg_name == "arg_0" {
+                    left = *value;
+                } else if arg_name == "arg_1" {
+                    right = *value;
+                }
+            } else {
                 return;
             }
-            trace!("{}: {:?}", pass, call);
-            let known_names = known_names.lock().unwrap();
-            let name = if let Some(name) = known_names.get(&call.callee) {
-                name
-            } else {
-                return; // noop now
-            };
-            trace!("{}: {:?}, {}", pass, call, name);
-            let mut left: i64 = 0;
-            let mut right: i64 = 0;
-            for (arg_name, arg) in &call.args {
-                let known_values = known_values.lock().unwrap();
-                if let Some(value) = known_values.get(arg) {
-                    if arg_name == "arg_0" {
-                        left = *value;
-                    } else if arg_name == "arg_1" {
-                        right = *value;
-                    }
-                } else {
-                    return;
-                }
-            }
-            let result = match &**name {
-                "+" => left.wrapping_add(right),
-                "-" => left.wrapping_sub(right),
-                "*" => left.wrapping_mul(right),
-                "/" => left.wrapping_div(right),
-                _ => {
-                    todo!("HANDLE {} {}", pass, name);
-                }
-            };
-            trace!(
-                "{}: {} with {:?} {:?} gives {:?}",
-                pass,
-                name,
-                left,
-                right,
-                result
-            );
-            // Update so that we don't have to re-find the updated values
-            shared.known_value_found = true;
-            let mut known_values = known_values.lock().unwrap();
-            known_values.insert(id, result);
-
-            let mut replace = replace.lock().unwrap();
-            replace.push((id, result));
-            fixed_point.store(false, Relaxed);
-            // i64_value.shared.optimizer_data.value = Some(i64_value.value);
         }
-    )?;
+        let result = match &**name {
+            "+" => left.wrapping_add(right),
+            "-" => left.wrapping_sub(right),
+            "*" => left.wrapping_mul(right),
+            "/" => left.wrapping_div(right),
+            _ => {
+                todo!("HANDLE {} {}", pass, name);
+            }
+        };
+        trace!(
+            "{}: {} with {:?} {:?} gives {:?}",
+            pass,
+            name,
+            left,
+            right,
+            result
+        );
+        // Update so that we don't have to re-find the updated values
+        shared.known_value_found = true;
+        let mut known_values = known_values.lock().unwrap();
+        known_values.insert(id, result);
+
+        let mut replace = replace.lock().unwrap();
+        replace.push((id, result));
+        fixed_point.store(false, Relaxed);
+        // i64_value.shared.optimizer_data.value = Some(i64_value.value);
+    })?;
     let replace = replace.lock().unwrap();
     for (id, value) in replace.iter() {
         debug!(
