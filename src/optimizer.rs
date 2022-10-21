@@ -34,7 +34,6 @@ fn constant_folding<C: CompilerContext + ?Sized>(
     root: C::ID,
     fixed_point: &AtomicBool,
 ) -> Result<C::ID, C::E> {
-    let pass = "Constant folding";
     // Find nodes to replace
     // ECS will run the Call component, but AST has to traverse all the nodes to check if they
     // are Calls.
@@ -42,13 +41,11 @@ fn constant_folding<C: CompilerContext + ?Sized>(
         let ref known_names = known_names;
         let ref known_values = known_values;
         context.for_each_call(&mut|id, call| {
-            trace!("{}: {:?}", pass, call);
             let name = if let Some(name) = known_names.get(&call.callee) {
                 name
             } else {
                 return; // skip now
             };
-            trace!("{}: {:?}, {}", pass, call, name);
             let mut left: Option<i64> = None;
             let mut right: Option<i64> = None;
             for (arg_name, arg) in &call.args {
@@ -65,14 +62,6 @@ fn constant_folding<C: CompilerContext + ?Sized>(
                 ("/", Some(left), Some(right)) => left.wrapping_div(right),
                 _ => return,
             };
-            trace!(
-                "{}: {} with {:?} {:?} gives {:?}",
-                pass,
-                name,
-                left,
-                right,
-                result
-            );
             // Update so that we don't have to re-find the updated values
             replace.push((id, result));
             fixed_point.store(false, Relaxed);
@@ -80,12 +69,6 @@ fn constant_folding<C: CompilerContext + ?Sized>(
         })?;
     }
     for (id, value) in replace.iter() {
-        debug!(
-            "Replacing ent.{:?} (i.e. {}) with {:?}",
-            id,
-            context.pretty(*id),
-            value
-        );
         known_values.insert(*id, *value);
         context.replace(*id, *value)?; // This is the bit that does the updates in place...
     }
@@ -106,7 +89,6 @@ pub fn optimize<C: CompilerContext + ?Sized>(
     // AST gets a benefit from running them during the same traversal.
     context.for_each(
         Some(&mut|id, symbol| {
-            // trace!("{}: {:?}", pass, &symbol);
             match &*symbol.name {
                 "+" | "-" | "*" | "/" => {
                     // Just pretend that remapping operators is not possible...
@@ -117,7 +99,6 @@ pub fn optimize<C: CompilerContext + ?Sized>(
         }),
         None,
         Some(&mut|id, i64_value| {
-            // trace!("{}: (i64) {}", pass, i64_value);
             known_values.insert(id, *i64_value);
         }),
     )?;
