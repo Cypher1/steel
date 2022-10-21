@@ -39,8 +39,8 @@ fn constant_folding<C: CompilerContext + ?Sized>(
     // ECS will run the Call component, but AST has to traverse all the nodes to check if they
     // are Calls.
     {
-        let ref operators = operators;
-        let ref known_values = known_values;
+        let operators = &operators;
+        let known_values = &known_values;
         context.for_each_call(&mut |id, call| {
             let name = if let Some(name) = operators.get(&call.callee) {
                 name
@@ -49,11 +49,11 @@ fn constant_folding<C: CompilerContext + ?Sized>(
             };
             let left: Option<i64> = call
                 .left
-                .map(|left| known_values.get(&left).map(|v| *v))
+                .map(|left| known_values.get(&left).copied())
                 .unwrap_or_default();
             let right: Option<i64> = call
                 .right
-                .map(|right| known_values.get(&right).map(|v| *v))
+                .map(|right| known_values.get(&right).copied())
                 .unwrap_or_default();
             use Operator::*;
             let result = match (name, left, right) {

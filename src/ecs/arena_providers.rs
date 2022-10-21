@@ -102,7 +102,7 @@ macro_rules! make_arena_provider {
                 if let Some(component_id) = ent.$kind {
                     let (entities, arena) = self.arena_mut();
                     let (_, old_value) = arena.remove_by_swap(component_id.id)?;
-                    let ref mut moved_component_owner = arena.get_mut(component_id.id)?.0;
+                    let moved_component_owner = &mut arena.get_mut(component_id.id)?.0;
                     // Update the owned component.
                     entities.get_mut(moved_component_owner.id)?.$kind = Some(component_id);
                     *moved_component_owner = id; // update the ownership in the component.

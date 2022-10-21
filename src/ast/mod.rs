@@ -94,7 +94,7 @@ impl NodeStore<Index, Node, ArenaError> for Ast {
     }
 
     fn remove(&mut self, id: Index) -> Result<Option<Node>, ArenaError> {
-        Ok(self.members.remove(id)?.map(|op| op))
+        self.members.remove(id)
     }
     fn add(&mut self, value: Node) -> Index {
         self.members.add(value)
