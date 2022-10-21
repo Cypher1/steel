@@ -143,7 +143,7 @@ pub fn generate_random_program_impl<Ctx: CompilerContext>(
             args.push((arg_name, arg_id));
         }
         let callee = generate_random_program(_name, store, &inner_spec, rng);
-        return store.add(Call { callee, args });
+        return store.add(Call::new(callee, args));
     }
     trace!("in scope: {:?}", &spec.in_scope);
     let symbols: Vec<Spec> = spec

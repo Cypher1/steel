@@ -1,5 +1,5 @@
 use crate::compiler_context::CompilerContext;
-use log::{debug, trace};
+// use log::{debug, trace};
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicBool, Ordering::Relaxed};
 
@@ -46,15 +46,8 @@ fn constant_folding<C: CompilerContext + ?Sized>(
             } else {
                 return; // skip now
             };
-            let mut left: Option<i64> = None;
-            let mut right: Option<i64> = None;
-            for (arg_name, arg) in &call.args {
-                if arg_name == "arg_0" {
-                    left = known_values.get(arg).cloned();
-                } else if arg_name == "arg_1" {
-                    right = known_values.get(arg).cloned();
-                }
-            }
+            let left: Option<i64> = call.left.map(|left| known_values.get(&left).map(|v|*v)).unwrap_or_default();
+            let right: Option<i64> = call.right.map(|right| known_values.get(&right).map(|v|*v)).unwrap_or_default();
             let result = match (&**name, left, right) {
                 // Both known
                 ("+", Some(left), Some(right)) => left.wrapping_add(right),

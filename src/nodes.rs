@@ -25,11 +25,23 @@ impl Symbol {
 pub struct Call<P> {
     pub callee: P,
     pub args: Vec<(String, P)>,
+    pub left: Option<P>,
+    pub right: Option<P>,
 }
 
-impl<P> Call<P> {
+impl<P: Clone> Call<P> {
     pub fn new(callee: P, args: Vec<(String, P)>) -> Self {
-        Self { callee, args }
+        let mut left = None;
+        let mut right = None;
+        for (name, id) in &args {
+            if name == "arg_0" {
+                left = Some(id).cloned();
+            }
+            if name == "arg_1" {
+                right = Some(id).cloned();
+            }
+        }
+        Self { callee, args, left, right }
     }
 }
 
