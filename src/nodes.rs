@@ -56,7 +56,12 @@ impl<P: Clone> Call<P> {
                 right = Some(id).cloned();
             }
         }
-        Self { callee, args, left, right }
+        Self {
+            callee,
+            args,
+            left,
+            right,
+        }
     }
 }
 

@@ -139,7 +139,8 @@ impl<T> Arena<T> {
             return Err(IndexOutOfBounds(id, len));
         }
         let mut value = self.members.pop().unwrap(); // There is always at least one member.
-        if id < len-1 { // swap if the id wasn't the last one...
+        if id < len - 1 {
+            // swap if the id wasn't the last one...
             std::mem::swap(&mut self.members[id], &mut value);
         }
         Ok(value) // Return the removed item. The 'user' must swap `id` and `len-1`

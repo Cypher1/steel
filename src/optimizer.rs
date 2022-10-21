@@ -41,14 +41,20 @@ fn constant_folding<C: CompilerContext + ?Sized>(
     {
         let ref operators = operators;
         let ref known_values = known_values;
-        context.for_each_call(&mut|id, call| {
+        context.for_each_call(&mut |id, call| {
             let name = if let Some(name) = operators.get(&call.callee) {
                 name
             } else {
                 return; // skip now
             };
-            let left: Option<i64> = call.left.map(|left| known_values.get(&left).map(|v|*v)).unwrap_or_default();
-            let right: Option<i64> = call.right.map(|right| known_values.get(&right).map(|v|*v)).unwrap_or_default();
+            let left: Option<i64> = call
+                .left
+                .map(|left| known_values.get(&left).map(|v| *v))
+                .unwrap_or_default();
+            let right: Option<i64> = call
+                .right
+                .map(|right| known_values.get(&right).map(|v| *v))
+                .unwrap_or_default();
             use Operator::*;
             let result = match (name, left, right) {
                 // Both known
@@ -96,10 +102,10 @@ pub fn optimize<C: CompilerContext + ?Sized>(
     // ECS will run each component separately but
     // AST gets a benefit from running them during the same traversal.
     context.for_each(
-        Some(&mut|id, i64_value| {
+        Some(&mut |id, i64_value| {
             known_values.insert(id, *i64_value);
         }),
-        Some(&mut|id, operator| {
+        Some(&mut |id, operator| {
             operators.insert(id, *operator);
         }),
         None,
@@ -111,7 +117,14 @@ pub fn optimize<C: CompilerContext + ?Sized>(
     loop {
         fixed_point.store(true, Relaxed);
         if optimizations.constant_folding {
-            root = constant_folding(context, &mut replace, &mut known_values, &mut operators, root, &fixed_point)?;
+            root = constant_folding(
+                context,
+                &mut replace,
+                &mut known_values,
+                &mut operators,
+                root,
+                &fixed_point,
+            )?;
         }
         if fixed_point.load(Relaxed) {
             break;

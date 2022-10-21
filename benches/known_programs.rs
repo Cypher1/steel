@@ -24,7 +24,12 @@ fn criterion_benchmark(c: &mut Criterion) {
         //if size > 1000 && size >= (2 * last) {
             last = size;
             let spec = Spec::default().sized(size);
-            let bench_type = format!("known program {} (depth {}): {}", render_size(&spec), depth, "plus tree");
+            let bench_type = format!(
+                "known program {} (depth {}): {}",
+                render_size(&spec),
+                depth,
+                "plus tree"
+            );
             programs.push((size, bench_type, plus_tree.clone()));
             // let bench_type = format!("known program {}: {}", render_size(&spec), "mul tree");
             // programs.push((size, bench_type, mul_tree.clone()));
