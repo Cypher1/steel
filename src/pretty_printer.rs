@@ -1,4 +1,5 @@
 use crate::compiler_context::CompilerContext;
+use crate::nodes::Operator;
 
 pub fn pretty<C: CompilerContext + ?Sized>(context: &C, id: C::ID) -> String {
     let (res, _complex_expr, is_operator) = pretty_impl(context, id);
@@ -22,8 +23,18 @@ pub fn pretty_impl<C: CompilerContext + ?Sized>(context: &C, id: C::ID) -> (Stri
     if let Ok(v) = context.get_i64(id) {
         return (format!("{}", v), *v < 0, false);
     }
+    if let Ok(s) = context.get_operator(id) {
+        use Operator::*;
+        let as_str = match s {
+            Add => "+",
+            Sub => "-",
+            Mul => "*",
+            Div => "/",
+        };
+        return (as_str.to_string(), false, true);
+    }
     if let Ok(s) = context.get_symbol(id) {
-        return (s.name.to_string(), false, s.is_operator);
+        return (s.name.to_string(), false, false);
     }
     if let Ok(c) = context.get_call(id) {
         let (mut callee, is_expr, is_op) = pretty_impl(context, c.callee);

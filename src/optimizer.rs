@@ -1,4 +1,5 @@
 use crate::compiler_context::CompilerContext;
+use crate::nodes::Operator;
 // use log::{debug, trace};
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicBool, Ordering::Relaxed};
@@ -30,7 +31,7 @@ fn constant_folding<C: CompilerContext + ?Sized>(
     context: &mut C,
     replace: &mut Vec<(C::ID, i64)>,
     known_values: &mut HashMap<C::ID, i64>,
-    known_names: &mut HashMap<C::ID, String>,
+    operators: &mut HashMap<C::ID, Operator>,
     root: C::ID,
     fixed_point: &AtomicBool,
 ) -> Result<C::ID, C::E> {
@@ -38,33 +39,34 @@ fn constant_folding<C: CompilerContext + ?Sized>(
     // ECS will run the Call component, but AST has to traverse all the nodes to check if they
     // are Calls.
     {
-        let ref known_names = known_names;
+        let ref operators = operators;
         let ref known_values = known_values;
         context.for_each_call(&mut|id, call| {
-            let name = if let Some(name) = known_names.get(&call.callee) {
+            let name = if let Some(name) = operators.get(&call.callee) {
                 name
             } else {
                 return; // skip now
             };
             let left: Option<i64> = call.left.map(|left| known_values.get(&left).map(|v|*v)).unwrap_or_default();
             let right: Option<i64> = call.right.map(|right| known_values.get(&right).map(|v|*v)).unwrap_or_default();
-            let result = match (&**name, left, right) {
+            use Operator::*;
+            let result = match (name, left, right) {
                 // Both known
-                ("+", Some(left), Some(right)) => left.wrapping_add(right),
-                ("-", Some(left), Some(right)) => left.wrapping_sub(right),
-                ("*", Some(left), Some(right)) => left.wrapping_mul(right),
-                ("/", Some(left), Some(right)) => left.wrapping_div(right),
+                (Add, Some(left), Some(right)) => left.wrapping_add(right),
+                (Sub, Some(left), Some(right)) => left.wrapping_sub(right),
+                (Mul, Some(left), Some(right)) => left.wrapping_mul(right),
+                (Div, Some(left), Some(right)) => left.wrapping_div(right),
                 // One known (other discarded): Only sound if no side-effects...
-                // ("*", Some(0), _) | ("*", _, Some(0)) => 0,
-                // ("/", Some(0), _) => 0,
-                // ("/", _, Some(0)) => 0, // TODO: Error values (/0)
+                // (Mul, Some(0), _) | (Mul, _, Some(0)) => 0,
+                // (Div, Some(0), _) => 0,
+                // (Div, _, Some(0)) => 0, // TODO: Error values (/0)
                 // One known (reduces to remaining)
                 /*
-                ("+", Some(0), Some(_zero_id), _, Some(value_id)) | ("+", _, Some(value_id), Some(0), Some(_zero_id)) => todo!(), // value_id
-                ("-", Some(0), Some(_zero_id), _, Some(value_id)) => todo!(), // -*value_id
-                ("-", _, Some(value_id), Some(0), Some(_zero_id)) => todo!(), // value_id
-                ("*", Some(1), Some(_zero_id), _, Some(value_id)) | ("*", _, Some(value_id), Some(1), Some(_zero_id)) => todo!(), // value_id
-                ("*", _, Some(value_id), Some(1), Some(_zero_id)) => todo!(), // value_id
+                (Add, Some(0), Some(_zero_id), _, Some(value_id)) | (Add, _, Some(value_id), Some(0), Some(_zero_id)) => todo!(), // value_id
+                (Sub, Some(0), Some(_zero_id), _, Some(value_id)) => todo!(), // -*value_id
+                (Sub, _, Some(value_id), Some(0), Some(_zero_id)) => todo!(), // value_id
+                (Mul, Some(1), Some(_zero_id), _, Some(value_id)) | (Mul, _, Some(value_id), Some(1), Some(_zero_id)) => todo!(), // value_id
+                (Mul, _, Some(value_id), Some(1), Some(_zero_id)) => todo!(), // value_id
                 */
                 _ => return,
             };
@@ -88,25 +90,20 @@ pub fn optimize<C: CompilerContext + ?Sized>(
     mut root: C::ID,
 ) -> Result<C::ID, C::E> {
     let mut known_values: HashMap<C::ID, i64> = HashMap::new();
-    let mut known_names: HashMap<C::ID, String> = HashMap::new();
+    let mut operators: HashMap<C::ID, Operator> = HashMap::new();
     // Get all the known symbols and i64 values.
     // let pass = "Pre-pass for Constant folding";
     // ECS will run each component separately but
     // AST gets a benefit from running them during the same traversal.
     context.for_each(
-        Some(&mut|id, symbol| {
-            match &*symbol.name {
-                "+" | "-" | "*" | "/" => {
-                    // Just pretend that remapping operators is not possible...
-                    known_names.insert(id, symbol.name.to_string());
-                }
-                _ => {}
-            }
-        }),
-        None,
         Some(&mut|id, i64_value| {
             known_values.insert(id, *i64_value);
         }),
+        Some(&mut|id, operator| {
+            operators.insert(id, *operator);
+        }),
+        None,
+        None,
     )?;
     // Replace nodes
     let fixed_point = AtomicBool::new(true);
@@ -114,7 +111,7 @@ pub fn optimize<C: CompilerContext + ?Sized>(
     loop {
         fixed_point.store(true, Relaxed);
         if optimizations.constant_folding {
-            root = constant_folding(context, &mut replace, &mut known_values, &mut known_names, root, &fixed_point)?;
+            root = constant_folding(context, &mut replace, &mut known_values, &mut operators, root, &fixed_point)?;
         }
         if fixed_point.load(Relaxed) {
             break;

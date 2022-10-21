@@ -1,5 +1,5 @@
 use crate::{
-    nodes::{Call, Symbol},
+    nodes::{Call, Symbol, Operator},
     CompilerContext,
 };
 use log::trace;
@@ -18,26 +18,24 @@ fn weighted_bool(rng: &mut ThreadRng, chance: f64) -> bool {
 pub struct Spec {
     pub size: Option<usize>,
     name: String,
-    is_operator: bool,
     in_scope: Vec<Spec>,
 }
 
 impl Spec {
-    pub fn new(name: &str, is_operator: bool) -> Self {
+    pub fn new(name: &str) -> Self {
         Self {
             name: name.to_string(),
             size: None,
-            is_operator,
             in_scope: Vec::new(),
         }
     }
 
     pub fn symbol(name: &str) -> Self {
-        Self::new(name, false)
+        Self::new(name)
     }
 
     pub fn operator(name: &str, n_args: usize) -> Self {
-        let mut spec = Self::new(name, true);
+        let mut spec = Self::new(name);
         for i in 0..n_args {
             spec = spec.add_symbol(Spec::symbol(&format!("arg_{}", i)));
         }
@@ -155,10 +153,15 @@ pub fn generate_random_program_impl<Ctx: CompilerContext>(
     if !symbols.is_empty() && weighted_bool(rng, CHANCE_OF_SYMBOL) {
         let symbol_index: usize = rng.gen_range(0..symbols.len());
         let spec = &symbols[symbol_index];
-        return store.add(Symbol {
-            name: spec.name.to_string(),
-            is_operator: spec.is_operator,
-        });
+        return match &*spec.name {
+            "+" => store.add(Operator::Add),
+            "-" => store.add(Operator::Sub),
+            "*" => store.add(Operator::Mul),
+            "/" => store.add(Operator::Div),
+            _ => store.add(Symbol {
+                name: spec.name.to_string(),
+            })
+        };
     }
     let value: i64 = if weighted_bool(rng, CHANCE_OF_POTENTIALLY_LARGE_CONSTANT) {
         rng.gen() // some potentially large constant.

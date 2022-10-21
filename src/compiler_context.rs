@@ -1,4 +1,4 @@
-use crate::nodes::{Call, Symbol};
+use crate::nodes::{Call, Symbol, Operator};
 
 pub trait NodeStore<ID, T, E> {
     fn add(&mut self, value: T) -> ID;
@@ -21,12 +21,19 @@ pub type ForEachNode<'a, C, T> =
 pub trait CompilerContext:
     NodeStore<Self::ID, Call<Self::ID>, Self::E>
     + NodeStore<Self::ID, Symbol, Self::E>
+    + NodeStore<Self::ID, Operator, Self::E>
     + NodeStore<Self::ID, i64, Self::E>
 {
     type ID: Eq + std::hash::Hash + Copy + std::fmt::Debug;
     type E: Into<crate::error::SteelErr> + std::fmt::Debug;
 
     fn new() -> Self;
+    fn get_operator(&self, id: Self::ID) -> Result<&Operator, Self::E> {
+        self.get(id)
+    }
+    fn get_operator_mut(&mut self, id: Self::ID) -> Result<&mut Operator, Self::E> {
+        self.get_mut(id)
+    }
     fn get_symbol(&self, id: Self::ID) -> Result<&Symbol, Self::E> {
         self.get(id)
     }
@@ -52,6 +59,7 @@ pub trait CompilerContext:
         // For each component type...
         <Self as NodeStore<Self::ID, Call<Self::ID>, Self::E>>::remove_any(self, id);
         <Self as NodeStore<Self::ID, Symbol, Self::E>>::remove_any(self, id);
+        <Self as NodeStore<Self::ID, Operator, Self::E>>::remove_any(self, id);
         <Self as NodeStore<Self::ID, i64, Self::E>>::remove_any(self, id);
 
         // TODO: Construct new, don't just get_mut...
@@ -62,21 +70,28 @@ pub trait CompilerContext:
     // Implement either all the `for_each_XXX`s or `for_each`
     // Call sites will pick whichever should work best for their use case.
     fn for_each_i64(&mut self, f: ForEachNode<Self, i64>) -> Result<(), Self::E> {
-        self.for_each(None, None, Some(f))
+        self.for_each(Some(f), None, None, None)
     }
-    fn for_each_call(&mut self, f: ForEachNode<Self, Call<Self::ID>>) -> Result<(), Self::E> {
-        self.for_each(None, Some(f), None)
+    fn for_each_operator(&mut self, f: ForEachNode<Self, Operator>) -> Result<(), Self::E> {
+        self.for_each(None, Some(f), None, None)
     }
     fn for_each_symbol(&mut self, f: ForEachNode<Self, Symbol>) -> Result<(), Self::E> {
-        self.for_each(Some(f), None, None)
+        self.for_each(None, None, Some(f), None)
+    }
+    fn for_each_call(&mut self, f: ForEachNode<Self, Call<Self::ID>>) -> Result<(), Self::E> {
+        self.for_each(None, None, None, Some(f))
     }
 
     fn for_each(
         &mut self,
+        i64_fn: Option<ForEachNode<Self, i64>>,
+        operator_fn: Option<ForEachNode<Self, Operator>>,
         symbol_fn: Option<ForEachNode<Self, Symbol>>,
         call_fn: Option<ForEachNode<Self, Call<Self::ID>>>,
-        i64_fn: Option<ForEachNode<Self, i64>>,
     ) -> Result<(), Self::E> {
+        if let Some(operator_fn) = operator_fn {
+            self.for_each_operator(operator_fn)?;
+        }
         if let Some(symbol_fn) = symbol_fn {
             self.for_each_symbol(symbol_fn)?;
         }

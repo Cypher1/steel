@@ -33,6 +33,7 @@ impl Ast {
 impl CompilerContext for Ast
 where
     Self: NodeStore<Index, i64, AstError>,
+    Self: NodeStore<Index, Operator, AstError>,
     Self: NodeStore<Index, Symbol, AstError>,
     Self: NodeStore<Index, Call<Index>, AstError>,
 {
@@ -53,12 +54,18 @@ where
 
     fn for_each(
         &mut self,
+        mut i64_fn: Option<ForEachNode<Self, i64>>,
+        mut operator_fn: Option<ForEachNode<Self, Operator>>,
         mut symbol_fn: Option<ForEachNode<Self, Symbol>>,
         mut call_fn: Option<ForEachNode<Self, Call<Self::ID>>>,
-        mut i64_fn: Option<ForEachNode<Self, i64>>,
     ) -> Result<(), Self::E> {
         for (id, node) in (&mut self.members).into_iter().enumerate() {
             match node {
+                Node::Operator(operator) => {
+                    if let Some(operator_fn) = &mut operator_fn {
+                        operator_fn(id, operator)
+                    }
+                }
                 Node::Symbol(symbol) => {
                     if let Some(symbol_fn) = &mut symbol_fn {
                         symbol_fn(id, symbol)
@@ -149,9 +156,10 @@ macro_rules! wrap_node {
     };
 }
 
+wrap_node!(i64, I64);
+wrap_node!(Operator, Operator);
 wrap_node!(Symbol, Symbol);
 wrap_node!(Call<Index>, Call);
-wrap_node!(i64, I64);
 
 #[cfg(test)]
 mod test {

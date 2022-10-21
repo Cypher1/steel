@@ -1,9 +1,9 @@
 use crate::compiler_context::{CompilerContext, NodeStore};
 use crate::error::SteelErr;
-use crate::nodes::{Call, Symbol};
+use crate::nodes::{Call, Symbol, Operator};
 use nom::{
     branch::alt,
-    bytes::complete::{tag as raw_tag, take_while, take_while1, take_while_m_n},
+    bytes::complete::{tag as raw_tag, take_while, take_while1},
     character::complete::{alpha1, multispace0},
     combinator::map_res,
     multi::separated_list0,
@@ -80,13 +80,8 @@ pub fn symbol<'source, ID, E: Into<SteelErr>, C: NodeStore<ID, Symbol, E>>(
     Ok((input, id))
 }
 
-fn is_operator_char(c: char) -> bool {
-    "~!@$%^&*-+=|?/\\:".contains(c)
-}
-
 type Precedence = i32;
 const MIN_PRECENDENCE: Precedence = Precedence::MIN;
-const MAX_PRECENDENCE: Precedence = Precedence::MAX;
 const INIT_PRECENDENCE: Precedence = MIN_PRECENDENCE;
 const MUL_PRECENDENCE: Precedence = 2;
 const PLUS_PRECENDENCE: Precedence = 1;
@@ -94,27 +89,30 @@ const PLUS_PRECENDENCE: Precedence = 1;
 pub fn operator_raw<'source>(
     input: &'source str,
     min_prec: &mut Precedence, // TODO: reject operators of the wrong prec...
-) -> SResult<'source, Symbol> {
-    let (input, name) = take_while_m_n(1, 3, is_operator_char)(input)?;
-    let precendence = match name {
-        "-" | "+" => PLUS_PRECENDENCE,
-        "/" | "*" => MUL_PRECENDENCE,
-        _ => MAX_PRECENDENCE,
+) -> SResult<'source, Operator> {
+    let ch = input.chars().next();
+    use Operator::*;
+    let (precendence, op) = match ch {
+        Some('+') => (PLUS_PRECENDENCE, Add),
+        Some('-') => (PLUS_PRECENDENCE, Sub),
+        Some('*') => (MUL_PRECENDENCE, Mul),
+        Some('/') => (MUL_PRECENDENCE, Div),
+        _ => return Err(nom::Err::Error(SteelErr::MalformedExpression(input.to_string(), "operator".to_string()))),
     };
     if precendence < *min_prec {
         return Err(nom::Err::Error(SteelErr::PrecedenceError { precendence }));
     }
     *min_prec = precendence; // otherwise raise the precendence.
-    Ok((input, Symbol::operator(name)))
+    Ok((&input[1..], op))
 }
 
-pub fn operator<'source, ID, E: Into<SteelErr>, C: NodeStore<ID, Symbol, E>>(
+pub fn operator<'source, ID, E: Into<SteelErr>, C: NodeStore<ID, Operator, E>>(
     context: &mut C,
     input: &'source str,
     min_prec: &mut Precedence,
 ) -> SResult<'source, ID> {
-    let (input, name) = operator_raw(input, min_prec)?;
-    let id = context.add(name);
+    let (input, operator) = operator_raw(input, min_prec)?;
+    let id = context.add(operator);
     Ok((input, id))
 }
 
@@ -189,9 +187,6 @@ where
     }
     let mut ignore_prec = INIT_PRECENDENCE;
     if let Ok((input, op)) = operator(context, input, &mut ignore_prec) {
-        if let Ok(op) = context.get_symbol_mut(op) {
-            op.is_operator = false;
-        }
         // Prefix operator e.g. -3.
         let mut ignore_prec = INIT_PRECENDENCE;
         if let Ok((input, right)) = expr(context, input, &mut ignore_prec) {

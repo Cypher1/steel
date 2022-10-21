@@ -3,9 +3,10 @@ use crate::nodes::*;
 
 #[derive(Debug)]
 pub enum Node {
+    I64(i64),
+    Operator(Operator),
     Symbol(Symbol),
     Call(Call<Index>),
-    I64(i64),
 }
 
 #[cfg(test)]

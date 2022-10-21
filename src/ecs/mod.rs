@@ -17,14 +17,16 @@ use arena_providers::*;
 #[derive(Debug, Default)]
 pub struct Ecs {
     entities: Arena<Entity>,
+    i64_values: Arena<(EntityId, i64)>,
+    operators: Arena<(EntityId, Operator)>,
     symbols: Arena<(EntityId, Symbol)>,
     calls: Arena<(EntityId, Call<EntityId>)>,
-    i64_values: Arena<(EntityId, i64)>,
 }
 
+make_arena_provider!(Ecs, i64, i_64, i64_values);
+make_arena_provider!(Ecs, Operator, operator, operators);
 make_arena_provider!(Ecs, Symbol, symbol, symbols);
 make_arena_provider!(Ecs, Call<EntityId>, call, calls);
-make_arena_provider!(Ecs, i64, i_64, i64_values);
 
 impl CompilerContext for Ecs {
     type ID = EntityId;
@@ -36,24 +38,27 @@ impl CompilerContext for Ecs {
     fn active_mem_usage(&self) -> usize {
         std::mem::size_of::<Self>()
             + self.entities.active_mem_usage()
+            + self.i64_values.active_mem_usage()
+            + self.operators.active_mem_usage()
             + self.symbols.active_mem_usage()
             + self.calls.active_mem_usage()
-            + self.i64_values.active_mem_usage()
     }
 
     fn mem_usage(&self) -> usize {
         std::mem::size_of::<Self>()
             + self.entities.mem_usage()
+            + self.i64_values.mem_usage()
+            + self.operators.mem_usage()
             + self.symbols.mem_usage()
             + self.calls.mem_usage()
-            + self.i64_values.mem_usage()
     }
 
     fn for_each(
         &mut self,
+        i64_fn: Option<ForEachNode<Self, i64>>,
+        operator_fn: Option<ForEachNode<Self, Operator>>,
         symbol_fn: Option<ForEachNode<Self, Symbol>>,
         call_fn: Option<ForEachNode<Self, Call<Self::ID>>>,
-        i64_fn: Option<ForEachNode<Self, i64>>,
     ) -> Result<(), Self::E> {
         // TODO: Parallel?
         if let Some(i64_fn) = i64_fn {
@@ -62,6 +67,14 @@ impl CompilerContext for Ecs {
                 // about the self.i64_values and self.entities being separable when hidden behind
                 // the function calls.
                 i64_fn(*id, i64_value);
+            }
+        }
+        if let Some(operator_fn) = operator_fn {
+            for (id, operator) in &mut self.operators {
+                // Note: We can't use the helper methods here because the compiler can't reason
+                // about the self.operators and self.entities being separable when hidden behind
+                // the function calls.
+                operator_fn(*id, operator);
             }
         }
         if let Some(symbol_fn) = symbol_fn {
