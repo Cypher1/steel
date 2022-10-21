@@ -62,17 +62,17 @@ where
             match &mut node.0 {
                 Node::Symbol(symbol) => {
                     if let Some(symbol_fn) = symbol_fn {
-                        symbol_fn(id, symbol, &mut node.1)
+                        symbol_fn(id, symbol)
                     }
                 }
                 Node::Call(call) => {
                     if let Some(call_fn) = call_fn {
-                        call_fn(id, call, &mut node.1)
+                        call_fn(id, call)
                     }
                 }
                 Node::I64(value) => {
                     if let Some(i64_fn) = i64_fn {
-                        i64_fn(id, value, &mut node.1)
+                        i64_fn(id, value)
                     }
                 }
             }

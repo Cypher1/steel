@@ -16,7 +16,7 @@ pub trait NodeStore<ID, T, E> {
 }
 
 pub type ForEachNode<'a, C, T> =
-    &'a dyn Fn(<C as CompilerContext>::ID, &mut T, &mut Shared<<C as CompilerContext>::ID>);
+    &'a dyn Fn(<C as CompilerContext>::ID, &mut T);
 
 pub trait CompilerContext:
     NodeStore<Self::ID, Call<Self::ID>, Self::E>

@@ -61,7 +61,7 @@ impl CompilerContext for Ecs {
                 // Note: We can't use the helper methods here because the compiler can't reason
                 // about the self.i64_values and self.entities being separable when hidden behind
                 // the function calls.
-                i64_fn(*id, i64_value, &mut self.entities.get_mut(id.id)?.shared);
+                i64_fn(*id, i64_value);
             }
         }
         if let Some(symbol_fn) = symbol_fn {
@@ -69,7 +69,7 @@ impl CompilerContext for Ecs {
                 // Note: We can't use the helper methods here because the compiler can't reason
                 // about the self.symbols and self.entities being separable when hidden behind
                 // the function calls.
-                symbol_fn(*id, symbol, &mut self.entities.get_mut(id.id)?.shared);
+                symbol_fn(*id, symbol);
             }
         }
         if let Some(call_fn) = call_fn {
@@ -77,7 +77,7 @@ impl CompilerContext for Ecs {
                 // Note: We can't use the helper methods here because the compiler can't reason
                 // about the self.calls and self.entities being separable when hidden behind
                 // the function calls.
-                call_fn(*id, call, &mut self.entities.get_mut(id.id)?.shared);
+                call_fn(*id, call);
             }
         }
         Ok(())

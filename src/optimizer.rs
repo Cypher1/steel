@@ -44,7 +44,7 @@ fn constant_folding<C: CompilerContext + ?Sized>(
     {
         let known_names = known_names.lock().unwrap();
         let known_values = known_values.lock().unwrap();
-        context.for_each_call(&|id, call, _shared| {
+        context.for_each_call(&|id, call| {
             trace!("{}: {:?}", pass, call);
             let name = if let Some(name) = known_names.get(&call.callee) {
                 name
@@ -110,7 +110,7 @@ pub fn optimize<C: CompilerContext + ?Sized>(
     // ECS will run each component separately but
     // AST gets a benefit from running them during the same traversal.
     context.for_each(
-        Some(&|id, symbol, _shared| {
+        Some(&|id, symbol| {
             // trace!("{}: {:?}", pass, &symbol);
             match &*symbol.name {
                 "+" | "-" | "*" | "/" => {
@@ -122,7 +122,7 @@ pub fn optimize<C: CompilerContext + ?Sized>(
             }
         }),
         None,
-        Some(&|id, i64_value, _shared| {
+        Some(&|id, i64_value| {
             // trace!("{}: (i64) {}", pass, i64_value);
             let mut known_values = known_values.lock().unwrap();
             known_values.insert(id, *i64_value);
