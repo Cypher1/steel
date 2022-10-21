@@ -31,30 +31,16 @@ impl Optimizations {
 
 fn constant_folding<C: CompilerContext + ?Sized>(
     context: &mut C,
+    known_values: &SharedMem<HashMap<C::ID, i64>>,
+    known_names: &SharedMem<HashMap<C::ID, String>>,
     root: C::ID,
     fixed_point: &AtomicBool,
 ) -> Result<C::ID, C::E> {
-    let known_values: SharedMem<HashMap<C::ID, i64>> = Arc::new(Mutex::new(HashMap::new()));
     let replace: SharedMem<Vec<(C::ID, i64)>> = Arc::new(Mutex::new(Vec::new()));
-    let known_names: SharedMem<HashMap<C::ID, String>> = Arc::new(Mutex::new(HashMap::new()));
     let pass = "Constant folding";
+    // Find nodes to replace
     context.for_each(
-        Some(&|id, symbol, shared| {
-            if shared.known_value_found {
-                return;
-            }
-            shared.known_value_found = true;
-            trace!("{}: {:?}", pass, &symbol);
-            match &*symbol.name {
-                "+" | "-" | "*" | "/" => {
-                    // Just pretend that remapping operators is not possible...
-                    let mut known_names = known_names.lock().unwrap();
-                    known_names.insert(id, symbol.name.to_string());
-                    fixed_point.store(false, Relaxed);
-                }
-                _ => {}
-            }
-        }),
+        None,
         Some(&|id, call, shared| {
             if shared.known_value_found {
                 trace!("{}: **DONE** {:?}", pass, call);
@@ -99,6 +85,7 @@ fn constant_folding<C: CompilerContext + ?Sized>(
                 right,
                 result
             );
+            // Update so that we don't have to re-find the updated values
             shared.known_value_found = true;
             let mut known_values = known_values.lock().unwrap();
             known_values.insert(id, result);
@@ -108,16 +95,7 @@ fn constant_folding<C: CompilerContext + ?Sized>(
             fixed_point.store(false, Relaxed);
             // i64_value.shared.optimizer_data.value = Some(i64_value.value);
         }),
-        Some(&|id, i64_value, shared| {
-            if shared.known_value_found {
-                return;
-            }
-            trace!("{}: (i64) {}", pass, i64_value);
-            shared.known_value_found = true;
-            let mut known_values = known_values.lock().unwrap();
-            known_values.insert(id, *i64_value);
-            fixed_point.store(false, Relaxed);
-        }),
+        None,
     )?;
     let replace = replace.lock().unwrap();
     for (id, value) in replace.iter() {
@@ -137,10 +115,42 @@ pub fn optimize<C: CompilerContext + ?Sized>(
     optimizations: &Optimizations,
     mut root: C::ID,
 ) -> Result<C::ID, C::E> {
+    let known_values: SharedMem<HashMap<C::ID, i64>> = Arc::new(Mutex::new(HashMap::new()));
+    let known_names: SharedMem<HashMap<C::ID, String>> = Arc::new(Mutex::new(HashMap::new()));
+    // Get all the known symbols and i64 values.
+    let pass = "Pre-pass for Constant folding";
+    context.for_each(
+        Some(&|id, symbol, shared| {
+            if shared.known_value_found {
+                return;
+            }
+            shared.known_value_found = true;
+            trace!("{}: {:?}", pass, &symbol);
+            match &*symbol.name {
+                "+" | "-" | "*" | "/" => {
+                    // Just pretend that remapping operators is not possible...
+                    let mut known_names = known_names.lock().unwrap();
+                    known_names.insert(id, symbol.name.to_string());
+                }
+                _ => {}
+            }
+        }),
+        None,
+        Some(&|id, i64_value, shared| {
+            if shared.known_value_found {
+                return;
+            }
+            trace!("{}: (i64) {}", pass, i64_value);
+            shared.known_value_found = true;
+            let mut known_values = known_values.lock().unwrap();
+            known_values.insert(id, *i64_value);
+        }),
+    )?;
+    // Replace nodes
     loop {
         let fixed_point = AtomicBool::new(true);
         if optimizations.constant_folding {
-            root = constant_folding(context, root, &fixed_point)?;
+            root = constant_folding(context, &known_values, &known_names, root, &fixed_point)?;
         }
         if fixed_point.load(Relaxed) {
             break;
