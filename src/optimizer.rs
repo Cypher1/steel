@@ -28,18 +28,17 @@ impl Optimizations {
 
 fn constant_folding<C: CompilerContext + ?Sized>(
     context: &mut C,
+    replace: &mut Vec<(C::ID, i64)>,
     known_values: &mut HashMap<C::ID, i64>,
     known_names: &mut HashMap<C::ID, String>,
     root: C::ID,
     fixed_point: &AtomicBool,
 ) -> Result<C::ID, C::E> {
-    let mut replace: Vec<(C::ID, i64)> = Vec::new();
     let pass = "Constant folding";
     // Find nodes to replace
     // ECS will run the Call component, but AST has to traverse all the nodes to check if they
     // are Calls.
     {
-        let ref mut replace = replace;
         let ref known_names = known_names;
         let ref known_values = known_values;
         context.for_each_call(&mut|id, call| {
@@ -90,6 +89,7 @@ fn constant_folding<C: CompilerContext + ?Sized>(
         known_values.insert(*id, *value);
         context.replace(*id, *value)?; // This is the bit that does the updates in place...
     }
+    replace.clear(); // no need to replace nodes twice (but keep the capacity for later).
     Ok(root)
 }
 
@@ -123,10 +123,11 @@ pub fn optimize<C: CompilerContext + ?Sized>(
     )?;
     // Replace nodes
     let fixed_point = AtomicBool::new(true);
+    let mut replace: Vec<(C::ID, i64)> = Vec::new();
     loop {
         fixed_point.store(true, Relaxed);
         if optimizations.constant_folding {
-            root = constant_folding(context, &mut known_values, &mut known_names, root, &fixed_point)?;
+            root = constant_folding(context, &mut replace, &mut known_values, &mut known_names, root, &fixed_point)?;
         }
         if fixed_point.load(Relaxed) {
             break;
