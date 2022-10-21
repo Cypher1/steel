@@ -313,6 +313,12 @@ where
     let res = if let Ok(v) = context.get_i64(id) {
         trace!("get constant i64 {}", v);
         Value::I64(*v)
+    } else if let Ok(s) = context.get_operator(id) {
+        trace!("get operator {:?}", &s);
+        state
+            .get_value_for(s.to_str())?
+            .cloned()
+            .ok_or_else(|| SteelErr::MissingValueForBinding(s.to_string()))?
     } else if let Ok(s) = context.get_symbol(id) {
         trace!("get symbol {:?}", &s.name);
         state

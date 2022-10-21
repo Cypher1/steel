@@ -6,6 +6,21 @@ pub enum Operator {
     Div,
 }
 
+impl Operator {
+    pub fn to_str(&self) -> &str {
+        use Operator::*;
+        match self {
+            Add => "+",
+            Sub => "-",
+            Mul => "*",
+            Div => "/",
+        }
+    }
+    pub fn to_string(&self) -> String {
+        self.to_str().to_string()
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
 pub struct Symbol {
     // TODO: Intern strings
