@@ -84,6 +84,7 @@ fn constant_folding<C: CompilerContext + ?Sized>(
     }
     for (id, value) in replace.iter() {
         known_values.insert(*id, *value);
+        // println!("REPLACING {:?} with value: {}", id, value);
         context.replace(*id, *value)?; // This is the bit that does the updates in place...
     }
     replace.clear(); // no need to replace nodes twice (but keep the capacity for later).

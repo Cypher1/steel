@@ -101,11 +101,11 @@ macro_rules! make_arena_provider {
                 let ent = self.entities.get(id.id)?;
                 if let Some(component_id) = ent.$kind {
                     let (entities, arena) = self.arena_mut();
-                    let (_, old_value) = arena.remove_by_swap(component_id.id)?;
-                    let moved_component_owner = &mut arena.get_mut(component_id.id)?.0;
-                    // Update the owned component.
+                    let (_id, old_value) = arena.remove_by_swap(component_id.id)?;
+                    let moved_component_owner = &arena.get(component_id.id)?.0;
+                    // println!("id: {:?} rem: {:?} moved_component_owner: {:?} old_value: {:?}", &id, &removed_id, &moved_component_owner, &old_value);
+                    // Update the owned component index.
                     entities.get_mut(moved_component_owner.id)?.$kind = Some(component_id);
-                    *moved_component_owner = id; // update the ownership in the component.
                     Ok(old_value)
                 } else {
                     Err(EcsError::ComponentNotFound(
