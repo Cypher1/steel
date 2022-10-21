@@ -135,7 +135,7 @@ impl<ID: Clone + std::fmt::Debug> Default for EvalState<ID> {
             bin_op(state, "*", |l, r| l.wrapping_mul(r))
         }))
         .register_extern(Impl::new("/", |state| {
-            bin_op(state, "/", |l, r| if r != 0 { l / r } else { 0 })
+            bin_op(state, "/", |l, r| if r != 0 { l / r } else { 0 }) // TODO: Error values (/0)
         }))
         .register_extern(Impl::new("putchar", |state: &mut EvalState<ID>| {
             if let Some(Value::I64(i)) = state.get_value_for("arg_0")? {

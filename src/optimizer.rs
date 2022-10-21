@@ -56,10 +56,23 @@ fn constant_folding<C: CompilerContext + ?Sized>(
                 }
             }
             let result = match (&**name, left, right) {
+                // Both known
                 ("+", Some(left), Some(right)) => left.wrapping_add(right),
                 ("-", Some(left), Some(right)) => left.wrapping_sub(right),
                 ("*", Some(left), Some(right)) => left.wrapping_mul(right),
                 ("/", Some(left), Some(right)) => left.wrapping_div(right),
+                // One known (other discarded): Only sound if no side-effects...
+                // ("*", Some(0), _) | ("*", _, Some(0)) => 0,
+                // ("/", Some(0), _) => 0,
+                // ("/", _, Some(0)) => 0, // TODO: Error values (/0)
+                // One known (reduces to remaining)
+                /*
+                ("+", Some(0), Some(_zero_id), _, Some(value_id)) | ("+", _, Some(value_id), Some(0), Some(_zero_id)) => todo!(), // value_id
+                ("-", Some(0), Some(_zero_id), _, Some(value_id)) => todo!(), // -*value_id
+                ("-", _, Some(value_id), Some(0), Some(_zero_id)) => todo!(), // value_id
+                ("*", Some(1), Some(_zero_id), _, Some(value_id)) | ("*", _, Some(value_id), Some(1), Some(_zero_id)) => todo!(), // value_id
+                ("*", _, Some(value_id), Some(1), Some(_zero_id)) => todo!(), // value_id
+                */
                 _ => return,
             };
             // Update so that we don't have to re-find the updated values
