@@ -68,25 +68,30 @@ pub trait CompilerContext:
 
     // Implement either all the `for_each_XXX`s or `for_each`
     // Call sites will pick whichever should work best for their use case.
-    fn for_each_i64(&mut self, f: ForEachNode<Self, i64>) -> Result<(), Self::E> {
+    fn for_each_i64<F: FnMut(Self::ID, &mut i64)>(&mut self, f: &mut F) -> Result<(), Self::E> {
         self.for_each(Some(f), None, None, None)
     }
-    fn for_each_operator(&mut self, f: ForEachNode<Self, Operator>) -> Result<(), Self::E> {
+    fn for_each_operator<F: FnMut(Self::ID, &mut Operator)>(&mut self, f: &mut F) -> Result<(), Self::E> {
         self.for_each(None, Some(f), None, None)
     }
-    fn for_each_symbol(&mut self, f: ForEachNode<Self, Symbol>) -> Result<(), Self::E> {
+    fn for_each_symbol<F: FnMut(Self::ID, &mut Symbol)>(&mut self, f: &mut F) -> Result<(), Self::E> {
         self.for_each(None, None, Some(f), None)
     }
-    fn for_each_call(&mut self, f: ForEachNode<Self, Call<Self::ID>>) -> Result<(), Self::E> {
+    fn for_each_call<F: FnMut(Self::ID, &mut Call<Self::ID>)>(&mut self, f: &mut F) -> Result<(), Self::E> {
         self.for_each(None, None, None, Some(f))
     }
 
-    fn for_each(
+    fn for_each<
+        F1: FnMut(Self::ID, &mut i64),
+        F2: FnMut(Self::ID, &mut Operator),
+        F3: FnMut(Self::ID, &mut Symbol),
+        F4: FnMut(Self::ID, &mut Call<Self::ID>)
+    >(
         &mut self,
-        i64_fn: Option<ForEachNode<Self, i64>>,
-        operator_fn: Option<ForEachNode<Self, Operator>>,
-        symbol_fn: Option<ForEachNode<Self, Symbol>>,
-        call_fn: Option<ForEachNode<Self, Call<Self::ID>>>,
+        i64_fn: Option<&mut F1>,
+        operator_fn: Option<&mut F2>,
+        symbol_fn: Option<&mut F3>,
+        call_fn: Option<&mut F4>,
     ) -> Result<(), Self::E> {
         if let Some(operator_fn) = operator_fn {
             self.for_each_operator(operator_fn)?;

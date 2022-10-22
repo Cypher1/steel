@@ -53,48 +53,43 @@ impl CompilerContext for Ecs {
             + self.calls.mem_usage()
     }
 
-    fn for_each(
-        &mut self,
-        i64_fn: Option<ForEachNode<Self, i64>>,
-        operator_fn: Option<ForEachNode<Self, Operator>>,
-        symbol_fn: Option<ForEachNode<Self, Symbol>>,
-        call_fn: Option<ForEachNode<Self, Call<Self::ID>>>,
-    ) -> Result<(), Self::E> {
-        // TODO: Parallel?
-        if let Some(i64_fn) = i64_fn {
-            for (id, i64_value) in &mut self.i64_values {
-                // Note: We can't use the helper methods here because the compiler can't reason
-                // about the self.i64_values and self.entities being separable when hidden behind
-                // the function calls.
-                i64_fn(*id, i64_value);
-            }
-        }
-        if let Some(operator_fn) = operator_fn {
-            for (id, operator) in &mut self.operators {
-                // Note: We can't use the helper methods here because the compiler can't reason
-                // about the self.operators and self.entities being separable when hidden behind
-                // the function calls.
-                operator_fn(*id, operator);
-            }
-        }
-        if let Some(symbol_fn) = symbol_fn {
-            for (id, symbol) in &mut self.symbols {
-                // Note: We can't use the helper methods here because the compiler can't reason
-                // about the self.symbols and self.entities being separable when hidden behind
-                // the function calls.
-                symbol_fn(*id, symbol);
-            }
-        }
-        if let Some(call_fn) = call_fn {
-            for (id, call) in &mut self.calls {
-                // Note: We can't use the helper methods here because the compiler can't reason
-                // about the self.calls and self.entities being separable when hidden behind
-                // the function calls.
-                call_fn(*id, call);
-            }
+    fn for_each_i64<F: FnMut(Self::ID, &mut i64)>(&mut self, f: &mut F) -> Result<(), Self::E> {
+        for (id, i64_value) in &mut self.i64_values {
+            // Note: We can't use the helper methods here because the compiler can't reason
+            // about the self.i64_values and self.entities being separable when hidden behind
+            // the function calls.
+            f(*id, i64_value);
         }
         Ok(())
     }
+    fn for_each_operator<F: FnMut(Self::ID, &mut Operator)>(&mut self, f: &mut F) -> Result<(), Self::E> {
+        for (id, operator) in &mut self.operators {
+            // Note: We can't use the helper methods here because the compiler can't reason
+            // about the self.operators and self.entities being separable when hidden behind
+            // the function calls.
+            f(*id, operator);
+        }
+        Ok(())
+    }
+    fn for_each_symbol<F: FnMut(Self::ID, &mut Symbol)>(&mut self, f: &mut F) -> Result<(), Self::E> {
+        for (id, symbol) in &mut self.symbols {
+            // Note: We can't use the helper methods here because the compiler can't reason
+            // about the self.symbols and self.entities being separable when hidden behind
+            // the function calls.
+            f(*id, symbol);
+        }
+        Ok(())
+    }
+    fn for_each_call<F: FnMut(Self::ID, &mut Call<Self::ID>)>(&mut self, f: &mut F) -> Result<(), Self::E> {
+        for (id, call) in &mut self.calls {
+            // Note: We can't use the helper methods here because the compiler can't reason
+            // about the self.calls and self.entities being separable when hidden behind
+            // the function calls.
+            f(*id, call);
+        }
+        Ok(())
+    }
+
 }
 
 impl<T> NodeStore<EntityId, T, EcsError> for Ecs

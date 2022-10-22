@@ -52,12 +52,17 @@ where
         std::mem::size_of::<Self>() + self.members.mem_usage()
     }
 
-    fn for_each(
+    fn for_each<
+        F1: FnMut(Self::ID, &mut i64),
+        F2: FnMut(Self::ID, &mut Operator),
+        F3: FnMut(Self::ID, &mut Symbol),
+        F4: FnMut(Self::ID, &mut Call<Self::ID>)
+    >(
         &mut self,
-        mut i64_fn: Option<ForEachNode<Self, i64>>,
-        mut operator_fn: Option<ForEachNode<Self, Operator>>,
-        mut symbol_fn: Option<ForEachNode<Self, Symbol>>,
-        mut call_fn: Option<ForEachNode<Self, Call<Self::ID>>>,
+        i64_fn: Option<&mut F1>,
+        operator_fn: Option<&mut F2>,
+        symbol_fn: Option<&mut F3>,
+        call_fn: Option<&mut F4>,
     ) -> Result<(), Self::E> {
         for (id, node) in (&mut self.members).into_iter().enumerate() {
             match node {
