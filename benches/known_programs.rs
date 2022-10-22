@@ -16,7 +16,7 @@ fn criterion_benchmark(c: &mut Criterion) {
     let mut size = 1;
     let mut last = 1;
     let mut depth = 1;
-    while size < 10000000 {
+    while size < 1000000 {
         depth += 1;
         plus_tree = format!("({})+({})", plus_tree, plus_tree);
         // mul_tree = format!("({})*({})", mul_tree, mul_tree);
