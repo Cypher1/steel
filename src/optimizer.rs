@@ -1,4 +1,4 @@
-use crate::compiler_context::CompilerContext;
+use crate::compiler_context::{CompilerContext, SysF};
 use crate::nodes::Operator;
 // use log::{debug, trace};
 use std::collections::HashMap;
@@ -102,15 +102,15 @@ pub fn optimize<C: CompilerContext + ?Sized>(
     // let pass = "Pre-pass for Constant folding";
     // ECS will run each component separately but
     // AST gets a benefit from running them during the same traversal.
-    context.for_each(
-        Some(&mut |id, i64_value| {
+    context.for_each::<_, _, SysF<_, _>, SysF<_, _>>(
+        &mut Some(&mut |id, i64_value| {
             known_values.insert(id, *i64_value);
         }),
-        Some(&mut |id, operator| {
+        &mut Some(&mut |id, operator| {
             operators.insert(id, *operator);
         }),
-        None,
-        None,
+        &mut None,
+        &mut None,
     )?;
     // Replace nodes
     let fixed_point = AtomicBool::new(true);

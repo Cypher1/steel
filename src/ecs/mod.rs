@@ -1,5 +1,5 @@
 use crate::arena::Arena;
-use crate::compiler_context::{CompilerContext, ForEachNode, NodeStore};
+use crate::compiler_context::{CompilerContext, NodeStore};
 use crate::nodes::*;
 
 mod component;

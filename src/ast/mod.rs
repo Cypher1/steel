@@ -1,4 +1,4 @@
-use crate::compiler_context::{CompilerContext, ForEachNode, NodeStore};
+use crate::compiler_context::{CompilerContext, NodeStore};
 use crate::nodes::*;
 use crate::tombstoning_arena::{Arena, ArenaError, Index};
 
@@ -59,30 +59,30 @@ where
         F4: FnMut(Self::ID, &mut Call<Self::ID>)
     >(
         &mut self,
-        i64_fn: Option<&mut F1>,
-        operator_fn: Option<&mut F2>,
-        symbol_fn: Option<&mut F3>,
-        call_fn: Option<&mut F4>,
+        i64_fn: &mut Option<&mut F1>,
+        operator_fn: &mut Option<&mut F2>,
+        symbol_fn: &mut Option<&mut F3>,
+        call_fn: &mut Option<&mut F4>,
     ) -> Result<(), Self::E> {
         for (id, node) in (&mut self.members).into_iter().enumerate() {
             match node {
                 Node::Operator(operator) => {
-                    if let Some(operator_fn) = &mut operator_fn {
+                    if let Some(operator_fn) = operator_fn {
                         operator_fn(id, operator)
                     }
                 }
                 Node::Symbol(symbol) => {
-                    if let Some(symbol_fn) = &mut symbol_fn {
+                    if let Some(symbol_fn) = symbol_fn {
                         symbol_fn(id, symbol)
                     }
                 }
                 Node::Call(call) => {
-                    if let Some(call_fn) = &mut call_fn {
+                    if let Some(call_fn) = call_fn {
                         call_fn(id, call)
                     }
                 }
                 Node::I64(value) => {
-                    if let Some(i64_fn) = &mut i64_fn {
+                    if let Some(i64_fn) = i64_fn {
                         i64_fn(id, value)
                     }
                 }
