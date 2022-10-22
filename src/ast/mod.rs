@@ -19,7 +19,7 @@ impl From<ArenaError> for AstError {
 
 use AstError::*;
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Ast {
     members: Arena<Node>,
 }

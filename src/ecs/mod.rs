@@ -14,7 +14,7 @@ pub use providers::EcsError;
 mod arena_providers;
 use arena_providers::*;
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Ecs {
     entities: Arena<Entity>,
     i64_values: Arena<(EntityId, i64)>,

@@ -1,4 +1,4 @@
-use criterion::{black_box, Criterion};
+use criterion::{black_box, Criterion, BatchSize};
 use log::debug;
 use steel::{gen_code::Spec, handle, handle_steps, CompilerContext, SteelErr, Tasks};
 
@@ -8,7 +8,7 @@ pub fn render_size(spec: &Spec) -> String {
         .unwrap_or_else(|| "".to_string())
 }
 
-pub fn benchmark_parse<T: CompilerContext>(
+pub fn benchmark_parse<T: CompilerContext + Clone>(
     name: &'static str,
     bench_type: &str,
     program: &str,
@@ -23,7 +23,7 @@ pub fn benchmark_parse<T: CompilerContext>(
     });
 }
 
-pub fn benchmark_optimize<T: CompilerContext>(
+pub fn benchmark_optimize<T: CompilerContext + Clone>(
     name: &'static str,
     bench_type: &str,
     program: &str,
@@ -37,12 +37,14 @@ pub fn benchmark_optimize<T: CompilerContext>(
         let mut store = T::new();
         let (id, _res) = handle_steps::<T>(&mut store, Tasks::parse(program))
             .expect("Should parse program without error");
+        let store = store;
         let id = id.expect("Should have parsed a program");
-        b.iter(|| handle_steps::<T>(&mut store, black_box(Tasks::pre_parsed(id).and_optimize())))
+        b.iter_batched_ref(|| store.clone(),
+        |store| handle_steps::<T>(store, black_box(Tasks::pre_parsed(id).and_optimize())), BatchSize::SmallInput)
     });
 }
 
-pub fn benchmark_eval_pre_optimized<T: CompilerContext>(
+pub fn benchmark_eval_pre_optimized<T: CompilerContext + Clone>(
     name: &'static str,
     bench_type: &str,
     program: &str,
@@ -58,13 +60,15 @@ pub fn benchmark_eval_pre_optimized<T: CompilerContext>(
             let mut store = T::new();
             let (id, _res) = handle_steps::<T>(&mut store, Tasks::parse(program).and_optimize())
                 .expect("Should parse program without error");
+            let store = store;
             let id = id.expect("Should have parsed a program");
-            b.iter(|| handle_steps::<T>(&mut store, black_box(Tasks::pre_parsed(id).and_eval())))
+            b.iter_batched_ref(|| store.clone(),
+            |store| handle_steps::<T>(store, black_box(Tasks::pre_parsed(id).and_eval())), BatchSize::SmallInput)
         },
     );
 }
 
-pub fn benchmark_eval<T: CompilerContext>(
+pub fn benchmark_eval<T: CompilerContext + Clone>(
     name: &'static str,
     bench_type: &str,
     program: &str,
@@ -78,12 +82,14 @@ pub fn benchmark_eval<T: CompilerContext>(
         let mut store = T::new();
         let (id, _res) = handle_steps::<T>(&mut store, Tasks::parse(program))
             .expect("Should parse program without error");
+        let store = store;
         let id = id.expect("Should have parsed a program");
-        b.iter(|| handle_steps::<T>(&mut store, black_box(Tasks::pre_parsed(id).and_eval())))
+        b.iter_batched_ref(|| store.clone(),
+        |store| handle_steps::<T>(store, black_box(Tasks::pre_parsed(id).and_eval())), BatchSize::SmallInput)
     });
 }
 
-pub fn benchmark_parse_and_eval_tasks<T: CompilerContext>(
+pub fn benchmark_parse_and_eval_tasks<T: CompilerContext + Clone>(
     name: &'static str,
     bench_type: &str,
     program: &str,
@@ -98,7 +104,7 @@ pub fn benchmark_parse_and_eval_tasks<T: CompilerContext>(
     });
 }
 
-pub fn benchmarks<T: CompilerContext>(
+pub fn benchmarks<T: CompilerContext + Clone>(
     name: &'static str,
     bench_type: &str,
     program: &str,

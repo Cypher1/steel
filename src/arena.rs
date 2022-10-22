@@ -2,7 +2,7 @@
 
 pub type Index = usize;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Arena<T> {
     members: Vec<Item<T>>,
 }
