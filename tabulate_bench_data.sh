@@ -30,7 +30,7 @@ IFS=$'\n'
 for name in $names; do
   row="$name"
   for kind in $kinds; do
-    comparable="$(echo "$tabulated" | grep -E "^$kind $name,")"
+    comparable="$(echo "$tabulated" | grep -F "$kind $name,")"
     for match_line in $comparable; do
       match_data="$(echo "$match_line" | sed "s/^[^,]*,//")"
       row="$row,$match_data"
