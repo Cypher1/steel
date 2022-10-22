@@ -20,7 +20,7 @@ impl<T> Default for Arena<T> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum Item<T> {
     Tombstone, // TODO: Add an index to the 'next' live entry (update lazily).
     Entry(T),

@@ -1,7 +1,7 @@
 use crate::arena::Index;
 use crate::nodes::*;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum Node {
     I64(i64),
     Operator(Operator),
