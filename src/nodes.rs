@@ -6,6 +6,12 @@ pub enum Operator {
     Div,
 }
 
+impl std::fmt::Display for Operator {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}", self.to_str())
+    }
+}
+
 impl Operator {
     pub fn to_str(&self) -> &str {
         use Operator::*;
@@ -15,9 +21,6 @@ impl Operator {
             Mul => "*",
             Div => "/",
         }
-    }
-    pub fn to_string(&self) -> String {
-        self.to_str().to_string()
     }
 }
 
