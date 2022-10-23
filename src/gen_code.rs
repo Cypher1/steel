@@ -1,5 +1,5 @@
 use crate::{
-    nodes::{Call, Symbol, Operator},
+    nodes::{Call, Operator, Symbol},
     CompilerContext,
 };
 use log::trace;
@@ -160,7 +160,7 @@ pub fn generate_random_program_impl<Ctx: CompilerContext>(
             "/" => store.add(Operator::Div),
             _ => store.add(Symbol {
                 name: spec.name.to_string(),
-            })
+            }),
         };
     }
     let value: i64 = if weighted_bool(rng, CHANCE_OF_POTENTIALLY_LARGE_CONSTANT) {

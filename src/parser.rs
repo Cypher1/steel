@@ -1,6 +1,6 @@
 use crate::compiler_context::{CompilerContext, NodeStore};
 use crate::error::SteelErr;
-use crate::nodes::{Call, Symbol, Operator};
+use crate::nodes::{Call, Operator, Symbol};
 use nom::{
     branch::alt,
     bytes::complete::{tag as raw_tag, take_while, take_while1},
@@ -97,7 +97,12 @@ pub fn operator_raw<'source>(
         Some('-') => (PLUS_PRECENDENCE, Sub),
         Some('*') => (MUL_PRECENDENCE, Mul),
         Some('/') => (MUL_PRECENDENCE, Div),
-        _ => return Err(nom::Err::Error(SteelErr::MalformedExpression(input.to_string(), "operator".to_string()))),
+        _ => {
+            return Err(nom::Err::Error(SteelErr::MalformedExpression(
+                input.to_string(),
+                "operator".to_string(),
+            )))
+        }
     };
     if precendence < *min_prec {
         return Err(nom::Err::Error(SteelErr::PrecedenceError { precendence }));
@@ -299,25 +304,13 @@ mod test {
     #[test]
     fn parse_operator() {
         let mut prec = INIT_PRECENDENCE;
-        assert_eq!(
-            operator_raw("+", &mut prec).unwrap(),
-            ("", Operator::Add)
-        );
+        assert_eq!(operator_raw("+", &mut prec).unwrap(), ("", Operator::Add));
         let mut prec = MUL_PRECENDENCE;
-        assert_eq!(
-            operator_raw("*", &mut prec).unwrap(),
-            ("", Operator::Mul)
-        );
+        assert_eq!(operator_raw("*", &mut prec).unwrap(), ("", Operator::Mul));
         let mut prec = PLUS_PRECENDENCE;
-        assert_eq!(
-            operator_raw("*", &mut prec).unwrap(),
-            ("", Operator::Mul)
-        );
+        assert_eq!(operator_raw("*", &mut prec).unwrap(), ("", Operator::Mul));
         let mut prec = INIT_PRECENDENCE;
-        assert_eq!(
-            operator_raw("*", &mut prec).unwrap(),
-            ("", Operator::Mul)
-        );
+        assert_eq!(operator_raw("*", &mut prec).unwrap(), ("", Operator::Mul));
     }
 
     #[test]

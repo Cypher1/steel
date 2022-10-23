@@ -1,4 +1,4 @@
-use crate::nodes::{Call, Symbol, Operator};
+use crate::nodes::{Call, Operator, Symbol};
 
 pub trait NodeStore<ID, T, E> {
     fn add(&mut self, value: T) -> ID;
@@ -15,8 +15,7 @@ pub trait NodeStore<ID, T, E> {
     }
 }
 
-pub type ForEachNode<'a, C, T> =
-    &'a mut dyn FnMut(<C as CompilerContext>::ID, &mut T);
+pub type ForEachNode<'a, C, T> = &'a mut dyn FnMut(<C as CompilerContext>::ID, &mut T);
 
 pub trait CompilerContext:
     NodeStore<Self::ID, Call<Self::ID>, Self::E>
