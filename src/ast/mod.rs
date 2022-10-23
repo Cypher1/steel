@@ -56,7 +56,7 @@ where
         F1: FnMut(Self::ID, &mut i64),
         F2: FnMut(Self::ID, &mut Operator),
         F3: FnMut(Self::ID, &mut Symbol),
-        F4: FnMut(Self::ID, &mut Call<Self::ID>)
+        F4: FnMut(Self::ID, &mut Call<Self::ID>),
     >(
         &mut self,
         i64_fn: &mut Option<&mut F1>,

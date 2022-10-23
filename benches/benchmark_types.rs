@@ -1,4 +1,4 @@
-use criterion::{black_box, Criterion, BatchSize};
+use criterion::{black_box, BatchSize, Criterion};
 use log::debug;
 use steel::{gen_code::Spec, handle, handle_steps, CompilerContext, SteelErr, Tasks};
 
@@ -39,8 +39,11 @@ pub fn benchmark_optimize<T: CompilerContext + Clone>(
             .expect("Should parse program without error");
         let store = store;
         let id = id.expect("Should have parsed a program");
-        b.iter_batched_ref(|| store.clone(),
-        |store| handle_steps::<T>(store, black_box(Tasks::pre_parsed(id).and_optimize())), BatchSize::SmallInput)
+        b.iter_batched_ref(
+            || store.clone(),
+            |store| handle_steps::<T>(store, black_box(Tasks::pre_parsed(id).and_optimize())),
+            BatchSize::SmallInput,
+        )
     });
 }
 
@@ -62,8 +65,11 @@ pub fn benchmark_eval_pre_optimized<T: CompilerContext + Clone>(
                 .expect("Should parse program without error");
             let store = store;
             let id = id.expect("Should have parsed a program");
-            b.iter_batched_ref(|| store.clone(),
-            |store| handle_steps::<T>(store, black_box(Tasks::pre_parsed(id).and_eval())), BatchSize::SmallInput)
+            b.iter_batched_ref(
+                || store.clone(),
+                |store| handle_steps::<T>(store, black_box(Tasks::pre_parsed(id).and_eval())),
+                BatchSize::SmallInput,
+            )
         },
     );
 }
@@ -84,8 +90,11 @@ pub fn benchmark_eval<T: CompilerContext + Clone>(
             .expect("Should parse program without error");
         let store = store;
         let id = id.expect("Should have parsed a program");
-        b.iter_batched_ref(|| store.clone(),
-        |store| handle_steps::<T>(store, black_box(Tasks::pre_parsed(id).and_eval())), BatchSize::SmallInput)
+        b.iter_batched_ref(
+            || store.clone(),
+            |store| handle_steps::<T>(store, black_box(Tasks::pre_parsed(id).and_eval())),
+            BatchSize::SmallInput,
+        )
     });
 }
 

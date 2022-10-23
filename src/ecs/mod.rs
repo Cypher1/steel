@@ -62,7 +62,10 @@ impl CompilerContext for Ecs {
         }
         Ok(())
     }
-    fn for_each_operator<F: FnMut(Self::ID, &mut Operator)>(&mut self, f: &mut F) -> Result<(), Self::E> {
+    fn for_each_operator<F: FnMut(Self::ID, &mut Operator)>(
+        &mut self,
+        f: &mut F,
+    ) -> Result<(), Self::E> {
         for (id, operator) in &mut self.operators {
             // Note: We can't use the helper methods here because the compiler can't reason
             // about the self.operators and self.entities being separable when hidden behind
@@ -71,7 +74,10 @@ impl CompilerContext for Ecs {
         }
         Ok(())
     }
-    fn for_each_symbol<F: FnMut(Self::ID, &mut Symbol)>(&mut self, f: &mut F) -> Result<(), Self::E> {
+    fn for_each_symbol<F: FnMut(Self::ID, &mut Symbol)>(
+        &mut self,
+        f: &mut F,
+    ) -> Result<(), Self::E> {
         for (id, symbol) in &mut self.symbols {
             // Note: We can't use the helper methods here because the compiler can't reason
             // about the self.symbols and self.entities being separable when hidden behind
@@ -80,7 +86,10 @@ impl CompilerContext for Ecs {
         }
         Ok(())
     }
-    fn for_each_call<F: FnMut(Self::ID, &mut Call<Self::ID>)>(&mut self, f: &mut F) -> Result<(), Self::E> {
+    fn for_each_call<F: FnMut(Self::ID, &mut Call<Self::ID>)>(
+        &mut self,
+        f: &mut F,
+    ) -> Result<(), Self::E> {
         for (id, call) in &mut self.calls {
             // Note: We can't use the helper methods here because the compiler can't reason
             // about the self.calls and self.entities being separable when hidden behind
@@ -89,7 +98,6 @@ impl CompilerContext for Ecs {
         }
         Ok(())
     }
-
 }
 
 impl<T> NodeStore<EntityId, T, EcsError> for Ecs

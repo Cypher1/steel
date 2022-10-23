@@ -69,23 +69,52 @@ pub trait CompilerContext:
     // Implement either all the `for_each_XXX`s or `for_each`
     // Call sites will pick whichever should work best for their use case.
     fn for_each_i64<F: FnMut(Self::ID, &mut i64)>(&mut self, f: &mut F) -> Result<(), Self::E> {
-        self.for_each::<F, SysF<Self::ID, _>, SysF<Self::ID, _>, SysF<Self::ID, _>>(&mut Some(f), &mut None, &mut None, &mut None)
+        self.for_each::<F, SysF<Self::ID, _>, SysF<Self::ID, _>, SysF<Self::ID, _>>(
+            &mut Some(f),
+            &mut None,
+            &mut None,
+            &mut None,
+        )
     }
-    fn for_each_operator<F: FnMut(Self::ID, &mut Operator)>(&mut self, f: &mut F) -> Result<(), Self::E> {
-        self.for_each::<SysF<Self::ID, _>, F, SysF<Self::ID, _>, SysF<Self::ID, _>>(&mut None, &mut Some(f), &mut None, &mut None)
+    fn for_each_operator<F: FnMut(Self::ID, &mut Operator)>(
+        &mut self,
+        f: &mut F,
+    ) -> Result<(), Self::E> {
+        self.for_each::<SysF<Self::ID, _>, F, SysF<Self::ID, _>, SysF<Self::ID, _>>(
+            &mut None,
+            &mut Some(f),
+            &mut None,
+            &mut None,
+        )
     }
-    fn for_each_symbol<F: FnMut(Self::ID, &mut Symbol)>(&mut self, f: &mut F) -> Result<(), Self::E> {
-        self.for_each::<SysF<Self::ID, _>, SysF<Self::ID, _>, F, SysF<Self::ID, _>>(&mut None, &mut None, &mut Some(f), &mut None)
+    fn for_each_symbol<F: FnMut(Self::ID, &mut Symbol)>(
+        &mut self,
+        f: &mut F,
+    ) -> Result<(), Self::E> {
+        self.for_each::<SysF<Self::ID, _>, SysF<Self::ID, _>, F, SysF<Self::ID, _>>(
+            &mut None,
+            &mut None,
+            &mut Some(f),
+            &mut None,
+        )
     }
-    fn for_each_call<F: FnMut(Self::ID, &mut Call<Self::ID>)>(&mut self, f: &mut F) -> Result<(), Self::E> {
-        self.for_each::<SysF<Self::ID, _>, SysF<Self::ID, _>, SysF<Self::ID, _>, F>(&mut None, &mut None, &mut None, &mut Some(f))
+    fn for_each_call<F: FnMut(Self::ID, &mut Call<Self::ID>)>(
+        &mut self,
+        f: &mut F,
+    ) -> Result<(), Self::E> {
+        self.for_each::<SysF<Self::ID, _>, SysF<Self::ID, _>, SysF<Self::ID, _>, F>(
+            &mut None,
+            &mut None,
+            &mut None,
+            &mut Some(f),
+        )
     }
 
     fn for_each<
         F1: FnMut(Self::ID, &mut i64),
         F2: FnMut(Self::ID, &mut Operator),
         F3: FnMut(Self::ID, &mut Symbol),
-        F4: FnMut(Self::ID, &mut Call<Self::ID>)
+        F4: FnMut(Self::ID, &mut Call<Self::ID>),
     >(
         &mut self,
         i64_fn: &mut Option<&mut F1>,
