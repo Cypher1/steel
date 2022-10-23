@@ -14,15 +14,10 @@ fn criterion_benchmark(c: &mut Criterion) {
     let mut plus_tree = "1".to_string();
     // let mut mul_tree = "1".to_string();
     let mut size = 1;
-    // let mut last = 1;
-    let mut depth = 1;
-    while size < 1000000 {
-        depth += 1;
+    while size < 100000 {
         plus_tree = format!("({})+({})", plus_tree, plus_tree);
         // mul_tree = format!("({})*({})", mul_tree, mul_tree);
         size = size * 2 + 2; // 2*size = args, 1= the op, 1 = the call.
-                             //if size > 1000 && size >= (2 * last) {
-                             // last = size;
         let spec = Spec::default().sized(size);
         let bench_type = format!("known program {}: {}", render_size(&spec), "plus tree");
         programs.push((size, bench_type, plus_tree.clone()));
