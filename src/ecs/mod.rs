@@ -53,16 +53,16 @@ impl CompilerContext for Ecs {
             + self.calls.mem_usage()
     }
 
-    fn for_each_i64<F: FnMut(Self::ID, &mut i64)>(&mut self, f: &mut F) -> Result<(), Self::E> {
+    fn for_each_i64<F: FnMut(&mut Self, Self::ID, &mut i64)>(&mut self, f: &mut F) -> Result<(), Self::E> {
         for (id, i64_value) in &mut self.i64_values {
             // Note: We can't use the helper methods here because the compiler can't reason
             // about the self.i64_values and self.entities being separable when hidden behind
             // the function calls.
-            f(*id, i64_value);
+            f(&mut self, *id, i64_value);
         }
         Ok(())
     }
-    fn for_each_operator<F: FnMut(Self::ID, &mut Operator)>(
+    fn for_each_operator<F: FnMut(&mut Self, Self::ID, &mut Operator)>(
         &mut self,
         f: &mut F,
     ) -> Result<(), Self::E> {
@@ -70,11 +70,11 @@ impl CompilerContext for Ecs {
             // Note: We can't use the helper methods here because the compiler can't reason
             // about the self.operators and self.entities being separable when hidden behind
             // the function calls.
-            f(*id, operator);
+            f(&mut self, *id, operator);
         }
         Ok(())
     }
-    fn for_each_symbol<F: FnMut(Self::ID, &mut Symbol)>(
+    fn for_each_symbol<F: FnMut(&mut Self, Self::ID, &mut Symbol)>(
         &mut self,
         f: &mut F,
     ) -> Result<(), Self::E> {
@@ -82,11 +82,11 @@ impl CompilerContext for Ecs {
             // Note: We can't use the helper methods here because the compiler can't reason
             // about the self.symbols and self.entities being separable when hidden behind
             // the function calls.
-            f(*id, symbol);
+            f(&mut self, *id, symbol);
         }
         Ok(())
     }
-    fn for_each_call<F: FnMut(Self::ID, &mut Call<Self::ID>)>(
+    fn for_each_call<F: FnMut(&mut Self, Self::ID, &mut Call<Self::ID>)>(
         &mut self,
         f: &mut F,
     ) -> Result<(), Self::E> {
@@ -94,7 +94,7 @@ impl CompilerContext for Ecs {
             // Note: We can't use the helper methods here because the compiler can't reason
             // about the self.calls and self.entities being separable when hidden behind
             // the function calls.
-            f(*id, call);
+            f(&mut self, *id, call);
         }
         Ok(())
     }

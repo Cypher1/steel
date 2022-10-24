@@ -1,7 +1,6 @@
 use crate::compiler_context::{CompilerContext, SysF};
 use crate::nodes::Operator;
 // use log::{debug, trace};
-use std::collections::HashMap;
 use std::sync::atomic::{AtomicBool, Ordering::Relaxed};
 
 #[derive(Default, Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
@@ -30,8 +29,6 @@ impl Optimizations {
 fn constant_folding<C: CompilerContext + ?Sized>(
     context: &mut C,
     replace: &mut Vec<(C::ID, i64)>,
-    known_values: &mut HashMap<C::ID, i64>,
-    operators: &mut HashMap<C::ID, Operator>,
     root: C::ID,
     fixed_point: &AtomicBool,
 ) -> Result<C::ID, C::E> {
@@ -39,21 +36,19 @@ fn constant_folding<C: CompilerContext + ?Sized>(
     // ECS will run the Call component, but AST has to traverse all the nodes to check if they
     // are Calls.
     {
-        let operators = &operators;
-        let known_values = &known_values;
-        context.for_each_call(&mut |id, call| {
-            let name = if let Some(name) = operators.get(&call.callee) {
+        context.for_each_call(&mut |ctx, id, call| {
+            let name = if let Some(name) = ctx.get(&call.callee)? {
                 name
             } else {
                 return; // skip now
             };
             let left: Option<i64> = call
                 .left
-                .map(|left| known_values.get(&left).copied())
+                .map(|left| ctx.get(&left).copied())
                 .unwrap_or_default();
             let right: Option<i64> = call
                 .right
-                .map(|right| known_values.get(&right).copied())
+                .map(|right| ctx.get(&right).copied())
                 .unwrap_or_default();
             use Operator::*;
             let result = match (name, left, right) {
@@ -83,7 +78,6 @@ fn constant_folding<C: CompilerContext + ?Sized>(
         })?;
     }
     for (id, value) in replace.iter() {
-        known_values.insert(*id, *value);
         // println!("REPLACING {:?} with value: {}", id, value);
         context.replace(*id, *value)?; // This is the bit that does the updates in place...
     }
@@ -96,22 +90,6 @@ pub fn optimize<C: CompilerContext + ?Sized>(
     optimizations: &Optimizations,
     mut root: C::ID,
 ) -> Result<C::ID, C::E> {
-    let mut known_values: HashMap<C::ID, i64> = HashMap::new();
-    let mut operators: HashMap<C::ID, Operator> = HashMap::new();
-    // Get all the known symbols and i64 values.
-    // let pass = "Pre-pass for Constant folding";
-    // ECS will run each component separately but
-    // AST gets a benefit from running them during the same traversal.
-    context.for_each::<_, _, SysF<_, _>, SysF<_, _>>(
-        &mut Some(&mut |id, i64_value| {
-            known_values.insert(id, *i64_value);
-        }),
-        &mut Some(&mut |id, operator| {
-            operators.insert(id, *operator);
-        }),
-        &mut None,
-        &mut None,
-    )?;
     // Replace nodes
     let fixed_point = AtomicBool::new(true);
     let mut replace: Vec<(C::ID, i64)> = Vec::new();
@@ -121,8 +99,6 @@ pub fn optimize<C: CompilerContext + ?Sized>(
             root = constant_folding(
                 context,
                 &mut replace,
-                &mut known_values,
-                &mut operators,
                 root,
                 &fixed_point,
             )?;

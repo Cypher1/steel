@@ -53,10 +53,10 @@ where
     }
 
     fn for_each<
-        F1: FnMut(Self::ID, &mut i64),
-        F2: FnMut(Self::ID, &mut Operator),
-        F3: FnMut(Self::ID, &mut Symbol),
-        F4: FnMut(Self::ID, &mut Call<Self::ID>),
+        F1: FnMut(&mut Self, Self::ID, &mut i64),
+        F2: FnMut(&mut Self, Self::ID, &mut Operator),
+        F3: FnMut(&mut Self, Self::ID, &mut Symbol),
+        F4: FnMut(&mut Self, Self::ID, &mut Call<Self::ID>),
     >(
         &mut self,
         i64_fn: &mut Option<&mut F1>,
@@ -68,22 +68,22 @@ where
             match node {
                 Node::Operator(operator) => {
                     if let Some(operator_fn) = operator_fn {
-                        operator_fn(id, operator)
+                        operator_fn(&mut self, id, operator)
                     }
                 }
                 Node::Symbol(symbol) => {
                     if let Some(symbol_fn) = symbol_fn {
-                        symbol_fn(id, symbol)
+                        symbol_fn(&mut self, id, symbol)
                     }
                 }
                 Node::Call(call) => {
                     if let Some(call_fn) = call_fn {
-                        call_fn(id, call)
+                        call_fn(&mut self, id, call)
                     }
                 }
                 Node::I64(value) => {
                     if let Some(i64_fn) = i64_fn {
-                        i64_fn(id, value)
+                        i64_fn(&mut self, id, value)
                     }
                 }
             }
