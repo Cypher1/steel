@@ -330,12 +330,12 @@ mod test {
         let mut prec = INIT_PRECENDENCE;
         assert_err_is!(
             operator_raw("#lol", &mut prec),
-            "Parsing Error: Failed in TakeWhileMN while parsing #lol"
+            "Parsing Error: Expected operator, found \"#lol\""
         );
         let mut prec = INIT_PRECENDENCE;
         assert_err_is!(
             operator_raw("123", &mut prec),
-            "Parsing Error: Failed in TakeWhileMN while parsing 123"
+            "Parsing Error: Expected operator, found \"123\""
         );
     }
 

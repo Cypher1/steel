@@ -199,6 +199,7 @@ pub fn eval_program<Ctx: CompilerContext>(
 
 #[cfg(test)]
 mod test {
+    use ntest::timeout;
     use super::*;
     use gen_code::{generate_random_program, Spec};
 
@@ -249,12 +250,14 @@ mod test {
     }
 
     #[test]
+    #[timeout(100)]
     fn can_handle_simple_program_ast() {
         let program = SIMPLE_PROGRAM;
         take_result(program, handle::<ast::Ast>(Tasks::all(program)))
     }
 
     #[test]
+    #[timeout(100)]
     fn can_handle_medium_program_ast() {
         let program = MEDIUM_PROGRAM;
         take_result(program, handle::<ast::Ast>(Tasks::all(program)))
@@ -286,12 +289,14 @@ mod test {
     }
 
     #[test]
+    #[timeout(100)]
     fn can_handle_simple_program_ecs() {
         let program = SIMPLE_PROGRAM;
         take_result(program, handle::<ecs::Ecs>(Tasks::all(program)))
     }
 
     #[test]
+    #[timeout(100)]
     fn can_handle_medium_program_ecs() {
         let program = MEDIUM_PROGRAM;
         take_result(program, handle::<ecs::Ecs>(Tasks::all(program)))

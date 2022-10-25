@@ -15,7 +15,7 @@ pub trait NodeStore<ID, T, E> {
     }
 }
 
-pub type ForEachNode<'a, C, T> = &'a mut dyn FnMut(<C as CompilerContext>::ID, &mut T);
+pub type SysF<S, ID, T> = fn(&mut S, ID, &mut T);
 
 pub trait CompilerContext:
     NodeStore<Self::ID, Call<Self::ID>, Self::E>
@@ -68,25 +68,59 @@ pub trait CompilerContext:
 
     // Implement either all the `for_each_XXX`s or `for_each`
     // Call sites will pick whichever should work best for their use case.
-    fn for_each_i64(&mut self, f: ForEachNode<Self, i64>) -> Result<(), Self::E> {
-        self.for_each(Some(f), None, None, None)
+    fn for_each_i64<F: FnMut(&mut Self, Self::ID, &mut i64)>(&mut self, f: &mut F) -> Result<(), Self::E> {
+        self.for_each::<F, SysF<Self, Self::ID, _>, SysF<Self, Self::ID, _>, SysF<Self, Self::ID, _>>(
+            &mut Some(f),
+            &mut None,
+            &mut None,
+            &mut None,
+        )
     }
-    fn for_each_operator(&mut self, f: ForEachNode<Self, Operator>) -> Result<(), Self::E> {
-        self.for_each(None, Some(f), None, None)
+    fn for_each_operator<F: FnMut(&mut Self, Self::ID, &mut Operator)>(
+        &mut self,
+        f: &mut F,
+    ) -> Result<(), Self::E> {
+        self.for_each::<SysF<Self, Self::ID, _>, F, SysF<Self, Self::ID, _>, SysF<Self, Self::ID, _>>(
+            &mut None,
+            &mut Some(f),
+            &mut None,
+            &mut None,
+        )
     }
-    fn for_each_symbol(&mut self, f: ForEachNode<Self, Symbol>) -> Result<(), Self::E> {
-        self.for_each(None, None, Some(f), None)
+    fn for_each_symbol<F: FnMut(&mut Self, Self::ID, &mut Symbol)>(
+        &mut self,
+        f: &mut F,
+    ) -> Result<(), Self::E> {
+        self.for_each::<SysF<Self, Self::ID, _>, SysF<Self, Self::ID, _>, F, SysF<Self, Self::ID, _>>(
+            &mut None,
+            &mut None,
+            &mut Some(f),
+            &mut None,
+        )
     }
-    fn for_each_call(&mut self, f: ForEachNode<Self, Call<Self::ID>>) -> Result<(), Self::E> {
-        self.for_each(None, None, None, Some(f))
+    fn for_each_call<F: FnMut(&mut Self, Self::ID, &mut Call<Self::ID>)>(
+        &mut self,
+        f: &mut F,
+    ) -> Result<(), Self::E> {
+        self.for_each::<SysF<Self, Self::ID, _>, SysF<Self, Self::ID, _>, SysF<Self, Self::ID, _>, F>(
+            &mut None,
+            &mut None,
+            &mut None,
+            &mut Some(f),
+        )
     }
 
-    fn for_each(
+    fn for_each<
+        F1: FnMut(&mut Self, Self::ID, &mut i64),
+        F2: FnMut(&mut Self, Self::ID, &mut Operator),
+        F3: FnMut(&mut Self, Self::ID, &mut Symbol),
+        F4: FnMut(&mut Self, Self::ID, &mut Call<Self::ID>),
+    >(
         &mut self,
-        i64_fn: Option<ForEachNode<Self, i64>>,
-        operator_fn: Option<ForEachNode<Self, Operator>>,
-        symbol_fn: Option<ForEachNode<Self, Symbol>>,
-        call_fn: Option<ForEachNode<Self, Call<Self::ID>>>,
+        i64_fn: &mut Option<&mut F1>,
+        operator_fn: &mut Option<&mut F2>,
+        symbol_fn: &mut Option<&mut F3>,
+        call_fn: &mut Option<&mut F4>,
     ) -> Result<(), Self::E> {
         if let Some(operator_fn) = operator_fn {
             self.for_each_operator(operator_fn)?;

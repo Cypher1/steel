@@ -1,5 +1,5 @@
 use crate::arena::Arena;
-use crate::compiler_context::{CompilerContext, ForEachNode, NodeStore};
+use crate::compiler_context::{CompilerContext, NodeStore};
 use crate::nodes::*;
 
 mod component;
@@ -53,45 +53,65 @@ impl CompilerContext for Ecs {
             + self.calls.mem_usage()
     }
 
-    fn for_each(
+    fn for_each_i64<F: FnMut(&mut Self, Self::ID, &mut i64)>(&mut self, f: &mut F) -> Result<(), Self::E> {
+        let mut index = 0;
+        let mut value = (EntityId::new(0), 0); // start with a dummy value;
+        while let Ok(other) = self.i64_values.get_mut(index) {
+            // swap to get the real value
+            std::mem::swap(&mut value, other);
+            f(self, value.0, &mut value.1);
+            // swap to put the real value back
+            let other = self.i64_values.get_mut(index).unwrap();
+            std::mem::swap(&mut value, other);
+            index += 1;
+        }
+        Ok(())
+    }
+    fn for_each_operator<F: FnMut(&mut Self, Self::ID, &mut Operator)>(
         &mut self,
-        i64_fn: Option<ForEachNode<Self, i64>>,
-        operator_fn: Option<ForEachNode<Self, Operator>>,
-        symbol_fn: Option<ForEachNode<Self, Symbol>>,
-        call_fn: Option<ForEachNode<Self, Call<Self::ID>>>,
+        f: &mut F,
     ) -> Result<(), Self::E> {
-        // TODO: Parallel?
-        if let Some(i64_fn) = i64_fn {
-            for (id, i64_value) in &mut self.i64_values {
-                // Note: We can't use the helper methods here because the compiler can't reason
-                // about the self.i64_values and self.entities being separable when hidden behind
-                // the function calls.
-                i64_fn(*id, i64_value);
-            }
+        let mut index = 0;
+        let mut value = (EntityId::new(0), Operator::Add); // start with a dummy value;
+        while let Ok(other) = self.operators.get_mut(index) {
+            std::mem::swap(&mut value, other);
+            f(self, value.0, &mut value.1);
+            // swap to put the real value back
+            let other = self.operators.get_mut(index).unwrap();
+            std::mem::swap(&mut value, other);
+            index += 1;
         }
-        if let Some(operator_fn) = operator_fn {
-            for (id, operator) in &mut self.operators {
-                // Note: We can't use the helper methods here because the compiler can't reason
-                // about the self.operators and self.entities being separable when hidden behind
-                // the function calls.
-                operator_fn(*id, operator);
-            }
+        Ok(())
+    }
+    fn for_each_symbol<F: FnMut(&mut Self, Self::ID, &mut Symbol)>(
+        &mut self,
+        f: &mut F,
+    ) -> Result<(), Self::E> {
+        let mut index = 0;
+        let mut value = (EntityId::new(0), Symbol::new("dummy")); // start with a dummy value;
+        while let Ok(other) = self.symbols.get_mut(index) {
+            std::mem::swap(&mut value, other);
+            f(self, value.0, &mut value.1);
+            // swap to put the real value back
+            let other = self.symbols.get_mut(index).unwrap();
+            std::mem::swap(&mut value, other);
+            index += 1;
         }
-        if let Some(symbol_fn) = symbol_fn {
-            for (id, symbol) in &mut self.symbols {
-                // Note: We can't use the helper methods here because the compiler can't reason
-                // about the self.symbols and self.entities being separable when hidden behind
-                // the function calls.
-                symbol_fn(*id, symbol);
-            }
-        }
-        if let Some(call_fn) = call_fn {
-            for (id, call) in &mut self.calls {
-                // Note: We can't use the helper methods here because the compiler can't reason
-                // about the self.calls and self.entities being separable when hidden behind
-                // the function calls.
-                call_fn(*id, call);
-            }
+        Ok(())
+    }
+    fn for_each_call<F: FnMut(&mut Self, Self::ID, &mut Call<Self::ID>)>(
+        &mut self,
+        f: &mut F,
+    ) -> Result<(), Self::E> {
+        let mut index = 0;
+        let mut value = (EntityId::new(0), Call::new(EntityId::new(0), vec![])); // start with a dummy value;
+        while let Ok(other) = self.calls.get_mut(index) {
+            std::mem::swap(&mut value, other);
+            f(self, value.0, &mut value.1);
+            // swap to put the real value back
+            let other = self.calls.get_mut(index).unwrap();
+            std::mem::swap(&mut value, other);
+            index += 1;
         }
         Ok(())
     }
@@ -168,7 +188,7 @@ mod test {
         let sym: &Symbol = ctx.get(hello)?;
         assert_eq!(
             format!("{:?}", sym),
-            "Symbol { name: \"hello\", is_operator: false }"
+            "Symbol { name: \"hello\" }"
         );
         Ok(())
     }
@@ -193,11 +213,11 @@ mod test {
 
         assert_eq!(
             format!("{:?}", ctx.get::<Symbol>(hello)),
-            "Ok(Symbol { name: \"hello\", is_operator: false })"
+            "Ok(Symbol { name: \"hello\" })"
         );
         assert_eq!(
             format!("{:?}", ctx.get::<Symbol>(world)),
-            "Ok(Symbol { name: \"world\", is_operator: false })"
+            "Ok(Symbol { name: \"world\" })"
         );
     }
 
@@ -209,7 +229,7 @@ mod test {
 
         assert_eq!(
             format!("{:?}", ctx.get::<Call>(reference)),
-            format!("Ok(Call {{ callee: {:?}, args: [] }})", reference)
+            format!("Ok(Call {{ callee: {:?}, args: [], left: None, right: None }})", reference)
         );
     }
 
@@ -224,8 +244,8 @@ mod test {
         assert_eq!(
             format!("{:?}", ctx.get::<Call>(reference)),
             format!(
-                "Ok(Call {{ callee: {:?}, args: [(\"arg_0\", {:?})] }})",
-                hello, world
+                "Ok(Call {{ callee: {:?}, args: [(\"arg_0\", {:?})], left: Some({:?}), right: None }})",
+                hello, world, world
             )
         );
     }
@@ -245,8 +265,8 @@ mod test {
         assert_eq!(
             format!("{:?}", ctx.get::<Call>(reference)),
             format!(
-                "Ok(Call {{ callee: {:?}, args: [(\"arg_0\", {:?}), (\"arg_1\", {:?})] }})",
-                plus, a, b
+                "Ok(Call {{ callee: {:?}, args: [(\"arg_0\", {:?}), (\"arg_1\", {:?})], left: Some({:?}), right: Some({:?}) }})",
+                plus, a, b, a, b,
             )
         );
     }

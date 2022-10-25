@@ -22,7 +22,7 @@ mod test {
 
         assert_eq!(
             format!("{:?}", ctx.get(hello)),
-            "Ok(Symbol(Symbol { name: \"hello\", is_operator: false }))"
+            "Ok(Symbol(Symbol { name: \"hello\" }))"
         );
     }
 
@@ -35,11 +35,11 @@ mod test {
 
         assert_eq!(
             format!("{:?}", ctx.get(hello)),
-            "Ok(Symbol(Symbol { name: \"hello\", is_operator: false }))"
+            "Ok(Symbol(Symbol { name: \"hello\" }))"
         );
         assert_eq!(
             format!("{:?}", ctx.get(world)),
-            "Ok(Symbol(Symbol { name: \"world\", is_operator: false }))"
+            "Ok(Symbol(Symbol { name: \"world\" }))"
         );
     }
 
@@ -69,8 +69,8 @@ mod test {
         assert_eq!(
             format!("{:?}", ctx.get(reference)),
             format!(
-                "Ok(Call(Call {{ callee: {:?}, args: [(\"arg_0\", {:?})] }}))",
-                hello, world
+                "Ok(Call(Call {{ callee: {:?}, args: [(\"arg_0\", {:?})], left: Some({:?}), right: None }}))",
+                hello, world, world
             )
         );
         Ok(())
@@ -91,8 +91,8 @@ mod test {
         assert_eq!(
             format!("{:?}", ctx.get(reference)),
             format!(
-                "Ok(Call(Call {{ callee: {:?}, args: [(\"arg_0\", {:?}), (\"arg_1\", {:?})] }}))",
-                plus, a, b
+                "Ok(Call(Call {{ callee: {:?}, args: [(\"arg_0\", {:?}), (\"arg_1\", {:?})], left: Some({:?}), right: Some({:?}) }}))",
+                plus, a, b, a, b
             )
         );
         Ok(())

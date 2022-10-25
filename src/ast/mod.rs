@@ -1,5 +1,5 @@
 use crate::arena::{Arena, ArenaError, Index};
-use crate::compiler_context::{CompilerContext, ForEachNode, NodeStore};
+use crate::compiler_context::{CompilerContext, NodeStore};
 use crate::nodes::*;
 
 mod node;
@@ -52,36 +52,58 @@ where
         std::mem::size_of::<Self>() + self.members.mem_usage()
     }
 
-    fn for_each(
+    fn for_each<
+        F1: FnMut(&mut Self, Self::ID, &mut i64),
+        F2: FnMut(&mut Self, Self::ID, &mut Operator),
+        F3: FnMut(&mut Self, Self::ID, &mut Symbol),
+        F4: FnMut(&mut Self, Self::ID, &mut Call<Self::ID>),
+    >(
         &mut self,
-        mut i64_fn: Option<ForEachNode<Self, i64>>,
-        mut operator_fn: Option<ForEachNode<Self, Operator>>,
-        mut symbol_fn: Option<ForEachNode<Self, Symbol>>,
-        mut call_fn: Option<ForEachNode<Self, Call<Self::ID>>>,
+        i64_fn: &mut Option<&mut F1>,
+        operator_fn: &mut Option<&mut F2>,
+        symbol_fn: &mut Option<&mut F3>,
+        call_fn: &mut Option<&mut F4>,
     ) -> Result<(), Self::E> {
-        for (id, node) in (&mut self.members).into_iter().enumerate() {
-            match node {
+        let mut index = 0;
+        loop {
+            let mut node = Node::I64(0); // start with a dummy value;
+            {
+                // swap to get the real value
+                let other = if let Ok(other) = self.members.get_mut(index) {
+                    other
+                } else {
+                    break;
+                };
+                std::mem::swap(&mut node, other);
+            }
+            match &mut node {
                 Node::Operator(operator) => {
-                    if let Some(operator_fn) = &mut operator_fn {
-                        operator_fn(id, operator)
+                    if let Some(operator_fn) = operator_fn {
+                        operator_fn(self, index, operator)
                     }
                 }
                 Node::Symbol(symbol) => {
-                    if let Some(symbol_fn) = &mut symbol_fn {
-                        symbol_fn(id, symbol)
+                    if let Some(symbol_fn) = symbol_fn {
+                        symbol_fn(self, index, symbol)
                     }
                 }
                 Node::Call(call) => {
-                    if let Some(call_fn) = &mut call_fn {
-                        call_fn(id, call)
+                    if let Some(call_fn) = call_fn {
+                        call_fn(self, index, call)
                     }
                 }
                 Node::I64(value) => {
-                    if let Some(i64_fn) = &mut i64_fn {
-                        i64_fn(id, value)
+                    if let Some(i64_fn) = i64_fn {
+                        i64_fn(self, index, value)
                     }
                 }
             }
+            {
+                // swap to get the real value back in place
+                let other = self.members.get_mut(index)?;
+                std::mem::swap(&mut node, other);
+            }
+            index += 1;
         }
         Ok(())
     }
@@ -94,7 +116,7 @@ impl NodeStore<Index, Node, ArenaError> for Ast {
     }
 
     fn remove(&mut self, id: Index) -> Result<Option<Node>, ArenaError> {
-        Ok(self.members.remove(id)?.map(|op| op))
+        self.members.remove(id)
     }
     fn add(&mut self, value: Node) -> Index {
         self.members.add(value)
@@ -173,7 +195,7 @@ mod test {
 
         assert_eq!(
             format!("{:?}", ctx.get_symbol(hello)),
-            "Ok(Symbol { name: \"hello\", is_operator: false })"
+            "Ok(Symbol { name: \"hello\" })"
         );
     }
 
@@ -186,11 +208,11 @@ mod test {
 
         assert_eq!(
             format!("{:?}", ctx.get_symbol(hello)),
-            "Ok(Symbol { name: \"hello\", is_operator: false })"
+            "Ok(Symbol { name: \"hello\" })"
         );
         assert_eq!(
             format!("{:?}", ctx.get_symbol(world)),
-            "Ok(Symbol { name: \"world\", is_operator: false })"
+            "Ok(Symbol { name: \"world\" })"
         );
     }
 
@@ -232,8 +254,8 @@ mod test {
         assert_eq!(
             format!("{:?}", ctx.get_call(reference)),
             format!(
-                "Ok(Call {{ callee: {:?}, args: [(\"arg_0\", {:?})] }})",
-                hello, world
+                "Ok(Call {{ callee: {:?}, args: [(\"arg_0\", {:?})], left: Some({:?}), right: None }})",
+                hello, world, world
             )
         );
         Ok(())
@@ -254,8 +276,8 @@ mod test {
         assert_eq!(
             format!("{:?}", ctx.get_call(reference)),
             format!(
-                "Ok(Call {{ callee: {:?}, args: [(\"arg_0\", {:?}), (\"arg_1\", {:?})] }})",
-                plus, a, b
+                "Ok(Call {{ callee: {:?}, args: [(\"arg_0\", {:?}), (\"arg_1\", {:?})], left: Some({:?}), right: Some({:?}) }})",
+                plus, a, b, a, b
             )
         );
         Ok(())
