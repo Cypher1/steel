@@ -22,6 +22,7 @@ pub trait CompilerContext:
     + NodeStore<Self::ID, Symbol, Self::E>
     + NodeStore<Self::ID, Operator, Self::E>
     + NodeStore<Self::ID, i64, Self::E>
+    + std::fmt::Debug
 {
     type ID: Eq + std::hash::Hash + Copy + std::fmt::Debug;
     type E: Into<crate::error::SteelErr> + std::fmt::Debug;
@@ -122,6 +123,9 @@ pub trait CompilerContext:
         symbol_fn: &mut Option<&mut F3>,
         call_fn: &mut Option<&mut F4>,
     ) -> Result<(), Self::E> {
+        if let Some(i64_fn) = i64_fn {
+            self.for_each_i64(i64_fn)?;
+        }
         if let Some(operator_fn) = operator_fn {
             self.for_each_operator(operator_fn)?;
         }
@@ -130,9 +134,6 @@ pub trait CompilerContext:
         }
         if let Some(call_fn) = call_fn {
             self.for_each_call(call_fn)?;
-        }
-        if let Some(i64_fn) = i64_fn {
-            self.for_each_i64(i64_fn)?;
         }
         Ok(())
     }
