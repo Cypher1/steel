@@ -104,13 +104,15 @@ impl CompilerContext for Ecs {
         f: &mut F,
     ) -> Result<(), Self::E> {
         let mut index = 0;
-        let mut value = (EntityId::new(0), Call::new(EntityId::new(0), vec![])); // start with a dummy value;
+        let init_value = (EntityId::new(0), Call::new(EntityId::new(0), vec![])); // start with a dummy value;
+        let mut value = init_value.clone();
         while let Ok(other) = self.calls.get_mut(index) {
             std::mem::swap(&mut value, other);
             f(self, value.0, &mut value.1);
             // swap to put the real value back
             let other = self.calls.get_mut(index).unwrap();
             std::mem::swap(&mut value, other);
+            assert_eq!(value, init_value);
             index += 1;
         }
         Ok(())
