@@ -1,4 +1,4 @@
-use crate::arena::Index;
+use crate::compact_arena::Index;
 use std::marker::PhantomData;
 
 pub fn typed_descriptor<T>() -> String {

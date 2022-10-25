@@ -57,10 +57,11 @@ pub trait CompilerContext:
         Self: NodeStore<Self::ID, T, Self::E>,
     {
         // For each component type...
-        <Self as NodeStore<Self::ID, Call<Self::ID>, Self::E>>::remove_any(self, id);
-        <Self as NodeStore<Self::ID, Symbol, Self::E>>::remove_any(self, id);
-        <Self as NodeStore<Self::ID, Operator, Self::E>>::remove_any(self, id);
-        <Self as NodeStore<Self::ID, i64, Self::E>>::remove_any(self, id);
+        // TODO: What if we just ignored the 'dead' components???
+        // <Self as NodeStore<Self::ID, Call<Self::ID>, Self::E>>::remove_any(self, id);
+        // <Self as NodeStore<Self::ID, Symbol, Self::E>>::remove_any(self, id);
+        // <Self as NodeStore<Self::ID, Operator, Self::E>>::remove_any(self, id);
+        // <Self as NodeStore<Self::ID, i64, Self::E>>::remove_any(self, id);
 
         // TODO: Construct new, don't just get_mut...
         <Self as NodeStore<Self::ID, T, Self::E>>::overwrite(self, id, value).expect("FAILED!?");
