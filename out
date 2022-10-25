@@ -1,7 +1,7 @@
 
 running 0 tests
 
-test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 52 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 55 filtered out; finished in 0.00s
 
 
 running 0 tests
@@ -21,410 +21,393 @@ test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 Gnuplot not found, using plotters backend
 Benchmarking ast optimize known program 1 constant
 Benchmarking ast optimize known program 1 constant: Warming up for 3.0000 s
-Benchmarking ast optimize known program 1 constant: Collecting 100 samples in estimated 5.0004 s (46M iterations)
+Benchmarking ast optimize known program 1 constant: Collecting 100 samples in estimated 5.0004 s (45M iterations)
 Benchmarking ast optimize known program 1 constant: Analyzing
 ast optimize known program 1 constant
-                        time:   [50.559 ns 50.825 ns 51.152 ns]
-                        change: [-12.113% -10.966% -9.8593%] (p = 0.00 < 0.05)
-                        Performance has improved.
-Found 3 outliers among 100 measurements (3.00%)
-  2 (2.00%) high mild
-  1 (1.00%) high severe
-
-Benchmarking ecs optimize known program 1 constant
-Benchmarking ecs optimize known program 1 constant: Warming up for 3.0000 s
-Benchmarking ecs optimize known program 1 constant: Collecting 100 samples in estimated 5.0003 s (32M iterations)
-Benchmarking ecs optimize known program 1 constant: Analyzing
-ecs optimize known program 1 constant
-                        time:   [46.649 ns 46.853 ns 47.073 ns]
-                        change: [-7.4561% -6.6541% -5.8468%] (p = 0.00 < 0.05)
-                        Performance has improved.
-Found 9 outliers among 100 measurements (9.00%)
-  5 (5.00%) low mild
-  4 (4.00%) high mild
-
-Benchmarking ast optimize known program 4: plus tree
-Benchmarking ast optimize known program 4: plus tree: Warming up for 3.0000 s
-Benchmarking ast optimize known program 4: plus tree: Collecting 100 samples in estimated 5.0018 s (8.5M iterations)
-Benchmarking ast optimize known program 4: plus tree: Analyzing
-ast optimize known program 4: plus tree
-                        time:   [354.44 ns 356.65 ns 358.49 ns]
-                        change: [-3.9780% -2.1204% -0.2866%] (p = 0.03 < 0.05)
-                        Change within noise threshold.
-
-Benchmarking ecs optimize known program 4: plus tree
-Benchmarking ecs optimize known program 4: plus tree: Warming up for 3.0000 s
-Benchmarking ecs optimize known program 4: plus tree: Collecting 100 samples in estimated 5.0019 s (4.7M iterations)
-Benchmarking ecs optimize known program 4: plus tree: Analyzing
-ecs optimize known program 4: plus tree
-                        time:   [476.76 ns 479.94 ns 482.95 ns]
-                        change: [-12.690% -11.510% -10.252%] (p = 0.00 < 0.05)
-                        Performance has improved.
-Found 1 outliers among 100 measurements (1.00%)
-  1 (1.00%) high severe
-
-Benchmarking ast optimize known program 10: plus tree
-Benchmarking ast optimize known program 10: plus tree: Warming up for 3.0000 s
-Benchmarking ast optimize known program 10: plus tree: Collecting 100 samples in estimated 5.0059 s (2.7M iterations)
-Benchmarking ast optimize known program 10: plus tree: Analyzing
-ast optimize known program 10: plus tree
-                        time:   [1.0782 µs 1.0818 µs 1.0856 µs]
-                        change: [-19.375% -17.809% -16.499%] (p = 0.00 < 0.05)
-                        Performance has improved.
-Found 26 outliers among 100 measurements (26.00%)
-  12 (12.00%) low severe
-  5 (5.00%) low mild
-  7 (7.00%) high mild
-  2 (2.00%) high severe
-
-Benchmarking ecs optimize known program 10: plus tree
-Benchmarking ecs optimize known program 10: plus tree: Warming up for 3.0000 s
-Benchmarking ecs optimize known program 10: plus tree: Collecting 100 samples in estimated 5.0028 s (2.3M iterations)
-Benchmarking ecs optimize known program 10: plus tree: Analyzing
-ecs optimize known program 10: plus tree
-                        time:   [1.1195 µs 1.1463 µs 1.1800 µs]
-                        change: [-24.612% -23.495% -22.119%] (p = 0.00 < 0.05)
-                        Performance has improved.
-Found 10 outliers among 100 measurements (10.00%)
-  6 (6.00%) high mild
-  4 (4.00%) high severe
-
-Benchmarking ast optimize known program 22: plus tree
-Benchmarking ast optimize known program 22: plus tree: Warming up for 3.0000 s
-Benchmarking ast optimize known program 22: plus tree: Collecting 100 samples in estimated 5.0102 s (1.0M iterations)
-Benchmarking ast optimize known program 22: plus tree: Analyzing
-ast optimize known program 22: plus tree
-                        time:   [2.7754 µs 2.7914 µs 2.8087 µs]
-                        change: [-19.101% -18.117% -17.164%] (p = 0.00 < 0.05)
-                        Performance has improved.
-Found 19 outliers among 100 measurements (19.00%)
-  3 (3.00%) low severe
-  9 (9.00%) low mild
-  5 (5.00%) high mild
-  2 (2.00%) high severe
-
-Benchmarking ecs optimize known program 22: plus tree
-Benchmarking ecs optimize known program 22: plus tree: Warming up for 3.0000 s
-Benchmarking ecs optimize known program 22: plus tree: Collecting 100 samples in estimated 5.0165 s (1.0M iterations)
-Benchmarking ecs optimize known program 22: plus tree: Analyzing
-ecs optimize known program 22: plus tree
-                        time:   [2.6288 µs 2.6439 µs 2.6596 µs]
-                        change: [-30.975% -30.187% -29.436%] (p = 0.00 < 0.05)
-                        Performance has improved.
-Found 6 outliers among 100 measurements (6.00%)
-  1 (1.00%) low mild
-  4 (4.00%) high mild
-  1 (1.00%) high severe
-
-Benchmarking ast optimize known program 46: plus tree
-Benchmarking ast optimize known program 46: plus tree: Warming up for 3.0000 s
-Benchmarking ast optimize known program 46: plus tree: Collecting 100 samples in estimated 5.0538 s (470k iterations)
-Benchmarking ast optimize known program 46: plus tree: Analyzing
-ast optimize known program 46: plus tree
-                        time:   [6.5225 µs 6.5459 µs 6.5673 µs]
-                        change: [-33.434% -28.541% -24.546%] (p = 0.00 < 0.05)
-                        Performance has improved.
-Found 1 outliers among 100 measurements (1.00%)
-  1 (1.00%) high severe
-
-Benchmarking ecs optimize known program 46: plus tree
-Benchmarking ecs optimize known program 46: plus tree: Warming up for 3.0000 s
-Benchmarking ecs optimize known program 46: plus tree: Collecting 100 samples in estimated 5.0036 s (409k iterations)
-Benchmarking ecs optimize known program 46: plus tree: Analyzing
-ecs optimize known program 46: plus tree
-                        time:   [6.1124 µs 6.1910 µs 6.2776 µs]
-                        change: [-42.436% -40.741% -39.075%] (p = 0.00 < 0.05)
-                        Performance has improved.
-Found 1 outliers among 100 measurements (1.00%)
-  1 (1.00%) high mild
-
-Benchmarking ast optimize known program 94: plus tree
-Benchmarking ast optimize known program 94: plus tree: Warming up for 3.0000 s
-Benchmarking ast optimize known program 94: plus tree: Collecting 100 samples in estimated 5.0415 s (207k iterations)
-Benchmarking ast optimize known program 94: plus tree: Analyzing
-ast optimize known program 94: plus tree
-                        time:   [17.557 µs 18.703 µs 20.045 µs]
-                        change: [+0.2377% +5.7658% +11.499%] (p = 0.04 < 0.05)
-                        Change within noise threshold.
-Found 12 outliers among 100 measurements (12.00%)
-  9 (9.00%) high mild
-  3 (3.00%) high severe
-
-Benchmarking ecs optimize known program 94: plus tree
-Benchmarking ecs optimize known program 94: plus tree: Warming up for 3.0000 s
-Benchmarking ecs optimize known program 94: plus tree: Collecting 100 samples in estimated 5.0194 s (167k iterations)
-Benchmarking ecs optimize known program 94: plus tree: Analyzing
-ecs optimize known program 94: plus tree
-                        time:   [21.720 µs 23.031 µs 24.583 µs]
-                        change: [+27.970% +34.143% +39.964%] (p = 0.00 < 0.05)
-                        Performance has regressed.
-Found 2 outliers among 100 measurements (2.00%)
-  2 (2.00%) high mild
-
-Benchmarking ast optimize known program 190: plus tree
-Benchmarking ast optimize known program 190: plus tree: Warming up for 3.0000 s
-Benchmarking ast optimize known program 190: plus tree: Collecting 100 samples in estimated 5.1385 s (86k iterations)
-Benchmarking ast optimize known program 190: plus tree: Analyzing
-ast optimize known program 190: plus tree
-                        time:   [35.967 µs 36.867 µs 37.950 µs]
-                        change: [-1.4189% +3.1891% +8.3789%] (p = 0.20 > 0.05)
-                        No change in performance detected.
-Found 7 outliers among 100 measurements (7.00%)
-  3 (3.00%) high mild
-  4 (4.00%) high severe
-
-Benchmarking ecs optimize known program 190: plus tree
-Benchmarking ecs optimize known program 190: plus tree: Warming up for 3.0000 s
-Benchmarking ecs optimize known program 190: plus tree: Collecting 100 samples in estimated 5.1955 s (121k iterations)
-Benchmarking ecs optimize known program 190: plus tree: Analyzing
-ecs optimize known program 190: plus tree
-                        time:   [28.269 µs 29.492 µs 30.936 µs]
-                        change: [-34.819% -32.365% -29.596%] (p = 0.00 < 0.05)
-                        Performance has improved.
-Found 12 outliers among 100 measurements (12.00%)
-  4 (4.00%) high mild
-  8 (8.00%) high severe
-
-Benchmarking ast optimize known program 382: plus tree
-Benchmarking ast optimize known program 382: plus tree: Warming up for 3.0000 s
-Benchmarking ast optimize known program 382: plus tree: Collecting 100 samples in estimated 5.2389 s (50k iterations)
-Benchmarking ast optimize known program 382: plus tree: Analyzing
-ast optimize known program 382: plus tree
-                        time:   [76.158 µs 78.373 µs 80.487 µs]
-                        change: [-3.9453% -1.6619% +0.7057%] (p = 0.15 > 0.05)
-                        No change in performance detected.
-Found 3 outliers among 100 measurements (3.00%)
-  3 (3.00%) high mild
-
-Benchmarking ecs optimize known program 382: plus tree
-Benchmarking ecs optimize known program 382: plus tree: Warming up for 3.0000 s
-Benchmarking ecs optimize known program 382: plus tree: Collecting 100 samples in estimated 5.2201 s (66k iterations)
-Benchmarking ecs optimize known program 382: plus tree: Analyzing
-ecs optimize known program 382: plus tree
-                        time:   [53.322 µs 55.585 µs 57.905 µs]
-                        change: [-39.352% -37.197% -35.008%] (p = 0.00 < 0.05)
-                        Performance has improved.
-Found 10 outliers among 100 measurements (10.00%)
-  2 (2.00%) high mild
-  8 (8.00%) high severe
-
-Benchmarking ast optimize known program 766: plus tree
-Benchmarking ast optimize known program 766: plus tree: Warming up for 3.0000 s
-Benchmarking ast optimize known program 766: plus tree: Collecting 100 samples in estimated 5.3384 s (25k iterations)
-Benchmarking ast optimize known program 766: plus tree: Analyzing
-ast optimize known program 766: plus tree
-                        time:   [170.25 µs 174.46 µs 179.29 µs]
-                        change: [+9.5043% +11.502% +13.616%] (p = 0.00 < 0.05)
-                        Performance has regressed.
-Found 5 outliers among 100 measurements (5.00%)
-  2 (2.00%) high mild
-  3 (3.00%) high severe
-
-Benchmarking ecs optimize known program 766: plus tree
-Benchmarking ecs optimize known program 766: plus tree: Warming up for 3.0000 s
-Benchmarking ecs optimize known program 766: plus tree: Collecting 100 samples in estimated 5.2834 s (30k iterations)
-Benchmarking ecs optimize known program 766: plus tree: Analyzing
-ecs optimize known program 766: plus tree
-                        time:   [107.92 µs 110.93 µs 114.56 µs]
-                        change: [-38.510% -35.235% -29.295%] (p = 0.00 < 0.05)
-                        Performance has improved.
-Found 11 outliers among 100 measurements (11.00%)
-  7 (7.00%) high mild
-  4 (4.00%) high severe
-
-Benchmarking ast optimize known program 1534: plus tree
-Benchmarking ast optimize known program 1534: plus tree: Warming up for 3.0000 s
-Benchmarking ast optimize known program 1534: plus tree: Collecting 100 samples in estimated 6.6155 s (15k iterations)
-Benchmarking ast optimize known program 1534: plus tree: Analyzing
-ast optimize known program 1534: plus tree
-                        time:   [357.22 µs 368.52 µs 379.90 µs]
-                        change: [+8.6693% +12.151% +15.795%] (p = 0.00 < 0.05)
-                        Performance has regressed.
-Found 3 outliers among 100 measurements (3.00%)
-  3 (3.00%) high mild
-
-Benchmarking ecs optimize known program 1534: plus tree
-Benchmarking ecs optimize known program 1534: plus tree: Warming up for 3.0000 s
-Benchmarking ecs optimize known program 1534: plus tree: Collecting 100 samples in estimated 6.6051 s (20k iterations)
-Benchmarking ecs optimize known program 1534: plus tree: Analyzing
-ecs optimize known program 1534: plus tree
-                        time:   [269.77 µs 284.04 µs 299.70 µs]
-                        change: [-23.694% -20.939% -17.666%] (p = 0.00 < 0.05)
-                        Performance has improved.
-Found 11 outliers among 100 measurements (11.00%)
-  7 (7.00%) high mild
-  4 (4.00%) high severe
-
-Benchmarking ast optimize known program 3070: plus tree
-Benchmarking ast optimize known program 3070: plus tree: Warming up for 3.0000 s
-Benchmarking ast optimize known program 3070: plus tree: Collecting 100 samples in estimated 8.5507 s (10k iterations)
-Benchmarking ast optimize known program 3070: plus tree: Analyzing
-ast optimize known program 3070: plus tree
-                        time:   [688.85 µs 697.39 µs 705.87 µs]
-                        change: [+7.8274% +9.9743% +12.043%] (p = 0.00 < 0.05)
-                        Performance has regressed.
-
-Benchmarking ecs optimize known program 3070: plus tree
-Benchmarking ecs optimize known program 3070: plus tree: Warming up for 3.0000 s
-Benchmarking ecs optimize known program 3070: plus tree: Collecting 100 samples in estimated 6.6524 s (10k iterations)
-Benchmarking ecs optimize known program 3070: plus tree: Analyzing
-ecs optimize known program 3070: plus tree
-                        time:   [533.81 µs 551.07 µs 569.02 µs]
-                        change: [-23.818% -19.128% -11.152%] (p = 0.00 < 0.05)
-                        Performance has improved.
-Found 2 outliers among 100 measurements (2.00%)
-  1 (1.00%) high mild
-  1 (1.00%) high severe
-
-Benchmarking ast optimize known program 6142: plus tree
-Benchmarking ast optimize known program 6142: plus tree: Warming up for 3.0000 s
-
-Warning: Unable to complete 100 samples in 5.0s. You may wish to increase target time to 8.8s, enable flat sampling, or reduce sample count to 50.
-Benchmarking ast optimize known program 6142: plus tree: Collecting 100 samples in estimated 8.8468 s (5050 iterations)
-Benchmarking ast optimize known program 6142: plus tree: Analyzing
-ast optimize known program 6142: plus tree
-                        time:   [1.3994 ms 1.4093 ms 1.4196 ms]
-                        change: [+0.7552% +3.0614% +5.5298%] (p = 0.01 < 0.05)
-                        Change within noise threshold.
-Found 8 outliers among 100 measurements (8.00%)
-  2 (2.00%) high mild
-  6 (6.00%) high severe
-
-Benchmarking ecs optimize known program 6142: plus tree
-Benchmarking ecs optimize known program 6142: plus tree: Warming up for 3.0000 s
-
-Warning: Unable to complete 100 samples in 5.0s. You may wish to increase target time to 6.2s, enable flat sampling, or reduce sample count to 60.
-Benchmarking ecs optimize known program 6142: plus tree: Collecting 100 samples in estimated 6.2451 s (5050 iterations)
-Benchmarking ecs optimize known program 6142: plus tree: Analyzing
-ecs optimize known program 6142: plus tree
-                        time:   [861.90 µs 873.22 µs 884.38 µs]
-                        change: [-39.042% -37.803% -36.546%] (p = 0.00 < 0.05)
-                        Performance has improved.
-Found 1 outliers among 100 measurements (1.00%)
-  1 (1.00%) high mild
-
-Benchmarking ast optimize known program 12286: plus tree
-Benchmarking ast optimize known program 12286: plus tree: Warming up for 3.0000 s
-Benchmarking ast optimize known program 12286: plus tree: Collecting 100 samples in estimated 5.0218 s (1400 iterations)
-Benchmarking ast optimize known program 12286: plus tree: Analyzing
-ast optimize known program 12286: plus tree
-                        time:   [2.9662 ms 3.0454 ms 3.1388 ms]
-                        change: [+12.397% +15.919% +19.901%] (p = 0.00 < 0.05)
-                        Performance has regressed.
-Found 8 outliers among 100 measurements (8.00%)
-  6 (6.00%) high mild
-  2 (2.00%) high severe
-
-Benchmarking ecs optimize known program 12286: plus tree
-Benchmarking ecs optimize known program 12286: plus tree: Warming up for 3.0000 s
-Benchmarking ecs optimize known program 12286: plus tree: Collecting 100 samples in estimated 5.2454 s (2100 iterations)
-Benchmarking ecs optimize known program 12286: plus tree: Analyzing
-ecs optimize known program 12286: plus tree
-                        time:   [1.7426 ms 1.7670 ms 1.7932 ms]
-                        change: [-36.306% -34.798% -33.399%] (p = 0.00 < 0.05)
-                        Performance has improved.
-Found 1 outliers among 100 measurements (1.00%)
-  1 (1.00%) high mild
-
-Benchmarking ast optimize known program 24574: plus tree
-Benchmarking ast optimize known program 24574: plus tree: Warming up for 3.0000 s
-Benchmarking ast optimize known program 24574: plus tree: Collecting 100 samples in estimated 5.2161 s (700 iterations)
-Benchmarking ast optimize known program 24574: plus tree: Analyzing
-ast optimize known program 24574: plus tree
-                        time:   [6.0725 ms 6.0978 ms 6.1291 ms]
-                        change: [+6.2892% +9.4185% +12.104%] (p = 0.00 < 0.05)
-                        Performance has regressed.
-Found 7 outliers among 100 measurements (7.00%)
-  3 (3.00%) high mild
-  4 (4.00%) high severe
-
-Benchmarking ecs optimize known program 24574: plus tree
-Benchmarking ecs optimize known program 24574: plus tree: Warming up for 3.0000 s
-Benchmarking ecs optimize known program 24574: plus tree: Collecting 100 samples in estimated 5.0379 s (1000 iterations)
-Benchmarking ecs optimize known program 24574: plus tree: Analyzing
-ecs optimize known program 24574: plus tree
-                        time:   [3.2626 ms 3.2966 ms 3.3341 ms]
-                        change: [-32.770% -30.240% -27.924%] (p = 0.00 < 0.05)
-                        Performance has improved.
-Found 5 outliers among 100 measurements (5.00%)
-  3 (3.00%) high mild
-  2 (2.00%) high severe
-
-Benchmarking ast optimize known program 49150: plus tree
-Benchmarking ast optimize known program 49150: plus tree: Warming up for 3.0000 s
-Benchmarking ast optimize known program 49150: plus tree: Collecting 100 samples in estimated 5.2001 s (300 iterations)
-Benchmarking ast optimize known program 49150: plus tree: Analyzing
-ast optimize known program 49150: plus tree
-                        time:   [16.072 ms 16.698 ms 17.404 ms]
-                        change: [+30.547% +36.590% +43.274%] (p = 0.00 < 0.05)
-                        Performance has regressed.
-Found 6 outliers among 100 measurements (6.00%)
-  3 (3.00%) high mild
-  3 (3.00%) high severe
-
-Benchmarking ecs optimize known program 49150: plus tree
-Benchmarking ecs optimize known program 49150: plus tree: Warming up for 3.0000 s
-Benchmarking ecs optimize known program 49150: plus tree: Collecting 100 samples in estimated 5.1405 s (500 iterations)
-Benchmarking ecs optimize known program 49150: plus tree: Analyzing
-ecs optimize known program 49150: plus tree
-                        time:   [6.9029 ms 6.9477 ms 6.9947 ms]
-                        change: [-44.221% -42.974% -41.771%] (p = 0.00 < 0.05)
-                        Performance has improved.
-Found 3 outliers among 100 measurements (3.00%)
-  3 (3.00%) high mild
-
-Benchmarking ast optimize known program 98302: plus tree
-Benchmarking ast optimize known program 98302: plus tree: Warming up for 3.0000 s
-Benchmarking ast optimize known program 98302: plus tree: Collecting 100 samples in estimated 6.8593 s (200 iterations)
-Benchmarking ast optimize known program 98302: plus tree: Analyzing
-ast optimize known program 98302: plus tree
-                        time:   [31.132 ms 31.614 ms 32.370 ms]
-                        change: [+5.7529% +8.4735% +11.906%] (p = 0.00 < 0.05)
-                        Performance has regressed.
-Found 8 outliers among 100 measurements (8.00%)
-  3 (3.00%) high mild
-  5 (5.00%) high severe
-
-Benchmarking ecs optimize known program 98302: plus tree
-Benchmarking ecs optimize known program 98302: plus tree: Warming up for 3.0000 s
-Benchmarking ecs optimize known program 98302: plus tree: Collecting 100 samples in estimated 6.3555 s (300 iterations)
-Benchmarking ecs optimize known program 98302: plus tree: Analyzing
-ecs optimize known program 98302: plus tree
-                        time:   [16.663 ms 16.916 ms 17.188 ms]
-                        change: [-35.293% -33.803% -32.337%] (p = 0.00 < 0.05)
+                        time:   [53.932 ns 54.334 ns 54.758 ns]
+                        change: [-5.4391% -4.6556% -3.8204%] (p = 0.00 < 0.05)
                         Performance has improved.
 Found 4 outliers among 100 measurements (4.00%)
   3 (3.00%) high mild
   1 (1.00%) high severe
 
+Benchmarking ecs optimize known program 1 constant
+Benchmarking ecs optimize known program 1 constant: Warming up for 3.0000 s
+Benchmarking ecs optimize known program 1 constant: Collecting 100 samples in estimated 5.0003 s (30M iterations)
+Benchmarking ecs optimize known program 1 constant: Analyzing
+ecs optimize known program 1 constant
+                        time:   [48.099 ns 48.357 ns 48.678 ns]
+                        change: [-1.0202% +0.0486% +1.0953%] (p = 0.93 > 0.05)
+                        No change in performance detected.
+Found 2 outliers among 100 measurements (2.00%)
+  2 (2.00%) high mild
+
+Benchmarking ast optimize known program 4: plus tree
+Benchmarking ast optimize known program 4: plus tree: Warming up for 3.0000 s
+Benchmarking ast optimize known program 4: plus tree: Collecting 100 samples in estimated 5.0027 s (8.4M iterations)
+Benchmarking ast optimize known program 4: plus tree: Analyzing
+ast optimize known program 4: plus tree
+                        time:   [338.15 ns 343.29 ns 349.98 ns]
+                        change: [-0.9617% +1.1081% +3.2988%] (p = 0.35 > 0.05)
+                        No change in performance detected.
+Found 9 outliers among 100 measurements (9.00%)
+  3 (3.00%) high mild
+  6 (6.00%) high severe
+
+Benchmarking ecs optimize known program 4: plus tree
+Benchmarking ecs optimize known program 4: plus tree: Warming up for 3.0000 s
+Benchmarking ecs optimize known program 4: plus tree: Collecting 100 samples in estimated 5.0038 s (5.8M iterations)
+Benchmarking ecs optimize known program 4: plus tree: Analyzing
+ecs optimize known program 4: plus tree
+                        time:   [401.27 ns 404.28 ns 407.64 ns]
+                        change: [-15.333% -14.129% -12.906%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 2 outliers among 100 measurements (2.00%)
+  2 (2.00%) high mild
+
+Benchmarking ast optimize known program 10: plus tree
+Benchmarking ast optimize known program 10: plus tree: Warming up for 3.0000 s
+Benchmarking ast optimize known program 10: plus tree: Collecting 100 samples in estimated 5.0018 s (2.8M iterations)
+Benchmarking ast optimize known program 10: plus tree: Analyzing
+ast optimize known program 10: plus tree
+                        time:   [1.0366 µs 1.0408 µs 1.0452 µs]
+                        change: [-4.2898% -3.4909% -2.6947%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 10 outliers among 100 measurements (10.00%)
+  7 (7.00%) low mild
+  2 (2.00%) high mild
+  1 (1.00%) high severe
+
+Benchmarking ecs optimize known program 10: plus tree
+Benchmarking ecs optimize known program 10: plus tree: Warming up for 3.0000 s
+Benchmarking ecs optimize known program 10: plus tree: Collecting 100 samples in estimated 5.0047 s (2.3M iterations)
+Benchmarking ecs optimize known program 10: plus tree: Analyzing
+ecs optimize known program 10: plus tree
+                        time:   [1.0870 µs 1.0912 µs 1.0954 µs]
+                        change: [-3.8212% -2.0303% -0.4615%] (p = 0.02 < 0.05)
+                        Change within noise threshold.
+Found 8 outliers among 100 measurements (8.00%)
+  4 (4.00%) low mild
+  3 (3.00%) high mild
+  1 (1.00%) high severe
+
+Benchmarking ast optimize known program 22: plus tree
+Benchmarking ast optimize known program 22: plus tree: Warming up for 3.0000 s
+Benchmarking ast optimize known program 22: plus tree: Collecting 100 samples in estimated 5.0050 s (1.1M iterations)
+Benchmarking ast optimize known program 22: plus tree: Analyzing
+ast optimize known program 22: plus tree
+                        time:   [3.2588 µs 3.3323 µs 3.3914 µs]
+                        change: [+6.8998% +10.056% +12.935%] (p = 0.00 < 0.05)
+                        Performance has regressed.
+
+Benchmarking ecs optimize known program 22: plus tree
+Benchmarking ecs optimize known program 22: plus tree: Warming up for 3.0000 s
+Benchmarking ecs optimize known program 22: plus tree: Collecting 100 samples in estimated 5.0010 s (1.0M iterations)
+Benchmarking ecs optimize known program 22: plus tree: Analyzing
+ecs optimize known program 22: plus tree
+                        time:   [2.6394 µs 2.6449 µs 2.6503 µs]
+                        change: [-0.2520% +0.8177% +1.9151%] (p = 0.14 > 0.05)
+                        No change in performance detected.
+Found 19 outliers among 100 measurements (19.00%)
+  11 (11.00%) low severe
+  5 (5.00%) low mild
+  2 (2.00%) high mild
+  1 (1.00%) high severe
+
+Benchmarking ast optimize known program 46: plus tree
+Benchmarking ast optimize known program 46: plus tree: Warming up for 3.0000 s
+Benchmarking ast optimize known program 46: plus tree: Collecting 100 samples in estimated 5.0269 s (470k iterations)
+Benchmarking ast optimize known program 46: plus tree: Analyzing
+ast optimize known program 46: plus tree
+                        time:   [6.8998 µs 7.0458 µs 7.2181 µs]
+                        change: [+7.7818% +10.094% +12.599%] (p = 0.00 < 0.05)
+                        Performance has regressed.
+Found 11 outliers among 100 measurements (11.00%)
+  5 (5.00%) high mild
+  6 (6.00%) high severe
+
+Benchmarking ecs optimize known program 46: plus tree
+Benchmarking ecs optimize known program 46: plus tree: Warming up for 3.0000 s
+Benchmarking ecs optimize known program 46: plus tree: Collecting 100 samples in estimated 5.0173 s (454k iterations)
+Benchmarking ecs optimize known program 46: plus tree: Analyzing
+ecs optimize known program 46: plus tree
+                        time:   [5.8825 µs 5.8996 µs 5.9175 µs]
+                        change: [-5.6708% -4.2694% -2.8453%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 16 outliers among 100 measurements (16.00%)
+  4 (4.00%) low severe
+  10 (10.00%) low mild
+  1 (1.00%) high mild
+  1 (1.00%) high severe
+
+Benchmarking ast optimize known program 94: plus tree
+Benchmarking ast optimize known program 94: plus tree: Warming up for 3.0000 s
+Benchmarking ast optimize known program 94: plus tree: Collecting 100 samples in estimated 5.0281 s (227k iterations)
+Benchmarking ast optimize known program 94: plus tree: Analyzing
+ast optimize known program 94: plus tree
+                        time:   [13.833 µs 13.894 µs 13.952 µs]
+                        change: [-29.440% -25.593% -21.751%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 1 outliers among 100 measurements (1.00%)
+  1 (1.00%) high severe
+
+Benchmarking ecs optimize known program 94: plus tree
+Benchmarking ecs optimize known program 94: plus tree: Warming up for 3.0000 s
+Benchmarking ecs optimize known program 94: plus tree: Collecting 100 samples in estimated 5.0562 s (263k iterations)
+Benchmarking ecs optimize known program 94: plus tree: Analyzing
+ecs optimize known program 94: plus tree
+                        time:   [12.833 µs 12.869 µs 12.911 µs]
+                        change: [-49.873% -47.581% -45.210%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 5 outliers among 100 measurements (5.00%)
+  1 (1.00%) low mild
+  1 (1.00%) high mild
+  3 (3.00%) high severe
+
+Benchmarking ast optimize known program 190: plus tree
+Benchmarking ast optimize known program 190: plus tree: Warming up for 3.0000 s
+Benchmarking ast optimize known program 190: plus tree: Collecting 100 samples in estimated 5.0430 s (111k iterations)
+Benchmarking ast optimize known program 190: plus tree: Analyzing
+ast optimize known program 190: plus tree
+                        time:   [30.846 µs 31.015 µs 31.202 µs]
+                        change: [-25.001% -21.944% -19.096%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 5 outliers among 100 measurements (5.00%)
+  1 (1.00%) low mild
+  2 (2.00%) high mild
+  2 (2.00%) high severe
+
+Benchmarking ecs optimize known program 190: plus tree
+Benchmarking ecs optimize known program 190: plus tree: Warming up for 3.0000 s
+Benchmarking ecs optimize known program 190: plus tree: Collecting 100 samples in estimated 5.1207 s (131k iterations)
+Benchmarking ecs optimize known program 190: plus tree: Analyzing
+ecs optimize known program 190: plus tree
+                        time:   [26.924 µs 27.125 µs 27.403 µs]
+                        change: [-8.7011% -5.5576% -2.6373%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 6 outliers among 100 measurements (6.00%)
+  1 (1.00%) low mild
+  1 (1.00%) high mild
+  4 (4.00%) high severe
+
+Benchmarking ast optimize known program 382: plus tree
+Benchmarking ast optimize known program 382: plus tree: Warming up for 3.0000 s
+Benchmarking ast optimize known program 382: plus tree: Collecting 100 samples in estimated 5.3817 s (61k iterations)
+Benchmarking ast optimize known program 382: plus tree: Analyzing
+ast optimize known program 382: plus tree
+                        time:   [66.035 µs 66.570 µs 67.088 µs]
+                        change: [-13.681% -11.743% -9.7823%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 2 outliers among 100 measurements (2.00%)
+  1 (1.00%) high mild
+  1 (1.00%) high severe
+
+Benchmarking ecs optimize known program 382: plus tree
+Benchmarking ecs optimize known program 382: plus tree: Warming up for 3.0000 s
+Benchmarking ecs optimize known program 382: plus tree: Collecting 100 samples in estimated 5.0775 s (66k iterations)
+Benchmarking ecs optimize known program 382: plus tree: Analyzing
+ecs optimize known program 382: plus tree
+                        time:   [53.739 µs 54.092 µs 54.539 µs]
+                        change: [-0.8912% +1.1643% +3.0445%] (p = 0.25 > 0.05)
+                        No change in performance detected.
+Found 5 outliers among 100 measurements (5.00%)
+  2 (2.00%) high mild
+  3 (3.00%) high severe
+
+Benchmarking ast optimize known program 766: plus tree
+Benchmarking ast optimize known program 766: plus tree: Warming up for 3.0000 s
+Benchmarking ast optimize known program 766: plus tree: Collecting 100 samples in estimated 5.7674 s (30k iterations)
+Benchmarking ast optimize known program 766: plus tree: Analyzing
+ast optimize known program 766: plus tree
+                        time:   [148.74 µs 152.50 µs 156.66 µs]
+                        change: [-16.952% -15.162% -13.276%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 14 outliers among 100 measurements (14.00%)
+  4 (4.00%) high mild
+  10 (10.00%) high severe
+
+Benchmarking ecs optimize known program 766: plus tree
+Benchmarking ecs optimize known program 766: plus tree: Warming up for 3.0000 s
+Benchmarking ecs optimize known program 766: plus tree: Collecting 100 samples in estimated 5.4857 s (35k iterations)
+Benchmarking ecs optimize known program 766: plus tree: Analyzing
+ecs optimize known program 766: plus tree
+                        time:   [110.37 µs 111.63 µs 113.07 µs]
+                        change: [-8.1959% -0.9873% +4.0926%] (p = 0.83 > 0.05)
+                        No change in performance detected.
+Found 5 outliers among 100 measurements (5.00%)
+  3 (3.00%) high mild
+  2 (2.00%) high severe
+
+Benchmarking ast optimize known program 1534: plus tree
+Benchmarking ast optimize known program 1534: plus tree: Warming up for 3.0000 s
+Benchmarking ast optimize known program 1534: plus tree: Collecting 100 samples in estimated 5.9165 s (15k iterations)
+Benchmarking ast optimize known program 1534: plus tree: Analyzing
+ast optimize known program 1534: plus tree
+                        time:   [303.27 µs 305.04 µs 306.99 µs]
+                        change: [-16.984% -15.096% -13.146%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 4 outliers among 100 measurements (4.00%)
+  2 (2.00%) low mild
+  1 (1.00%) high mild
+  1 (1.00%) high severe
+
+Benchmarking ecs optimize known program 1534: plus tree
+Benchmarking ecs optimize known program 1534: plus tree: Warming up for 3.0000 s
+Benchmarking ecs optimize known program 1534: plus tree: Collecting 100 samples in estimated 6.6138 s (20k iterations)
+Benchmarking ecs optimize known program 1534: plus tree: Analyzing
+ecs optimize known program 1534: plus tree
+                        time:   [222.11 µs 224.22 µs 226.42 µs]
+                        change: [-20.673% -17.836% -15.054%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 3 outliers among 100 measurements (3.00%)
+  2 (2.00%) high mild
+  1 (1.00%) high severe
+
+Benchmarking ast optimize known program 3070: plus tree
+Benchmarking ast optimize known program 3070: plus tree: Warming up for 3.0000 s
+Benchmarking ast optimize known program 3070: plus tree: Collecting 100 samples in estimated 8.2148 s (10k iterations)
+Benchmarking ast optimize known program 3070: plus tree: Analyzing
+ast optimize known program 3070: plus tree
+                        time:   [630.50 µs 634.43 µs 638.90 µs]
+                        change: [-8.3333% -7.2108% -6.1191%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 5 outliers among 100 measurements (5.00%)
+  4 (4.00%) high mild
+  1 (1.00%) high severe
+
+Benchmarking ecs optimize known program 3070: plus tree
+Benchmarking ecs optimize known program 3070: plus tree: Warming up for 3.0000 s
+Benchmarking ecs optimize known program 3070: plus tree: Collecting 100 samples in estimated 6.1911 s (10k iterations)
+Benchmarking ecs optimize known program 3070: plus tree: Analyzing
+ecs optimize known program 3070: plus tree
+                        time:   [447.79 µs 453.63 µs 459.31 µs]
+                        change: [-25.107% -18.180% -13.147%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 9 outliers among 100 measurements (9.00%)
+  4 (4.00%) low mild
+  4 (4.00%) high mild
+  1 (1.00%) high severe
+
+Benchmarking ast optimize known program 6142: plus tree
+Benchmarking ast optimize known program 6142: plus tree: Warming up for 3.0000 s
+
+Warning: Unable to complete 100 samples in 5.0s. You may wish to increase target time to 8.3s, enable flat sampling, or reduce sample count to 50.
+Benchmarking ast optimize known program 6142: plus tree: Collecting 100 samples in estimated 8.3391 s (5050 iterations)
+Benchmarking ast optimize known program 6142: plus tree: Analyzing
+ast optimize known program 6142: plus tree
+                        time:   [1.3103 ms 1.3164 ms 1.3220 ms]
+                        change: [-10.386% -8.7328% -7.2031%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 1 outliers among 100 measurements (1.00%)
+  1 (1.00%) high mild
+
+Benchmarking ecs optimize known program 6142: plus tree
+Benchmarking ecs optimize known program 6142: plus tree: Warming up for 3.0000 s
+
+Warning: Unable to complete 100 samples in 5.0s. You may wish to increase target time to 6.5s, enable flat sampling, or reduce sample count to 60.
+Benchmarking ecs optimize known program 6142: plus tree: Collecting 100 samples in estimated 6.4625 s (5050 iterations)
+Benchmarking ecs optimize known program 6142: plus tree: Analyzing
+ecs optimize known program 6142: plus tree
+                        time:   [957.41 µs 967.95 µs 977.61 µs]
+                        change: [+9.2264% +10.978% +12.819%] (p = 0.00 < 0.05)
+                        Performance has regressed.
+Found 1 outliers among 100 measurements (1.00%)
+  1 (1.00%) high mild
+
+Benchmarking ast optimize known program 12286: plus tree
+Benchmarking ast optimize known program 12286: plus tree: Warming up for 3.0000 s
+Benchmarking ast optimize known program 12286: plus tree: Collecting 100 samples in estimated 5.0339 s (1300 iterations)
+Benchmarking ast optimize known program 12286: plus tree: Analyzing
+ast optimize known program 12286: plus tree
+                        time:   [2.7227 ms 2.7493 ms 2.7798 ms]
+                        change: [-12.521% -9.7217% -7.0574%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 14 outliers among 100 measurements (14.00%)
+  3 (3.00%) high mild
+  11 (11.00%) high severe
+
+Benchmarking ecs optimize known program 12286: plus tree
+Benchmarking ecs optimize known program 12286: plus tree: Warming up for 3.0000 s
+Benchmarking ecs optimize known program 12286: plus tree: Collecting 100 samples in estimated 5.0937 s (2000 iterations)
+Benchmarking ecs optimize known program 12286: plus tree: Analyzing
+ecs optimize known program 12286: plus tree
+                        time:   [1.7323 ms 1.7406 ms 1.7495 ms]
+                        change: [-3.0052% -1.4976% -0.0034%] (p = 0.05 > 0.05)
+                        No change in performance detected.
+Found 5 outliers among 100 measurements (5.00%)
+  4 (4.00%) high mild
+  1 (1.00%) high severe
+
+Benchmarking ast optimize known program 24574: plus tree
+Benchmarking ast optimize known program 24574: plus tree: Warming up for 3.0000 s
+Benchmarking ast optimize known program 24574: plus tree: Collecting 100 samples in estimated 5.0552 s (700 iterations)
+Benchmarking ast optimize known program 24574: plus tree: Analyzing
+ast optimize known program 24574: plus tree
+                        time:   [5.8397 ms 5.8532 ms 5.8669 ms]
+                        change: [-4.5460% -4.0117% -3.5505%] (p = 0.00 < 0.05)
+                        Performance has improved.
+
+Benchmarking ecs optimize known program 24574: plus tree
+Benchmarking ecs optimize known program 24574: plus tree: Warming up for 3.0000 s
+Benchmarking ecs optimize known program 24574: plus tree: Collecting 100 samples in estimated 5.1193 s (1000 iterations)
+Benchmarking ecs optimize known program 24574: plus tree: Analyzing
+ecs optimize known program 24574: plus tree
+                        time:   [3.5370 ms 3.5482 ms 3.5604 ms]
+                        change: [+6.3526% +7.6307% +8.7981%] (p = 0.00 < 0.05)
+                        Performance has regressed.
+Found 4 outliers among 100 measurements (4.00%)
+  4 (4.00%) high mild
+
+Benchmarking ast optimize known program 49150: plus tree
+Benchmarking ast optimize known program 49150: plus tree: Warming up for 3.0000 s
+Benchmarking ast optimize known program 49150: plus tree: Collecting 100 samples in estimated 6.2536 s (400 iterations)
+Benchmarking ast optimize known program 49150: plus tree: Analyzing
+ast optimize known program 49150: plus tree
+                        time:   [12.776 ms 12.843 ms 12.919 ms]
+                        change: [-26.264% -23.087% -20.062%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 6 outliers among 100 measurements (6.00%)
+  2 (2.00%) high mild
+  4 (4.00%) high severe
+
+Benchmarking ecs optimize known program 49150: plus tree
+Benchmarking ecs optimize known program 49150: plus tree: Warming up for 3.0000 s
+Benchmarking ecs optimize known program 49150: plus tree: Collecting 100 samples in estimated 5.3418 s (500 iterations)
+Benchmarking ecs optimize known program 49150: plus tree: Analyzing
+ecs optimize known program 49150: plus tree
+                        time:   [7.7062 ms 7.7609 ms 7.8300 ms]
+                        change: [+10.584% +11.705% +13.009%] (p = 0.00 < 0.05)
+                        Performance has regressed.
+Found 12 outliers among 100 measurements (12.00%)
+  7 (7.00%) high mild
+  5 (5.00%) high severe
+
+Benchmarking ast optimize known program 98302: plus tree
+Benchmarking ast optimize known program 98302: plus tree: Warming up for 3.0000 s
+Benchmarking ast optimize known program 98302: plus tree: Collecting 100 samples in estimated 6.6759 s (200 iterations)
+Benchmarking ast optimize known program 98302: plus tree: Analyzing
+ast optimize known program 98302: plus tree
+                        time:   [29.837 ms 30.003 ms 30.209 ms]
+                        change: [-7.3866% -5.0970% -3.4548%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 4 outliers among 100 measurements (4.00%)
+  3 (3.00%) high mild
+  1 (1.00%) high severe
+
+Benchmarking ecs optimize known program 98302: plus tree
+Benchmarking ecs optimize known program 98302: plus tree: Warming up for 3.0000 s
+Benchmarking ecs optimize known program 98302: plus tree: Collecting 100 samples in estimated 7.0369 s (300 iterations)
+Benchmarking ecs optimize known program 98302: plus tree: Analyzing
+ecs optimize known program 98302: plus tree
+                        time:   [18.230 ms 18.449 ms 18.704 ms]
+                        change: [+6.8535% +9.0609% +11.273%] (p = 0.00 < 0.05)
+                        Performance has regressed.
+Found 7 outliers among 100 measurements (7.00%)
+  2 (2.00%) high mild
+  5 (5.00%) high severe
+
 Benchmarking ast optimize known program 196606: plus tree
 Benchmarking ast optimize known program 196606: plus tree: Warming up for 3.0000 s
 
-Warning: Unable to complete 100 samples in 5.0s. You may wish to increase target time to 7.7s, or reduce sample count to 60.
-Benchmarking ast optimize known program 196606: plus tree: Collecting 100 samples in estimated 7.6643 s (100 iterations)
-Benchmarking ast optimize known program 196606: plus tree: Analyzing
-ast optimize known program 196606: plus tree
-                        time:   [70.565 ms 71.469 ms 72.486 ms]
-                        change: [+0.7071% +2.3178% +4.1250%] (p = 0.01 < 0.05)
-                        Change within noise threshold.
-Found 9 outliers among 100 measurements (9.00%)
-  7 (7.00%) high mild
-  2 (2.00%) high severe
-
-Benchmarking ecs optimize known program 196606: plus tree
-Benchmarking ecs optimize known program 196606: plus tree: Warming up for 3.0000 s
-Benchmarking ecs optimize known program 196606: plus tree: Collecting 100 samples in estimated 8.7533 s (200 iterations)
-Benchmarking ecs optimize known program 196606: plus tree: Analyzing
-ecs optimize known program 196606: plus tree
-                        time:   [34.996 ms 36.061 ms 37.315 ms]
-                        change: [-46.625% -44.085% -41.678%] (p = 0.00 < 0.05)
-                        Performance has improved.
-Found 9 outliers among 100 measurements (9.00%)
-  4 (4.00%) high mild
-  5 (5.00%) high severe
-
-Benchmarking ast optimize known program 393214: plus tree
-Benchmarking ast optimize known program 393214: plus tree: Warming up for 3.0000 s
-
-Warning: Unable to complete 100 samples in 5.0s. You may wish to increase target time to 16.2s, or reduce sample count to 30.
-Benchmarking ast optimize known program 393214: plus tree: Collecting 100 samples in estimated 16.175 s (100 iterations)
+Warning: Unable to complete 100 samples in 5.0s. You may wish to increase target time to 7.1s, or reduce sample count to 70.
+Benchmarking ast optimize known program 196606: plus tree: Collecting 100 samples in estimated 7.1275 s (100 iterations)
