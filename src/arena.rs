@@ -104,6 +104,10 @@ impl<T> Arena<T> {
         Self { members }
     }
 
+    pub fn capacity(&self) -> usize {
+        self.members.len()
+    }
+
     pub fn active_mem_usage(&self) -> usize {
         self.members.len() * std::mem::size_of::<T>()
     }

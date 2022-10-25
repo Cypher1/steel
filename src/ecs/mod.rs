@@ -56,13 +56,15 @@ impl CompilerContext for Ecs {
     fn for_each_i64<F: FnMut(&mut Self, Self::ID, &mut i64)>(&mut self, f: &mut F) -> Result<(), Self::E> {
         let mut index = 0;
         let mut value = (EntityId::new(0), 0); // start with a dummy value;
-        while let Ok(other) = self.i64_values.get_mut(index) {
-            // swap to get the real value
-            std::mem::swap(&mut value, other);
-            f(self, value.0, &mut value.1);
-            // swap to put the real value back
-            let other = self.i64_values.get_mut(index).unwrap();
-            std::mem::swap(&mut value, other);
+        while index < self.i64_values.capacity() {
+            if let Ok(other) = self.i64_values.get_mut(index) {
+                // swap to get the real value
+                std::mem::swap(&mut value, other);
+                f(self, value.0, &mut value.1);
+                // swap to put the real value back
+                let other = self.i64_values.get_mut(index).unwrap();
+                std::mem::swap(&mut value, other);
+            }
             index += 1;
         }
         Ok(())
@@ -73,12 +75,14 @@ impl CompilerContext for Ecs {
     ) -> Result<(), Self::E> {
         let mut index = 0;
         let mut value = (EntityId::new(0), Operator::Add); // start with a dummy value;
-        while let Ok(other) = self.operators.get_mut(index) {
-            std::mem::swap(&mut value, other);
-            f(self, value.0, &mut value.1);
-            // swap to put the real value back
-            let other = self.operators.get_mut(index).unwrap();
-            std::mem::swap(&mut value, other);
+        while index < self.operators.capacity() {
+            if let Ok(other) = self.operators.get_mut(index) {
+                std::mem::swap(&mut value, other);
+                f(self, value.0, &mut value.1);
+                // swap to put the real value back
+                let other = self.operators.get_mut(index).unwrap();
+                std::mem::swap(&mut value, other);
+            }
             index += 1;
         }
         Ok(())
@@ -89,12 +93,14 @@ impl CompilerContext for Ecs {
     ) -> Result<(), Self::E> {
         let mut index = 0;
         let mut value = (EntityId::new(0), Symbol::new("dummy")); // start with a dummy value;
-        while let Ok(other) = self.symbols.get_mut(index) {
-            std::mem::swap(&mut value, other);
-            f(self, value.0, &mut value.1);
-            // swap to put the real value back
-            let other = self.symbols.get_mut(index).unwrap();
-            std::mem::swap(&mut value, other);
+        while index < self.symbols.capacity() {
+            if let Ok(other) = self.symbols.get_mut(index) {
+                std::mem::swap(&mut value, other);
+                f(self, value.0, &mut value.1);
+                // swap to put the real value back
+                let other = self.symbols.get_mut(index).unwrap();
+                std::mem::swap(&mut value, other);
+            }
             index += 1;
         }
         Ok(())
@@ -106,13 +112,15 @@ impl CompilerContext for Ecs {
         let mut index = 0;
         let init_value = (EntityId::new(0), Call::new(EntityId::new(0), vec![])); // start with a dummy value;
         let mut value = init_value.clone();
-        while let Ok(other) = self.calls.get_mut(index) {
-            std::mem::swap(&mut value, other);
-            f(self, value.0, &mut value.1);
-            // swap to put the real value back
-            let other = self.calls.get_mut(index).unwrap();
-            std::mem::swap(&mut value, other);
-            assert_eq!(value, init_value);
+        while index < self.calls.capacity() {
+            if let Ok(other) = self.calls.get_mut(index) {
+                std::mem::swap(&mut value, other);
+                f(self, value.0, &mut value.1);
+                // swap to put the real value back
+                let other = self.calls.get_mut(index).unwrap();
+                std::mem::swap(&mut value, other);
+                assert_eq!(value, init_value);
+            }
             index += 1;
         }
         Ok(())
