@@ -1,4 +1,4 @@
-use crate::arena::Arena;
+use crate::compact_arena::Arena;
 use crate::compiler_context::{CompilerContext, NodeStore};
 use crate::nodes::*;
 

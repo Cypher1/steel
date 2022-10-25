@@ -1,4 +1,4 @@
-use crate::arena::Index;
+use crate::tombstoning_arena::Index;
 use crate::nodes::*;
 
 #[derive(Clone, Debug)]
@@ -12,7 +12,7 @@ pub enum Node {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::arena::{Arena, ArenaError};
+    use crate::tombstoning_arena::{Arena, ArenaError};
 
     #[test]
     fn can_construct_node() {
