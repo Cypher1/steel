@@ -199,9 +199,9 @@ pub fn eval_program<Ctx: CompilerContext>(
 
 #[cfg(test)]
 mod test {
-    use ntest::timeout;
     use super::*;
     use gen_code::{generate_random_program, Spec};
+    use ntest::timeout;
 
     fn take_result<T: std::fmt::Debug, E: std::fmt::Debug>(program: &str, res: Result<T, E>) {
         // TODO: Should happen in an init phase.

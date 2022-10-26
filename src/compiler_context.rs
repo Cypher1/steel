@@ -69,7 +69,10 @@ pub trait CompilerContext:
 
     // Implement either all the `for_each_XXX`s or `for_each`
     // Call sites will pick whichever should work best for their use case.
-    fn for_each_i64<F: FnMut(&mut Self, Self::ID, &mut i64)>(&mut self, f: &mut F) -> Result<(), Self::E> {
+    fn for_each_i64<F: FnMut(&mut Self, Self::ID, &mut i64)>(
+        &mut self,
+        f: &mut F,
+    ) -> Result<(), Self::E> {
         self.for_each::<F, SysF<Self, Self::ID, _>, SysF<Self, Self::ID, _>, SysF<Self, Self::ID, _>>(
             &mut Some(f),
             &mut None,
