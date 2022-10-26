@@ -88,12 +88,7 @@ pub fn optimize<C: CompilerContext + ?Sized + std::fmt::Debug>(
     loop {
         fixed_point = true;
         if optimizations.constant_folding {
-            root = constant_folding(
-                context,
-                &mut replace,
-                root,
-                &mut fixed_point,
-            )?;
+            root = constant_folding(context, &mut replace, root, &mut fixed_point)?;
         }
         if fixed_point {
             break;

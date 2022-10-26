@@ -53,7 +53,10 @@ impl CompilerContext for Ecs {
             + self.calls.mem_usage()
     }
 
-    fn for_each_i64<F: FnMut(&mut Self, Self::ID, &mut i64)>(&mut self, f: &mut F) -> Result<(), Self::E> {
+    fn for_each_i64<F: FnMut(&mut Self, Self::ID, &mut i64)>(
+        &mut self,
+        f: &mut F,
+    ) -> Result<(), Self::E> {
         let mut index = 0;
         let mut value = (EntityId::new(0), 0); // start with a dummy value;
         while index < self.i64_values.capacity() {
@@ -196,10 +199,7 @@ mod test {
         let hello = ctx.add(Symbol::new("hello"));
 
         let sym: &Symbol = ctx.get(hello)?;
-        assert_eq!(
-            format!("{:?}", sym),
-            "Symbol { name: \"hello\" }"
-        );
+        assert_eq!(format!("{:?}", sym), "Symbol { name: \"hello\" }");
         Ok(())
     }
 
@@ -239,7 +239,10 @@ mod test {
 
         assert_eq!(
             format!("{:?}", ctx.get::<Call>(reference)),
-            format!("Ok(Call {{ callee: {:?}, args: [], left: None, right: None }})", reference)
+            format!(
+                "Ok(Call {{ callee: {:?}, args: [], left: None, right: None }})",
+                reference
+            )
         );
     }
 
