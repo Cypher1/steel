@@ -1,17 +1,19 @@
 optimize known program test,ast min,ast avg,ast max,ecs min,ecs avg,ecs max
-optimize known program 1 constant,65.989 ns,66.026 ns,66.062 ns,69.726 ns,69.771 ns,69.819 ns
-optimize known program 4: plus tree,431.19 ns,431.44 ns,431.68 ns,549.29 ns,549.94 ns,550.53 ns
-optimize known program 10: plus tree,1.3315 µs,1.3347 µs,1.3379 µs,1.5861 µs,1.5933 µs,1.5992 µs
-optimize known program 22: plus tree,3.4437 µs,3.4626 µs,3.4798 µs,3.8092 µs,3.8508 µs,3.8862 µs
-optimize known program 46: plus tree,7.8490 µs,7.8902 µs,7.9277 µs,8.1536 µs,8.2516 µs,8.3345 µs
-optimize known program 94: plus tree,17.966 µs,18.057 µs,18.142 µs,18.611 µs,18.736 µs,18.835 µs
-optimize known program 190: plus tree,38.552 µs,38.726 µs,38.873 µs,37.546 µs,37.931 µs,38.251 µs
-optimize known program 382: plus tree,82.646 µs,83.352 µs,83.966 µs,74.835 µs,75.586 µs,76.192 µs
-optimize known program 766: plus tree,172.73 µs,174.05 µs,175.27 µs,152.36 µs,153.88 µs,155.12 µs
-optimize known program 1534: plus tree,356.52 µs,359.23 µs,361.55 µs,316.95 µs,320.51 µs,324.48 µs
-optimize known program 3070: plus tree,791.32 µs,794.71 µs,797.57 µs,636.13 µs,639.84 µs,642.82 µs
-optimize known program 6142: plus tree,1.6500 ms,1.6547 ms,1.6590 ms,1.2780 ms,1.2838 ms,1.2884 ms
-optimize known program 12286: plus tree,3.2246 ms,3.2317 ms,3.2391 ms,2.5025 ms,2.5071 ms,2.5122 ms
-optimize known program 24574: plus tree,6.8585 ms,6.8990 ms,6.9425 ms,5.3285 ms,5.3615 ms,5.3964 ms
-optimize known program 49150: plus tree,16.135 ms,16.163 ms,16.195 ms,12.734 ms,12.850 ms,12.974 ms
-optimize known program 98302: plus tree,36.071 ms,36.200 ms,36.342 ms
+optimize known program 1 constant,68.110 ns,68.164 ns,68.227 ns,72.362 ns,72.398 ns,72.441 ns
+optimize known program 4: plus tree,448.00 ns,449.21 ns,450.59 ns,576.91 ns,577.33 ns,577.74 ns
+optimize known program 10: plus tree,1.3632 µs,1.3671 µs,1.3708 µs,1.6216 µs,1.6287 µs,1.6347 µs
+optimize known program 22: plus tree,3.8051 µs,3.8274 µs,3.8462 µs,3.9937 µs,4.0236 µs,4.0480 µs
+optimize known program 46: plus tree,8.1446 µs,8.1996 µs,8.2483 µs,8.4650 µs,8.5413 µs,8.6044 µs
+optimize known program 94: plus tree,17.662 µs,17.767 µs,17.865 µs,18.502 µs,18.772 µs,19.002 µs
+optimize known program 190: plus tree,37.849 µs,38.075 µs,38.284 µs,38.184 µs,38.625 µs,38.995 µs
+optimize known program 382: plus tree,84.730 µs,85.710 µs,86.654 µs,78.213 µs,78.617 µs,78.925 µs
+optimize known program 766: plus tree,179.61 µs,180.94 µs,182.09 µs,162.81 µs,163.58 µs,164.28 µs
+optimize known program 1534: plus tree,379.25 µs,380.82 µs,382.08 µs,314.86 µs,317.78 µs,320.13 µs
+optimize known program 3070: plus tree,792.24 µs,796.37 µs,799.72 µs,644.74 µs,647.62 µs,649.88 µs
+optimize known program 6142: plus tree,1.6593 ms,1.6631 ms,1.6661 ms,1.3029 ms,1.3082 ms,1.3126 ms
+optimize known program 12286: plus tree,3.2747 ms,3.2867 ms,3.3000 ms,2.4992 ms,2.5022 ms,2.5055 ms
+optimize known program 24574: plus tree,7.2765 ms,7.3066 ms,7.3381 ms,5.4415 ms,5.4659 ms,5.4921 ms
+optimize known program 49150: plus tree,16.422 ms,16.458 ms,16.496 ms,12.773 ms,12.848 ms,12.933 ms
+optimize known program 98302: plus tree,37.964 ms,38.383 ms,38.844 ms,29.585 ms,29.993 ms,30.425 ms
+optimize known program 196606: plus tree,80.427 ms,81.261 ms,82.225 ms,61.502 ms,61.858 ms,62.245 ms
+optimize known program 393214: plus tree,162.07 ms,162.89 ms,164.23 ms,126.90 ms,129.95 ms,133.88 ms
