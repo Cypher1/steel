@@ -122,9 +122,9 @@ pub fn benchmarks<T: CompilerContext + Clone>(
 ) where
     SteelErr: From<<T as CompilerContext>::E>,
 {
-    //benchmark_parse::<T>(name, bench_type, program, spec, c);
+    benchmark_parse::<T>(name, bench_type, program, spec, c);
     benchmark_optimize::<T>(name, bench_type, program, spec, c);
-    //benchmark_eval::<T>(name, bench_type, program, spec, c);
-    //benchmark_eval_pre_optimized::<T>(name, bench_type, program, spec, c);
-    //benchmark_parse_and_eval_tasks::<T>(name, bench_type, program, spec, c);
+    benchmark_eval::<T>(name, bench_type, program, spec, c);
+    benchmark_eval_pre_optimized::<T>(name, bench_type, program, spec, c);
+    benchmark_parse_and_eval_tasks::<T>(name, bench_type, program, spec, c);
 }
