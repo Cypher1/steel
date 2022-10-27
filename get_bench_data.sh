@@ -1,2 +1,2 @@
 #!/bin/bash
-cargo bench "known program" | tee out
+cargo bench "optimize known program" | tee out
