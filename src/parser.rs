@@ -13,9 +13,8 @@ use nom::{
 type SResult<'a, T> = std::result::Result<(&'a str, T), nom::Err<SteelErr>>;
 
 fn tag(raw: &str) -> impl Fn(&str) -> SResult<&str> + '_ {
-    // TODO: Consider only ignoring some whitespace...
-    move |input: &str| {
-        let (input, _) = multispace0::<&str, SteelErr>(input)?;
+    |input: &str| {
+        let input = multispace0::<&str, SteelErr>(input)?.0;
         raw_tag::<&str, &str, SteelErr>(raw)(input)
             .map_err(|e| SteelErr::ErrorExpected(Box::new(e.into()), raw.to_string()).into())
     }
