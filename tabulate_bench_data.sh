@@ -19,7 +19,7 @@ data="$(
   sed "s/\]//")"
 
 # Split up the timing values
-tabulated="$(echo "$data" | sed "s/ \(.s\) / \1,/g")"
+tabulated="$(echo "$data" | sed "s/ \(.s\) / \1,/g" | sed "s/ s / s, /g")"
 # echo -en "$tabulated"
 
 kinds="$(echo "$tabulated" | grep -E -o "^[^ ]*" | sort | uniq)"
