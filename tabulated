@@ -1,19 +1,35 @@
+optimize known program parse and eval known program 10: plus tree,11.694 µs,11.912 µs,12.139 µs,7.8480 µs,7.9117 µs,7.9818 µs
+optimize known program parse and eval known program 12286: plus tree,34.165 ms,34.557 ms,34.956 ms,36.986 ms,38.340 ms,39.885 ms
+optimize known program parse and eval known program 1534: plus tree,2.7013 ms,2.7328 ms,2.7662 ms,2.8438 ms,2.8789 ms,2.9153 ms
+optimize known program parse and eval known program 190: plus tree,128.59 µs,131.31 µs,134.19 µs,134.96 µs,140.20 µs,144.99 µs
+optimize known program parse and eval known program 196606: plus tree,6.3344 s, 6.3751 s, 6.4240 s,6.4706 s, 6.4949 s, 6.5226 s
+optimize known program parse and eval known program 1 constant,1.7127 µs,1.7287 µs,1.7470 µs,2.0845 µs,2.1011 µs,2.1210 µs
+optimize known program parse and eval known program 22: plus tree,14.894 µs,15.034 µs,15.174 µs,17.364 µs,18.043 µs,18.695 µs
+optimize known program parse and eval known program 24574: plus tree,137.42 ms,139.35 ms,141.33 ms,142.10 ms,146.31 ms,151.09 ms
+optimize known program parse and eval known program 3070: plus tree,6.0931 ms,6.1499 ms,6.2093 ms,6.3956 ms,6.4800 ms,6.5683 ms
+optimize known program parse and eval known program 382: plus tree,369.28 µs,385.56 µs,406.83 µs,913.70 µs,948.65 µs,983.01 µs
+optimize known program parse and eval known program 46: plus tree,35.327 µs,36.759 µs,38.481 µs,29.971 µs,30.308 µs,30.674 µs
+optimize known program parse and eval known program 49150: plus tree,537.39 ms,593.16 ms,655.61 ms,474.07 ms,499.70 ms,529.13 ms
+optimize known program parse and eval known program 4: plus tree,6.5767 µs,7.0257 µs,7.5582 µs,7.1509 µs,7.4659 µs,7.7773 µs
+optimize known program parse and eval known program 6142: plus tree,12.826 ms,13.494 ms,14.251 ms,11.401 ms,11.588 ms,11.779 ms
+optimize known program parse and eval known program 766: plus tree,1.4976 ms,1.5683 ms,1.6407 ms,1.7265 ms,1.8336 ms,1.9511 ms
+optimize known program parse and eval known program 94: plus tree,54.590 µs,55.004 µs,55.447 µs,59.346 µs,59.855 µs,60.442 µs
+optimize known program parse and eval known program 98302: plus tree,1.6295 s, 1.6674 s, 1.7098 s,1.9117 s, 2.0143 s, 2.1269 s
+optimize known program parse known program 10: plus tree,4.3563 µs,4.4138 µs,4.4815 µs,5.1146 µs,5.3751 µs,5.6419 µs
+optimize known program parse known program 12286: plus tree,34.839 ms,36.926 ms,39.087 ms,22.643 ms,22.959 ms,23.288 ms
+optimize known program parse known program 1534: plus tree,2.0951 ms,2.1301 ms,2.1689 ms,1.8979 ms,1.9212 ms,1.9451 ms
+optimize known program parse known program 190: plus tree,75.655 µs,78.752 µs,82.159 µs,71.782 µs,72.314 µs,72.892 µs
+optimize known program parse known program 196606: plus tree,5.8888 s, 6.1489 s, 6.4424 s,5.3027 s, 5.3404 s, 5.3905 s
+optimize known program parse known program 1 constant,1.3908 µs,1.5288 µs,1.6602 µs,1.1400 µs,1.1695 µs,1.1949 µs
+optimize known program parse known program 22: plus tree,7.6440 µs,7.7192 µs,7.8010 µs,9.7386 µs,10.273 µs,10.759 µs
+optimize known program parse known program 24574: plus tree,108.67 ms,110.47 ms,112.43 ms,131.84 ms,135.63 ms,139.60 ms
+optimize known program parse known program 3070: plus tree,5.6005 ms,5.7806 ms,5.9680 ms,4.6461 ms,4.6928 ms,4.7411 ms
+optimize known program parse known program 382: plus tree,403.79 µs,423.37 µs,444.70 µs,325.52 µs,343.18 µs,359.17 µs
+optimize known program parse known program 46: plus tree,36.246 µs,41.069 µs,45.832 µs,16.821 µs,17.037 µs,17.290 µs
+optimize known program parse known program 49150: plus tree,427.26 ms,445.28 ms,468.29 ms,362.60 ms,370.20 ms,378.66 ms
+optimize known program parse known program 4: plus tree,1.9160 µs,2.0564 µs,2.1866 µs,3.5955 µs,4.3291 µs,5.0602 µs
+optimize known program parse known program 6142: plus tree,10.967 ms,11.080 ms,11.196 ms,7.7105 ms,7.7643 ms,7.8240 ms
+optimize known program parse known program 766: plus tree,768.00 µs,785.59 µs,806.06 µs,1.0541 ms,1.1193 ms,1.1972 ms
+optimize known program parse known program 94: plus tree,34.544 µs,35.073 µs,35.735 µs,35.827 µs,36.375 µs,37.016 µs
+optimize known program parse known program 98302: plus tree,1.3722 s, 1.4103 s, 1.4528 s,1.5215 s, 1.6020 s, 1.6917 s
 optimize known program test,ast min,ast avg,ast max,ecs min,ecs avg,ecs max
-optimize known program 1 constant,68.110 ns,68.164 ns,68.227 ns,72.362 ns,72.398 ns,72.441 ns
-optimize known program 4: plus tree,448.00 ns,449.21 ns,450.59 ns,576.91 ns,577.33 ns,577.74 ns
-optimize known program 10: plus tree,1.3632 µs,1.3671 µs,1.3708 µs,1.6216 µs,1.6287 µs,1.6347 µs
-optimize known program 22: plus tree,3.8051 µs,3.8274 µs,3.8462 µs,3.9937 µs,4.0236 µs,4.0480 µs
-optimize known program 46: plus tree,8.1446 µs,8.1996 µs,8.2483 µs,8.4650 µs,8.5413 µs,8.6044 µs
-optimize known program 94: plus tree,17.662 µs,17.767 µs,17.865 µs,18.502 µs,18.772 µs,19.002 µs
-optimize known program 190: plus tree,37.849 µs,38.075 µs,38.284 µs,38.184 µs,38.625 µs,38.995 µs
-optimize known program 382: plus tree,84.730 µs,85.710 µs,86.654 µs,78.213 µs,78.617 µs,78.925 µs
-optimize known program 766: plus tree,179.61 µs,180.94 µs,182.09 µs,162.81 µs,163.58 µs,164.28 µs
-optimize known program 1534: plus tree,379.25 µs,380.82 µs,382.08 µs,314.86 µs,317.78 µs,320.13 µs
-optimize known program 3070: plus tree,792.24 µs,796.37 µs,799.72 µs,644.74 µs,647.62 µs,649.88 µs
-optimize known program 6142: plus tree,1.6593 ms,1.6631 ms,1.6661 ms,1.3029 ms,1.3082 ms,1.3126 ms
-optimize known program 12286: plus tree,3.2747 ms,3.2867 ms,3.3000 ms,2.4992 ms,2.5022 ms,2.5055 ms
-optimize known program 24574: plus tree,7.2765 ms,7.3066 ms,7.3381 ms,5.4415 ms,5.4659 ms,5.4921 ms
-optimize known program 49150: plus tree,16.422 ms,16.458 ms,16.496 ms,12.773 ms,12.848 ms,12.933 ms
-optimize known program 98302: plus tree,37.964 ms,38.383 ms,38.844 ms,29.585 ms,29.993 ms,30.425 ms
-optimize known program 196606: plus tree,80.427 ms,81.261 ms,82.225 ms,61.502 ms,61.858 ms,62.245 ms
-optimize known program 393214: plus tree,162.07 ms,162.89 ms,164.23 ms,126.90 ms,129.95 ms,133.88 ms
