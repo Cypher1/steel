@@ -1,2 +1,2 @@
 #!/bin/bash
-cargo bench $@ | tee out
+cargo bench "$@" | tee out
